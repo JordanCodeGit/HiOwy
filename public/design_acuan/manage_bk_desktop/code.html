@@ -1,0 +1,615 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-lowest": "#ffffff", "on-tertiary-fixed-variant": "#005137", "error": "#ba1a1a", "on-secondary-fixed-variant": "#004b73", "on-background": "#0b1c30", "surface-dim": "#cbdbf5", "outline": "#76777d", "secondary-fixed": "#cce5ff", "on-primary-fixed-variant": "#3f465c", "surface-tint": "#565e74", "surface-container-high": "#dce9ff", "on-error": "#ffffff", "secondary-fixed-dim": "#93ccff", "on-primary-fixed": "#131b2e", "on-primary-container": "#7c839b", "error-container": "#ffdad6", "on-tertiary-fixed": "#002114", "inverse-primary": "#bec6e0", "on-secondary": "#ffffff", "background": "#f8f9ff", "on-secondary-fixed": "#001d31", "primary-fixed": "#dae2fd", "inverse-surface": "#213145", "secondary": "#006398", "on-tertiary": "#ffffff", "tertiary": "#000000", "surface": "#f8f9ff", "on-primary": "#ffffff", "secondary-container": "#5bb8fe", "surface-variant": "#d3e4fe", "on-tertiary-container": "#069669", "on-surface-variant": "#45464d", "on-error-container": "#93000a", "primary-container": "#131b2e", "on-surface": "#0b1c30", "primary": "#000000", "surface-container": "#e5eeff", "tertiary-container": "#002114", "tertiary-fixed": "#85f8c4", "surface-container-low": "#eff4ff", "surface-bright": "#f8f9ff", "inverse-on-surface": "#eaf1ff", "tertiary-fixed-dim": "#68dba9", "surface-container-highest": "#d3e4fe", "outline-variant": "#c6c6cd", "primary-fixed-dim": "#bec6e0", "on-secondary-container": "#00476e" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-sm": "0.5rem", "margin": "1.5rem", "space-md": "1rem", "gutter-sm": "1rem", "margin-lg": "3rem", "space-xl": "2.5rem", "margin-sm": "1rem", "space-xs": "0.25rem", "gutter": "1.5rem", "space-lg": "1.5rem", "gutter-lg": "2rem" }, "fontFamily": { "body-sm": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "display-lg-mobile": ["Montserrat"], "label-lg": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "title-lg": ["Plus Jakarta Sans"], "headline-lg": ["Montserrat"], "headline-md": ["Montserrat"], "headline-sm": ["Montserrat"], "title-md": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Montserrat"], "label-md": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "display-lg": ["Montserrat"] }, "fontSize": { "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "display-lg-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "700" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "title-lg": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "24px", "fontWeight": "600" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }] } } } }</script></head><body class="bg-surface font-body-md text-on-surface min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between py-6"><div class="flex flex-col"><div class="flex items-center gap-space-sm px-6 mb-8"><div class="w-10 h-10 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[24px]">shield_with_heart</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">HiOwy!</span></div></div><div class="px-6 mb-3"><span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Navigasi Utama</span></div><nav class="flex flex-col gap-space-xs px-4" data-active-classes="bg-surface-container-high text-on-surface font-semibold shadow-sm"><a class="flex items-center gap-space-sm px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="laporan" href="#"><span class="material-symbols-outlined text-[20px]">inbox</span><span class="font-title-md text-title-md">Laporan</span></a><a class="flex items-center gap-space-sm px-4 py-3 rounded-xl bg-secondary text-on-primary font-semibold shadow-sm transition-all" data-path="kelola" href="#"><span class="material-symbols-outlined text-[20px]">category</span><span class="font-title-md text-title-md">Kelola</span></a><a class="flex items-center gap-space-sm px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="halaman-pelajari" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span class="font-title-md text-title-md">Halaman Pelajari</span></a><a class="flex items-center gap-space-sm px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="statistik" href="#"><span class="material-symbols-outlined text-[20px]">equalizer</span><span class="font-title-md text-title-md">Statistik</span></a><a class="flex items-center gap-space-sm px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="arsip" href="#"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span class="font-title-md text-title-md">Arsip</span></a><a class="flex items-center gap-space-sm px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="log-akses" href="#"><span class="material-symbols-outlined text-[20px]">history</span><span class="font-title-md text-title-md">Log Akses</span></a></nav></div><div class="px-4 flex flex-col gap-space-md"><a class="flex items-center gap-space-sm px-4 py-3 rounded-xl text-error hover:bg-error-container hover:text-on-error-container transition-all" data-path="keluar" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span class="font-title-md text-title-md font-semibold">Keluar</span></a></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-20 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-8 flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-lowest px-3 py-1.5 rounded-full shadow-sm"><span class="w-2.5 h-2.5 rounded-full bg-on-tertiary-container animate-pulse"></span><span class="font-label-sm text-label-sm text-on-surface">Tahun Ajaran Aktif 2024/2025</span><span class="font-label-sm text-label-sm text-outline-variant">•</span><span class="font-label-sm text-label-sm text-secondary font-semibold">Semester Genap</span></div><div class="relative hidden xl:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span><input class="w-80 h-10 pl-9 pr-4 bg-surface-container-lowest text-on-surface placeholder:text-outline text-body-sm font-body-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all" placeholder="Cari nomor laporan, nama siswa, atau kata kunci..." type="text"></div></div><div class="flex items-center gap-space-md"><button class="relative w-10 h-10 rounded-xl bg-surface-container-lowest hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors shadow-sm" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error"></span></button><div class="flex items-center gap-space-sm pl-2"><div class="flex flex-col text-right"><span class="font-title-md text-title-md text-on-surface leading-tight font-semibold">Sarah Jenkins, S.Psi</span><span class="font-label-sm text-label-sm text-on-surface-variant">Konselor Utama BK</span></div><div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-headline-sm text-headline-sm text-on-primary font-bold shadow-sm">SJ</div></div></div></header><main class="w-full pt-20 bg-surface flex-1 px-8 py-6"><div class="flex flex-col w-full">
+<!-- PAGE HEADER & SUB-NAVIGASI -->
+<div class="flex flex-col gap-space-md mb-8">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex flex-col">
+
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Jenis, Lokasi, Staff, QR</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+          Konfigurasi jenis aduan, titik lokasi kejadian sekolah, dan tautan kode QR pelaporan resmi.
+        </p>
+</div>
+<!-- Quick Institutional Status Pill -->
+<div class="flex items-center gap-3 bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-sm self-start lg:self-center">
+<span class="material-symbols-outlined text-secondary text-[22px]">account_balance</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Unit SEKOLAH</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">SMA Negeri 1 Teladan</span>
+</div>
+</div>
+</div>
+<!-- ELEGAN SUB-NAV TABS -->
+<div class="flex items-center gap-2 p-1.5 bg-surface-container-low rounded-xl w-fit mt-2">
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-title-md text-title-md font-semibold transition-all bg-surface-container-lowest text-on-surface shadow-sm" id="tab-btn-jenis" onclick="switchTab('jenis')" type="button">
+<span class="material-symbols-outlined text-[19px]">category</span>
+<span class="">Jenis Kejadian</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-label-sm" id="badge-total-jenis">7</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-title-md text-title-md font-medium text-on-surface-variant hover:text-on-surface transition-all" id="tab-btn-lokasi" onclick="switchTab('lokasi')" type="button">
+<span class="material-symbols-outlined text-[19px]">pin_drop</span>
+<span class="">Lokasi Kejadian</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-outline font-label-sm text-label-sm">8</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-title-md text-title-md font-medium text-on-surface-variant hover:text-on-surface transition-all" id="tab-btn-qr" onclick="switchTab('qr')" type="button">
+<span class="material-symbols-outlined text-[19px]">qr_code_2</span>
+<span class="">QR Sekolah</span>
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-title-md text-title-md font-medium text-on-surface-variant hover:text-on-surface transition-all cursor-pointer" id="tab-btn-staf" onclick="switchTab('staf')" type="button"><span class="material-symbols-outlined text-[19px]">person_add</span><span class="">Undang Staf</span><span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-label-sm" id="badge-total-staf">3</span></button></div>
+</div>
+<!-- TAB CONTENT 1: JENIS KEJADIAN -->
+<section class="flex-col gap-6 flex" id="panel-jenis">
+<div class="flex flex-col gap-6 w-full">
+<!-- Master Table Container -->
+<div class="w-full flex flex-col gap-4">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="px-6 py-4 flex items-center justify-between bg-surface-container-low/50"><div class="flex items-center gap-3"><div class="flex items-center gap-2"><span class="font-title-md text-title-md font-semibold text-on-surface">Daftar Pilihan Aduan Siswa</span></div></div><button class="bg-primary text-on-primary px-4 py-2 rounded-xl text-label-md font-label-md font-semibold flex items-center gap-2 hover:bg-inverse-surface cursor-pointer shadow-sm transition-all" onclick="openKategoriModal('tambah')" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span class="">Tambah Kategori</span></button></div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider"><th class="py-3.5 px-6 w-20 text-center">Urutan</th><th class="py-3.5 px-6">Nama Jenis Kejadian</th><th class="py-3.5 px-6 w-36">Status</th><th class="py-3.5 px-6 w-28 text-right">Aksi</th></tr>
+</thead>
+<tbody class="divide-y-0" id="kategori-table-body"><!-- Row 1 --><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60" data-ppksp="Kekerasan Psikis" data-status="aktif" data-visibilitas="bk"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface row-order-num">1</span><div class="flex flex-col"><button class="text-outline hover:text-on-surface leading-none opacity-40 cursor-not-allowed" disabled="" title="Paling Atas" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" title="Turunkan urutan" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text">Ejekan &amp; Intimidasi Verbal</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="openKategoriModal('edit', this)" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><!-- Row 2 --><tr class="hover:bg-surface-container-low/40 transition-colors bg-surface-container-lowest border-b border-surface-container/60" data-ppksp="Kekerasan Fisik" data-status="aktif" data-visibilitas="kesiswaan"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface row-order-num">2</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text">Perundungan Fisik &amp; Pemukulan</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="openKategoriModal('edit', this)" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><!-- Row 3 --><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60" data-ppksp="Pengucilan &amp; Diskriminasi" data-status="aktif" data-visibilitas="bk"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface row-order-num">3</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text">Pengucilan &amp; Diskriminasi Sosial</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="openKategoriModal('edit', this)" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><!-- Row 4 --><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60" data-ppksp="Kekerasan Siber" data-status="aktif" data-visibilitas="kesiswaan"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface row-order-num">4</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text">Pelecehan Melalui Chat &amp; Medsos</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="openKategoriModal('edit', this)" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><!-- Row 5 --><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60" data-ppksp="Kekerasan Seksual" data-status="aktif" data-visibilitas="bk"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface row-order-num">5</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text">Sentuhan atau Perilaku Tidak Pantas</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="openKategoriModal('edit', this)" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><!-- Row 6 --><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60" data-ppksp="Kekerasan Psikis" data-status="aktif" data-visibilitas="kesiswaan"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface row-order-num">6</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text">Pemerasan &amp; Tekanan Kelompok</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="openKategoriModal('edit', this)" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><!-- Row 7 (Permanent) --><tr class="bg-surface-container-low/30 hover:bg-surface-container-low/50 transition-colors" data-permanent="true" data-ppksp="Lainnya" data-status="aktif" data-visibilitas="bk"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container-high px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface row-order-num">7</span><span class="material-symbols-outlined text-outline text-[14px]" title="Posisi penampung aduan">lock</span></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text">Masalah Pribadi &amp; Lainnya</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="openKategoriModal('edit', this)" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- TAB CONTENT 2: LOKASI KEJADIAN -->
+<section class="flex-col gap-6 hidden" id="panel-lokasi"><div class="w-full flex flex-col gap-4"><div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col w-full"><div class="px-6 py-4 flex items-center justify-between bg-surface-container-low/50"><div class="flex items-center gap-2"><span class="font-title-md text-title-md font-semibold text-on-surface">Daftar Titik Lokasi Kejadian</span><span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">8 Lokasi Terdaftar</span></div><button class="px-3.5 py-2 rounded-xl bg-secondary-fixed text-on-secondary-fixed-variant hover:bg-secondary-fixed-dim transition-all font-title-md text-title-md font-semibold flex items-center gap-1.5" onclick="openTambahLokasiModal()" type="button"><span class="material-symbols-outlined text-[18px]">add_location_alt</span><span class="">Tambah Titik Lokasi</span></button></div><div class="overflow-x-auto w-full"><table class="w-full text-left"><thead><tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider"><th class="py-3.5 px-6 w-20 text-center">Urutan</th><th class="py-3.5 px-6">Nama Titik Lokasi</th><th class="py-3.5 px-6 w-36">Status</th><th class="py-3.5 px-6 w-36 text-right">Aksi</th></tr></thead><tbody class="divide-y-0" id="location-table-body"><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface">1</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md font-semibold text-on-surface block">Ruang Kelas</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface">2</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md font-semibold text-on-surface block">Kantin Sekolah</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface">3</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md font-semibold text-on-surface block">Toilet &amp; Kamar Mandi</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface">4</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md font-semibold text-on-surface block">Lapangan &amp; Area Olahraga</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface">5</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md font-semibold text-on-surface block">Koridor &amp; Area Tangga</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface">6</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md font-semibold text-on-surface block">Perjalanan ke / dari Sekolah</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6 text-center"><div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg"><span class="font-label-md text-label-md font-bold text-on-surface">7</span><div class="flex flex-col"><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button><button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button></div></div></td><td class="py-4 px-6"><span class="font-title-md text-title-md font-semibold text-on-surface block">Daring (Chat &amp; Media Sosial)</span></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr></tbody></table></div></div></div></section>
+<!-- TAB CONTENT 3: QR SEKOLAH RESMI -->
+<section class="flex-col gap-6 hidden" id="panel-qr">
+<div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container/60 overflow-hidden flex flex-col xl:flex-row">
+<!-- Left Side: QR Code & School Direct Link Info -->
+<div class="p-8 flex flex-col items-center text-center xl:w-5/12 xl:border-r border-surface-container/60 bg-surface-container-lowest shrink-0 justify-between">
+<div class="w-full flex flex-col items-center">
+<!-- Institutional Decorative Bar -->
+<div class="w-full h-1.5 rounded-full bg-secondary mb-6"></div>
+<!-- School Identity -->
+<div class="flex items-center gap-3 mb-5 self-start text-left">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary shrink-0">
+<span class="material-symbols-outlined text-[28px]">school</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Tautan Aduan Resmi</span>
+<span class="font-title-lg text-title-lg font-bold text-on-surface">SMA Negeri 1 Teladan</span>
+</div>
+</div>
+<!-- Crisp Vector QR Code Preview -->
+<div class="p-5 bg-surface-container-lowest rounded-2xl border border-surface-container shadow-sm my-2 flex flex-col items-center justify-center">
+<svg class="w-52 h-52 text-slate-900" fill="currentColor" viewBox="0 0 240 240">
+<rect fill="currentColor" height="60" rx="8" width="60" x="15" y="15"></rect>
+<rect fill="white" height="44" rx="4" width="44" x="23" y="23"></rect>
+<rect fill="currentColor" height="28" rx="2" width="28" x="31" y="31"></rect>
+<rect fill="currentColor" height="60" rx="8" width="60" x="165" y="15"></rect>
+<rect fill="white" height="44" rx="4" width="44" x="173" y="23"></rect>
+<rect fill="currentColor" height="28" rx="2" width="28" x="181" y="31"></rect>
+<rect fill="currentColor" height="60" rx="8" width="60" x="15" y="165"></rect>
+<rect fill="white" height="44" rx="4" width="44" x="23" y="173"></rect>
+<rect fill="currentColor" height="28" rx="2" width="28" x="31" y="181"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="85" y="25"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="105" y="25"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="125" y="25"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="145" y="25"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="85" y="45"></rect>
+<rect fill="currentColor" height="10" rx="2" width="20" x="115" y="45"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="145" y="45"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="25" y="85"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="25" y="105"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="25" y="125"></rect>
+<rect fill="currentColor" height="10" rx="2" width="10" x="25" y="145"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="85" y="85"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="105" y="85"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="125" y="85"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="145" y="85"></rect>
+<rect fill="currentColor" height="12" rx="2" width="20" x="165" y="85"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="195" y="85"></rect>
+<rect fill="currentColor" height="12" rx="2" width="20" x="85" y="105"></rect>
+<rect fill="currentColor" height="12" rx="2" width="30" x="115" y="105"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="155" y="105"></rect>
+<rect fill="currentColor" height="12" rx="2" width="32" x="175" y="105"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="85" y="125"></rect>
+<rect fill="currentColor" height="12" rx="2" width="20" x="105" y="125"></rect>
+<rect fill="currentColor" height="12" rx="2" width="20" x="135" y="125"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="165" y="125"></rect>
+<rect fill="currentColor" height="12" rx="2" width="22" x="185" y="125"></rect>
+<rect fill="currentColor" height="12" rx="2" width="30" x="85" y="145"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="125" y="145"></rect>
+<rect fill="currentColor" height="12" rx="2" width="25" x="145" y="145"></rect>
+<rect fill="currentColor" height="12" rx="2" width="27" x="180" y="145"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="85" y="165"></rect>
+<rect fill="currentColor" height="12" rx="2" width="20" x="105" y="165"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="135" y="165"></rect>
+<rect fill="currentColor" height="12" rx="2" width="20" x="155" y="165"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="185" y="165"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="205" y="165"></rect>
+<rect fill="currentColor" height="12" rx="2" width="22" x="95" y="185"></rect>
+<rect fill="currentColor" height="12" rx="2" width="22" x="125" y="185"></rect>
+<rect fill="currentColor" height="12" rx="2" width="32" x="155" y="185"></rect>
+<rect fill="currentColor" height="12" rx="2" width="22" x="195" y="185"></rect>
+<rect fill="currentColor" height="12" rx="2" width="30" x="85" y="205"></rect>
+<rect fill="currentColor" height="12" rx="2" width="20" x="125" y="205"></rect>
+<rect fill="currentColor" height="12" rx="2" width="12" x="155" y="205"></rect>
+<rect fill="currentColor" height="12" rx="2" width="42" x="175" y="205"></rect>
+<circle cx="120" cy="120" fill="white" r="16"></circle>
+<circle cx="120" cy="120" fill="#006398" r="12"></circle>
+</svg>
+</div>
+</div>
+<!-- Manual Code Badge -->
+<div class="mt-4 p-3 bg-surface-container rounded-xl w-full flex flex-col items-center justify-center">
+<div class="flex items-center gap-2 mt-0.5">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-wider">KODE SEKOLAH: N1-SMATLD</span>
+<button class="text-secondary hover:text-on-surface transition-colors p-1 cursor-pointer" onclick="copySchoolCode()" title="Salin kode" type="button">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+</button>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Tautan langsung: <strong class="text-secondary font-semibold">pedulisiswa.sch.id/s/smakita</strong></span>
+</div>
+</div>
+<!-- Right Side: Aset Cetak & Distribusi Pengumuman Content -->
+<div class="p-8 flex flex-col justify-between flex-1 gap-6 bg-surface-container-low/30">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-2.5 text-secondary">
+<span class="material-symbols-outlined text-[24px]">print</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Panduan Pencetakan &amp; Publikasi</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Aset Cetak &amp; Distribusi Pengumuman</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1.5 leading-relaxed">
+          Gunakan materi resmi format A4 untuk disosialisasikan dan ditempelkan di majalah dinding (mading), papan pengumuman ruang BK, perpustakaan, lobi sekolah, dan setiap ruang kelas.
+        </p>
+</div>
+<!-- Feature Highlights / Specs -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+<div class="p-3.5 bg-surface-container-lowest rounded-xl border border-surface-container flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Resolusi Siap Cetak</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Format vector 300 DPI tidak pecah saat dicetak poster besar.</span>
+</div>
+</div>
+<div class="p-3.5 bg-surface-container-lowest rounded-xl border border-surface-container flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">campaign</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Kanal Aman &amp; Terlindungi</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mengarahkan siswa langsung ke formulir terenkripsi BK.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Download Buttons Footer -->
+<div class="pt-4 border-t border-surface-container/60 flex flex-col sm:flex-row items-center gap-3">
+<button class="w-full sm:w-auto flex-1 px-5 py-3.5 bg-primary hover:bg-inverse-surface text-on-primary rounded-xl font-title-md text-title-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2.5 cursor-pointer" onclick="triggerDownloadAlert('Poster Panduan PDF (A4)')" type="button">
+<span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+<span class="">Unduh Poster Panduan PDF (A4)</span>
+</button>
+<button class="w-full sm:w-auto flex-1 px-5 py-3.5 bg-secondary-fixed text-on-secondary-fixed-variant hover:bg-secondary-fixed-dim rounded-xl font-title-md text-title-md font-semibold transition-all flex items-center justify-center gap-2.5 cursor-pointer" onclick="triggerDownloadAlert('Gambar QR (PNG)')" type="button">
+<span class="material-symbols-outlined text-[20px]">image</span>
+<span class="">Unduh Gambar QR (PNG)</span>
+</button>
+</div>
+</div>
+</div>
+<div class="w-full flex flex-col gap-4 mt-2"><div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col"><div class="px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-low/40 border-b border-surface-container/60"><div class="flex flex-col gap-1"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[20px]">qr_code_scanner</span></div><h2 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Daftar Kode QR Titik Lokasi Aktif</h2><span class="px-2.5 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-label-sm font-semibold">5 Titik Terbit</span></div></div><div class="flex items-center gap-3 shrink-0"><div class="relative hidden sm:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[16px]">search</span><input class="w-60 h-9 pl-8 pr-3 bg-surface-container-lowest text-on-surface placeholder:text-outline text-body-sm font-body-sm rounded-xl border border-surface-container focus:outline-none focus:ring-2 focus:ring-secondary transition-all" placeholder="Cari titik lokasi / slug..." type="text"></div></div></div><div class="overflow-x-auto w-full"><table class="w-full text-left"><thead><tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider border-b border-surface-container/60"><th class="py-3.5 px-6">Nama Titik Lokasi</th><th class="py-3.5 px-6">Tautan / Link URL</th><th class="py-3.5 px-6 w-36">Status QR</th><th class="py-3.5 px-6 w-36 text-left">Total Akses</th><th class="py-3.5 px-6 w-52 text-right">Aksi</th></tr></thead><tbody class="divide-y-0"><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0"><span class="material-symbols-outlined text-[18px]">storefront</span></div><span class="font-title-md text-title-md font-semibold text-on-surface">Kantin &amp; Area Pujasera</span></div></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md font-mono"><span class="material-symbols-outlined text-[14px] text-outline">link</span><span class="">qr.pedulisiswa.sch.id/loc-knt01</span></div></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 text-on-surface font-semibold font-title-md text-title-md"><span class="material-symbols-outlined text-[18px] text-secondary">qr_code_scanner</span><span class="">142</span><span class="font-body-sm text-body-sm font-normal text-on-surface-variant">kali</span></div></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="triggerDownloadAlert('QR Kantin (PNG &amp; SVG)')" type="button"><span class="material-symbols-outlined text-[16px]">download</span><span class="">Unduh QR</span></button><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-colors" onclick="showToast('Regenerasi Berhasil', 'Kode QR Kantin berhasil diperbarui.')" title="Regenerate QR" type="button"><span class="material-symbols-outlined text-[16px]">refresh</span><span class="">Regenerate QR</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0"><span class="material-symbols-outlined text-[18px]">stairs</span></div><span class="font-title-md text-title-md font-semibold text-on-surface">Koridor Kelas Lantai 2</span></div></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md font-mono"><span class="material-symbols-outlined text-[14px] text-outline">link</span><span class="">qr.pedulisiswa.sch.id/loc-krd02</span></div></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 text-on-surface font-semibold font-title-md text-title-md"><span class="material-symbols-outlined text-[18px] text-secondary">qr_code_scanner</span><span class="">89</span><span class="font-body-sm text-body-sm font-normal text-on-surface-variant">kali</span></div></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="triggerDownloadAlert('QR Koridor Lt.2 (PNG &amp; SVG)')" type="button"><span class="material-symbols-outlined text-[16px]">download</span><span class="">Unduh QR</span></button><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-colors" onclick="showToast('Regenerasi Berhasil', 'Kode QR Koridor Kelas Lt.2 berhasil diperbarui.')" title="Regenerate QR" type="button"><span class="material-symbols-outlined text-[16px]">refresh</span><span class="">Regenerate QR</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0"><span class="material-symbols-outlined text-[18px]">wc</span></div><span class="font-title-md text-title-md font-semibold text-on-surface">Toilet &amp; Area Belakang</span></div></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md font-mono"><span class="material-symbols-outlined text-[14px] text-outline">link</span><span class="">qr.pedulisiswa.sch.id/loc-tlt03</span></div></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 text-on-surface font-semibold font-title-md text-title-md"><span class="material-symbols-outlined text-[18px] text-secondary">qr_code_scanner</span><span class="">64</span><span class="font-body-sm text-body-sm font-normal text-on-surface-variant">kali</span></div></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="triggerDownloadAlert('QR Toilet &amp; Belakang (PNG &amp; SVG)')" type="button"><span class="material-symbols-outlined text-[16px]">download</span><span class="">Unduh QR</span></button><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-colors" onclick="showToast('Regenerasi Berhasil', 'Kode QR Toilet &amp; Belakang berhasil diperbarui.')" title="Regenerate QR" type="button"><span class="material-symbols-outlined text-[16px]">refresh</span><span class="">Regenerate QR</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60"><td class="py-4 px-6"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0"><span class="material-symbols-outlined text-[18px]">sports_soccer</span></div><span class="font-title-md text-title-md font-semibold text-on-surface">Lapangan Olahraga &amp; Tribun</span></div></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md font-mono"><span class="material-symbols-outlined text-[14px] text-outline">link</span><span class="">qr.pedulisiswa.sch.id/loc-lpg04</span></div></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 text-on-surface font-semibold font-title-md text-title-md"><span class="material-symbols-outlined text-[18px] text-secondary">qr_code_scanner</span><span class="">53</span><span class="font-body-sm text-body-sm font-normal text-on-surface-variant">kali</span></div></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="triggerDownloadAlert('QR Lapangan &amp; Tribun (PNG &amp; SVG)')" type="button"><span class="material-symbols-outlined text-[16px]">download</span><span class="">Unduh QR</span></button><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-colors" onclick="showToast('Regenerasi Berhasil', 'Kode QR Lapangan &amp; Tribun berhasil diperbarui.')" title="Regenerate QR" type="button"><span class="material-symbols-outlined text-[16px]">refresh</span><span class="">Regenerate QR</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors"><td class="py-4 px-6"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0"><span class="material-symbols-outlined text-[18px]">local_parking</span></div><span class="font-title-md text-title-md font-semibold text-on-surface">Area Parkir &amp; Gerbang Masuk</span></div></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md font-mono"><span class="material-symbols-outlined text-[14px] text-outline">link</span><span class="">qr.pedulisiswa.sch.id/loc-prk05</span></div></td><td class="py-4 px-6"><span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span></td><td class="py-4 px-6"><div class="inline-flex items-center gap-1.5 text-on-surface font-semibold font-title-md text-title-md"><span class="material-symbols-outlined text-[18px] text-secondary">qr_code_scanner</span><span class="">31</span><span class="font-body-sm text-body-sm font-normal text-on-surface-variant">kali</span></div></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="triggerDownloadAlert('QR Parkir &amp; Gerbang (PNG &amp; SVG)')" type="button"><span class="material-symbols-outlined text-[16px]">download</span><span class="">Unduh QR</span></button><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-colors" onclick="showToast('Regenerasi Berhasil', 'Kode QR Parkir &amp; Gerbang berhasil diperbarui.')" title="Regenerate QR" type="button"><span class="material-symbols-outlined text-[16px]">refresh</span><span class="">Regenerate QR</span></button></div></td></tr></tbody></table></div></div></div></section><section class="flex-col gap-6 hidden" id="panel-staf"><div class="w-full flex flex-col gap-4"><div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container/60 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary shrink-0"><span class="material-symbols-outlined text-[24px]">group_add</span></div><div class="flex flex-col"><div class="flex items-center gap-2"><h3 class="font-title-lg text-title-lg font-bold text-on-surface">Kelola &amp; Undang Staf Sekolah</h3><span class="px-2.5 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-label-sm font-semibold">SMA Negeri 1 Teladan</span></div><p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Undang rekan Guru BK, Kesiswaan, atau Wali Kelas untuk berkolaborasi mengelola laporan.</p></div></div><div class="flex items-center gap-3"><button class="px-4 py-2.5 rounded-xl border border-outline-variant/60 hover:bg-surface-container text-on-surface font-title-md text-title-md font-semibold transition-colors flex items-center gap-2 cursor-pointer shadow-sm" onclick="copyUnitInviteLink()" type="button"><span class="material-symbols-outlined text-[18px] text-secondary">link</span><span class="">Salin Tautan Undangan</span></button><button class="px-5 py-2.5 rounded-xl bg-primary text-on-primary hover:bg-inverse-surface font-title-md text-title-md font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-sm" onclick="openUndangStafModal()" type="button"><span class="material-symbols-outlined text-[18px]">person_add</span><span class="">+ Undang Anggota Baru</span></button></div></div><div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col"><div class="px-6 py-4 flex items-center justify-between bg-surface-container-low/50"><div class="flex items-center gap-2"><span class="font-title-md text-title-md font-semibold text-on-surface">Daftar Anggota &amp; Undangan Terkirim</span><span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm" id="staf-count-pill">3 Anggota Terdaftar</span></div></div><div class="overflow-x-auto w-full"></div></div></div></section>
+<!-- TOAST NOTIFICATION CONTAINER -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-surface-container-lowest text-on-surface px-5 py-3.5 rounded-2xl shadow-xl border border-surface-container-high" id="toast-notification">
+<div class="w-8 h-8 rounded-xl bg-on-tertiary-container/15 text-on-tertiary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface" id="toast-title">Kategori Berhasil Disimpan</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="toast-message">Kategori aduan berhasil disimpan ke daftar.</span>
+</div>
+</div>
+<!-- MODAL DIALOG POPUP: TAMBAH / UBAH KATEGORI ADUAN INTERAKTIF -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto transition-opacity duration-200 hidden" id="modal-kategori" onclick="handleBackdropClick(event)">
+<div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full shadow-2xl flex flex-col border border-surface-container my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200" onclick="event.stopPropagation()">
+<!-- Modal Header -->
+<div class="px-6 py-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/40">
+<div class="flex gap-3 items-center">
+<div class="w-10 h-10 rounded-xl bg-secondary-fixed text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]" id="modal-kategori-icon">add_circle</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="modal-kategori-title">Tambah Kategori Baru</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant" id="modal-kategori-subtitle">Konfigurasikan label jenis aduan yang akan muncul di alur pelaporan siswa.</p>
+</div>
+</div>
+<button class="w-9 h-9 rounded-xl flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors shrink-0 -mr-1 cursor-pointer" onclick="closeKategoriModal()" title="Tutup modal" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body Form -->
+<div class="p-6 flex flex-col gap-4">
+<!-- Field 1: Label Jenis Kejadian -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="modal-input-label">
+            Nama Jenis Kejadian (Label Tampilan Siswa) <span class="text-error">*</span>
+</label>
+<span class="font-label-sm text-label-sm text-outline" id="modal-char-count">26/80</span>
+</div>
+<input class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="modal-input-label" maxlength="80" oninput="updateModalCharCount(this)" placeholder="Contoh: Pemalakan atau Intimidasi Kelompok" type="text">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Label ini langsung ditampilkan pada daftar opsi saat siswa melapor.</span>
+</div>
+<!-- Field 2: Klasifikasi PPKSP -->
+<div class="flex flex-col gap-1.5">
+<div class="relative">
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Field 3: Akses Visibilitas Unit -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md font-semibold text-on-surface">Status Kategori</label>
+</div>
+<!-- Field 4: Status Kategori Toggle -->
+<div class="p-3.5 bg-surface-container-low/70 rounded-xl border border-surface-container flex items-center justify-between gap-4">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold text-on-surface">Status Kategori</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="modal-status-text">Aktif (Ditampilkan ke Siswa)</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer shrink-0">
+<input checked="" class="sr-only peer" id="modal-toggle-status" onchange="updateStatusToggleLabel(this)" type="checkbox">
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-on-tertiary-container"></div>
+</label>
+</div>
+<!-- SOP Integrity Note -->
+</div>
+<!-- Modal Footer -->
+<div class="px-6 py-4 border-t border-surface-container bg-surface-container-low/30 flex items-center justify-end gap-3">
+<button class="px-4 py-2.5 rounded-xl border border-outline-variant/60 text-on-surface hover:bg-surface-container font-title-md text-title-md font-medium transition-colors cursor-pointer" onclick="closeKategoriModal()" type="button">Batal</button>
+<button class="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-title-md text-title-md font-semibold hover:bg-inverse-surface active:scale-[0.99] transition-all shadow-sm flex items-center gap-2 cursor-pointer" onclick="saveKategoriModal()" type="button">
+<span class="material-symbols-outlined text-[19px]">check</span>
+<span class="" id="modal-btn-save-text">Simpan Perubahan</span>
+</button>
+</div>
+</div>
+</div>
+<!-- MODAL TAMBAH LOKASI SEDERHANA -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 hidden" id="modal-tambah-lokasi" onclick="if(event.target===this)closeTambahLokasiModal()">
+<div class="bg-surface-container-lowest rounded-2xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4" onclick="event.stopPropagation()">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[22px]">add_location</span>
+<h4 class="font-title-lg text-title-lg font-bold text-on-surface">Tambah Titik Lokasi Baru</h4>
+</div>
+<button class="text-outline hover:text-on-surface" onclick="closeTambahLokasiModal()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md font-semibold text-on-surface">Nama Titik Lokasi</label>
+<input class="w-full px-3.5 py-2.5 bg-surface-container-low text-on-surface rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-secondary" id="new-loc-name" placeholder="Contoh: Perpustakaan &amp; Ruang Baca" type="text">
+</div>
+<div class="flex flex-col gap-1">
+</div>
+</div>
+<div class="flex items-center justify-end gap-2 pt-2">
+<button class="px-4 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container font-title-md text-title-md font-medium transition-colors cursor-pointer" onclick="closeTambahLokasiModal()" type="button">
+          Batal
+        </button>
+<button class="px-4 py-2.5 rounded-xl bg-primary text-on-primary font-title-md text-title-md font-semibold hover:bg-inverse-surface transition-colors shadow-sm cursor-pointer" onclick="saveNewLocation()" type="button">
+          Simpan Lokasi
+        </button>
+</div>
+</div>
+</div>
+<!-- CLIENT-SIDE MICRO-INTERACTIONS SCRIPT -->
+<script>
+    let currentEditRow = null;
+
+    function switchTab(tabKey) {
+      const panelJenis = document.getElementById('panel-jenis');
+      const panelLokasi = document.getElementById('panel-lokasi');
+      const panelQr = document.getElementById('panel-qr');
+
+      const btnJenis = document.getElementById('tab-btn-jenis');
+      const btnLokasi = document.getElementById('tab-btn-lokasi');
+      const btnQr = document.getElementById('tab-btn-qr');
+
+      const allPanels = [panelJenis, panelLokasi, panelQr];
+      const allBtns = [btnJenis, btnLokasi, btnQr];
+
+      allPanels.forEach(p => {
+        p.classList.add('hidden');
+        p.classList.remove('flex');
+      });
+
+      allBtns.forEach(b => {
+        b.className = 'flex items-center gap-2 px-5 py-2.5 rounded-lg font-title-md text-title-md font-medium text-on-surface-variant hover:text-on-surface transition-all';
+      });
+
+      if (tabKey === 'jenis') {
+        panelJenis.classList.remove('hidden');
+        panelJenis.classList.add('flex');
+        btnJenis.className = 'flex items-center gap-2 px-5 py-2.5 rounded-lg font-title-md text-title-md font-semibold transition-all bg-surface-container-lowest text-on-surface shadow-sm';
+      } else if (tabKey === 'lokasi') {
+        panelLokasi.classList.remove('hidden');
+        panelLokasi.classList.add('flex');
+        btnLokasi.className = 'flex items-center gap-2 px-5 py-2.5 rounded-lg font-title-md text-title-md font-semibold transition-all bg-surface-container-lowest text-on-surface shadow-sm';
+      } else if (tabKey === 'qr') {
+        panelQr.classList.remove('hidden');
+        panelQr.classList.add('flex');
+        btnQr.className = 'flex items-center gap-2 px-5 py-2.5 rounded-lg font-title-md text-title-md font-semibold transition-all bg-surface-container-lowest text-on-surface shadow-sm';
+      }
+    }
+
+    function updateModalCharCount(el) {
+      const count = el.value ? el.value.length : 0;
+      document.getElementById('modal-char-count').innerText = count + '/80';
+    }
+
+    function updateStatusToggleLabel(input) {
+      const text = document.getElementById('modal-status-text');
+      if (input.checked) {
+        text.innerText = 'Aktif (Ditampilkan ke Siswa)';
+      } else {
+        text.innerText = 'Disembunyikan / Nonaktif sementara';
+      }
+    }
+
+    function handleBackdropClick(e) {
+      if (e.target.id === 'modal-kategori') {
+        closeKategoriModal();
+      }
+    }
+
+    function openKategoriModal(mode, rowElement) {
+      const modal = document.getElementById('modal-kategori');
+      const titleEl = document.getElementById('modal-kategori-title');
+      const subTitleEl = document.getElementById('modal-kategori-subtitle');
+      const iconEl = document.getElementById('modal-kategori-icon');
+      const inputLabel = document.getElementById('modal-input-label');
+      const selectPpksp = document.getElementById('modal-select-ppksp');
+      const radioBk = document.getElementById('vis-bk');
+      const radioKesiswaan = document.getElementById('vis-kesiswaan');
+      const toggleStatus = document.getElementById('modal-toggle-status');
+      const btnSaveText = document.getElementById('modal-btn-save-text');
+
+      if (mode === 'tambah') {
+        currentEditRow = null;
+        titleEl.innerText = 'Tambah Kategori Baru';
+        subTitleEl.innerText = 'Konfigurasikan label jenis aduan yang akan muncul di alur pelaporan siswa.';
+        iconEl.innerText = 'add_circle';
+        inputLabel.value = '';
+        selectPpksp.selectedIndex = 0;
+        radioBk.checked = true;
+        toggleStatus.checked = true;
+        toggleStatus.disabled = false;
+        btnSaveText.innerText = 'Simpan Kategori';
+      } else {
+        // Mode edit
+        const targetRow = (rowElement && rowElement.closest) ? rowElement.closest('tr') : (event ? event.target.closest('tr') : null);
+        currentEditRow = targetRow;
+
+        const labelText = targetRow ? (targetRow.querySelector('.row-label-text')?.innerText.trim() || '') : '';
+        const ppkspVal = targetRow ? (targetRow.getAttribute('data-ppksp') || 'Kekerasan Psikis') : 'Kekerasan Psikis';
+        const visibilitasVal = targetRow ? (targetRow.getAttribute('data-visibilitas') || 'bk') : 'bk';
+        const isPermanent = targetRow ? (targetRow.getAttribute('data-permanent') === 'true') : false;
+        const statusVal = targetRow ? (targetRow.getAttribute('data-status') !== 'nonaktif') : true;
+
+        titleEl.innerText = 'Ubah Kategori Aduan';
+        subTitleEl.innerText = 'Perbarui detail label aduan untuk alur pelaporan siswa.';
+        iconEl.innerText = 'edit_note';
+        inputLabel.value = labelText;
+        selectPpksp.value = ppkspVal;
+        
+        if (visibilitasVal === 'kesiswaan') {
+          radioKesiswaan.checked = true;
+        } else {
+          radioBk.checked = true;
+        }
+
+        toggleStatus.checked = statusVal;
+        toggleStatus.disabled = isPermanent;
+        btnSaveText.innerText = 'Simpan Perubahan';
+      }
+
+      updateModalCharCount(inputLabel);
+      updateStatusToggleLabel(toggleStatus);
+
+      modal.classList.remove('hidden');
+      setTimeout(() => inputLabel.focus(), 60);
+    }
+
+    function closeKategoriModal() {
+      const modal = document.getElementById('modal-kategori');
+      modal.classList.add('hidden');
+    }
+
+    function showToast(title, message) {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-title').innerText = title;
+      document.getElementById('toast-message').innerText = message;
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    function saveKategoriModal() {
+      const name = document.getElementById('modal-input-label').value.trim();
+      const ppksp = document.getElementById('modal-select-ppksp').value;
+      const visibilitas = document.querySelector('input[name="modal-visibilitas"]:checked').value;
+      const isActive = document.getElementById('modal-toggle-status').checked;
+
+      if (!name) {
+        alert('Harap isi Nama Jenis Kejadian');
+        document.getElementById('modal-input-label').focus();
+        return;
+      }
+
+      const tbody = document.getElementById('kategori-table-body');
+
+      if (currentEditRow) {
+        // Edit Mode: perbarui teks dan atribut data row yang dipilih
+        const titleSpan = currentEditRow.querySelector('.row-label-text');
+        if (titleSpan) titleSpan.innerText = name;
+
+        currentEditRow.setAttribute('data-ppksp', ppksp);
+        currentEditRow.setAttribute('data-visibilitas', visibilitas);
+        currentEditRow.setAttribute('data-status', isActive ? 'aktif' : 'nonaktif');
+
+        const statusCell = currentEditRow.querySelector('td:nth-child(3)');
+        if (statusCell) {
+          statusCell.innerHTML = isActive
+            ? `<span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span>`
+            : `<span class="inline-flex items-center gap-1.5 text-outline font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-outline"></span>Nonaktif</span>`;
+        }
+
+        closeKategoriModal();
+        showToast('Perubahan Kategori Berhasil Diperbarui', `Kategori '${name}' berhasil diperbarui.`);
+      } else {
+        // Tambah Mode: Sisipkan row sebelum baris permanen terakhir
+        const totalRows = tbody.rows.length;
+        const newOrder = totalRows; // nomor sebelum row terakhir
+        const newRow = tbody.insertRow(totalRows - 1);
+        newRow.className = 'hover:bg-surface-container-low/40 transition-colors bg-surface-container-lowest border-b border-surface-container/60';
+        newRow.setAttribute('data-ppksp', ppksp);
+        newRow.setAttribute('data-visibilitas', visibilitas);
+        newRow.setAttribute('data-status', isActive ? 'aktif' : 'nonaktif');
+
+        const statusHtml = isActive
+          ? `<span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span>`
+          : `<span class="inline-flex items-center gap-1.5 text-outline font-label-md text-label-md font-semibold row-status-badge"><span class="w-2 h-2 rounded-full bg-outline"></span>Nonaktif</span>`;
+
+        newRow.innerHTML = `
+          <td class="py-4 px-6 text-center">
+            <div class="inline-flex items-center gap-1 bg-surface-container px-2.5 py-1 rounded-lg">
+              <span class="font-label-md text-label-md font-bold text-on-surface row-order-num">${newOrder}</span>
+              <div class="flex flex-col">
+                <button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_less</span></button>
+                <button class="text-outline hover:text-secondary leading-none" type="button"><span class="material-symbols-outlined text-[14px]">expand_more</span></button>
+              </div>
+            </div>
+          </td>
+          <td class="py-4 px-6">
+            <span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text">${name}</span>
+          </td>
+          <td class="py-4 px-6">
+            ${statusHtml}
+          </td>
+          <td class="py-4 px-6 text-right">
+            <button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold transition-colors" onclick="openKategoriModal('edit', this)" type="button">
+              <span class="material-symbols-outlined text-[16px]">edit</span>
+              <span>Ubah</span>
+            </button>
+          </td>
+        `;
+
+        // Update urutan baris terakhir yang terkunci
+        const lastRowOrder = tbody.rows[tbody.rows.length - 1].querySelector('.row-order-num');
+        if (lastRowOrder) lastRowOrder.innerText = tbody.rows.length;
+
+        // Update badge total
+        const badgeTotal = document.getElementById('badge-total-jenis');
+        if (badgeTotal) badgeTotal.innerText = tbody.rows.length;
+
+        closeKategoriModal();
+        showToast('Kategori Berhasil Disimpan', `'${name}' telah aktif di alur pelaporan.`);
+      }
+    }
+
+    function toggleActiveStatus(button) {
+      const row = button.closest('tr');
+      const statusCell = row.cells[3];
+      if (button.innerText.includes('Nonaktifkan')) {
+        button.innerText = 'Aktifkan';
+        button.classList.remove('text-on-surface-variant');
+        button.classList.add('text-secondary', 'font-semibold');
+        statusCell.innerHTML = '<span class="inline-flex items-center gap-1 text-outline font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-outline"></span>Nonaktif</span>';
+      } else {
+        button.innerText = 'Nonaktifkan';
+        button.classList.add('text-on-surface-variant');
+        button.classList.remove('text-secondary', 'font-semibold');
+        statusCell.innerHTML = '<span class="inline-flex items-center gap-1 text-on-tertiary-container font-label-md text-label-md font-semibold"><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>Aktif</span>';
+      }
+    }
+
+    function openTambahLokasiModal() {
+      document.getElementById('modal-tambah-lokasi').classList.remove('hidden');
+    }
+
+    function closeTambahLokasiModal() {
+      document.getElementById('modal-tambah-lokasi').classList.add('hidden');
+    }
+
+    function saveNewLocation() {
+      const name = document.getElementById('new-loc-name').value.trim();
+      const desc = document.getElementById('new-loc-desc').value.trim() || 'Titik pantau terdaftar';
+      if (!name) return;
+
+      const tbody = document.getElementById('location-table-body');
+      const rowCount = tbody.rows.length;
+      const newRow = tbody.insertRow(rowCount - 1);
+      newRow.className = 'hover:bg-surface-container-low/40 transition-colors bg-surface-container-lowest';
+      newRow.innerHTML = `
+        <td class="py-3.5 px-4 text-center">
+          <div class="inline-flex items-center gap-1 bg-surface-container px-2 py-1 rounded-lg">
+            <span class="font-label-md text-label-md font-bold text-on-surface">${rowCount}</span>
+            <div class="flex flex-col">
+              <button type="button" class="text-outline hover:text-secondary leading-none"><span class="material-symbols-outlined text-[14px]">expand_less</span></button>
+              <button type="button" class="text-outline hover:text-secondary leading-none"><span class="material-symbols-outlined text-[14px]">expand_more</span></button>
+            </div>
+          </div>
+        </td>
+        <td class="py-3.5 px-4">
+          <span class="font-title-md text-title-md font-semibold text-on-surface">${name}</span>
+          <span class="font-body-sm text-body-sm text-on-surface-variant block">${desc}</span>
+        </td>
+        <td class="py-3.5 px-4">
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Area Khusus</span>
+        </td>
+        <td class="py-3.5 px-4">
+          <span class="inline-flex items-center gap-1 text-on-tertiary-container font-label-md text-label-md font-semibold">
+            <span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+            Aktif
+          </span>
+        </td>
+        <td class="py-3.5 px-4 text-right">
+          <div class="inline-flex items-center gap-2">
+            <button type="button" class="px-2.5 py-1.5 rounded-lg hover:bg-surface-container text-secondary font-label-md text-label-md font-semibold">Ubah</button>
+            <button type="button" onclick="toggleActiveStatus(this)" class="px-2.5 py-1.5 rounded-lg hover:bg-error-container text-on-surface-variant hover:text-on-error-container font-label-md text-label-md">Nonaktifkan</button>
+          </div>
+        </td>
+      `;
+
+      closeTambahLokasiModal();
+      document.getElementById('new-loc-name').value = '';
+      document.getElementById('new-loc-desc').value = '';
+      showToast('Titik Lokasi Ditambahkan', `Titik '${name}' berhasil ditambahkan.`);
+    }
+
+    function copySchoolCode() {
+      navigator.clipboard.writeText('N1-SMATLD');
+      showToast('Tersalin', 'Kode sekolah N1-SMATLD berhasil disalin ke clipboard.');
+    }
+
+    function triggerDownloadAlert(assetName) {
+      alert(`Memulai pengunduhan berkas resmi: ${assetName}. File siap dicetak dalam format proporsional.`);
+    }
+
+    // Keyboard support: Escape closes modal
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeKategoriModal();
+        closeTambahLokasiModal();
+      }
+    });
+</script>
+</div></main></div>
+
+
+</body></html>

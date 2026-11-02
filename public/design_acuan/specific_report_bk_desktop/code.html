@@ -1,0 +1,231 @@
+<!DOCTYPE html><html class="h-full bg-[#f8f9ff]" lang="id" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SafeReport Campus - Konselor BK</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#000000",
+            "background": "#f8f9ff",
+            "surface": "#ffffff",
+            "surface-dim": "#cbdbf5",
+            "surface-container-low": "#eff4ff",
+            "surface-container": "#e5eeff",
+            "surface-container-high": "#dce9ff",
+            "secondary": "#006398",
+            "on-surface": "#0f172a",
+            "on-surface-variant": "#475569"
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Custom clean scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+<meta content="web_dashboard" name="shell-type"></head>
+<body class="h-full font-sans text-on-surface antialiased bg-[#f8f9ff] flex">
+<!-- SIDEBAR NAVIGATION -->
+<aside class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200/80 z-30 flex flex-col justify-between select-none">
+<div class="flex flex-col">
+<!-- App Brand Logo -->
+<div class="px-6 py-5 flex items-center gap-3 border-b border-slate-100">
+<div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+<span class="material-symbols-outlined text-[22px] fill-1 text-white">verified_user</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-bold text-[17px] tracking-tight text-slate-900 leading-none">HiOwy!</span>
+</div>
+</div>
+</div>
+<!-- Nav Links -->
+<div class="px-3 py-4">
+<div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigasi Utama</div>
+<nav class="space-y-1"><a aria-current="page" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white shadow-sm transition-all" href="#"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-[20px] text-white fill-1">inbox</span><span class="text-white">Laporan</span></div><span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">49</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#"><span class="material-symbols-outlined text-[20px] text-slate-400">tune</span><span class="">Kelola</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#"><span class="material-symbols-outlined text-[20px] text-slate-400">menu_book</span><span class="">Halaman Pelajari</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#"><span class="material-symbols-outlined text-[20px] text-slate-400">bar_chart</span><span class="">Statistik</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#"><span class="material-symbols-outlined text-[20px] text-slate-400">archive</span><span class="">Arsip</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#"><span class="material-symbols-outlined text-[20px] text-slate-400">history</span><span class="">Log Akses</span></a></nav>
+</div>
+</div>
+<!-- Bottom Sign Out Action -->
+<div class="p-4 border-t border-slate-100">
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all" href="#">
+<span class="material-symbols-outlined text-[19px]">logout</span>
+<span class="">Keluar</span>
+</a>
+</div>
+</aside>
+<!-- MAIN WRAPPER -->
+<div class="pl-64 flex-1 flex flex-col min-w-0">
+<!-- TOP BAR -->
+<header class="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur border-b border-slate-200/80 px-8 flex items-center justify-between">
+<!-- Left: Academic Year Badge -->
+<div class="flex items-center gap-3">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 text-slate-700 text-xs font-semibold border border-slate-200">
+<span class="material-symbols-outlined text-[16px] text-slate-500">school</span>
+<span class="">Tahun Ajaran 2024/2025</span>
+</div>
+</div>
+<!-- Right: Search, Notification, Profile -->
+<div class="flex items-center gap-4">
+<!-- Global Quick Search -->
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all" placeholder="Pencarian cepat..." type="text">
+</div>
+<button aria-label="Notifikasi" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
+</button>
+<div class="h-5 w-[1px] bg-slate-200"></div>
+<!-- Counselor Profile -->
+<div class="flex items-center gap-2.5 pl-1">
+<img alt="Sarah Jenkins" class="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvlX5hx9KnXITSSX3R-7IEfz2Yi7VZrAEmhjUg7Dx-d4K_EWFpD97XbJzp4MMhUJXYyTUf6LAuW78y6RKZy_dJ9yKTctYTJhU4QqJg-D22RJo-ILpV6ccZ8_8ldqlBQmm5MaNGI7qcat2nHtZ5hqQaKqBOdE-TuGRPhqCbXQfiyRM8sf80mlQHybccQTYe-RvL0my0d-AWm0jA_fYMzXIscGgYc6nDm_jG8CHUi8w">
+<div class="flex flex-col text-left">
+<span class="text-xs font-semibold text-slate-900 leading-tight">Sarah Jenkins, M.Pd.</span>
+<span class="text-[10px] text-slate-500 font-medium leading-none mt-0.5">Guru BK / Konselor Inti</span>
+</div>
+</div>
+</div>
+</header>
+<!-- CONTENT BODY -->
+<main class="p-8 max-w-[1580px] w-full mx-auto space-y-6"><div class="flex flex-col gap-6 w-full"><nav class="flex items-center justify-between text-xs text-slate-500"><div class="flex items-center gap-2"><a class="inline-flex items-center gap-1 font-medium text-slate-600 hover:text-slate-900 transition-colors" href="#"><span class="material-symbols-outlined text-[16px]">arrow_back</span>Semua Laporan</a><span class="text-slate-300">/</span><span class="font-semibold text-slate-900">Detail Kasus #SR-2024-8042</span></div><div class="flex items-center gap-2 text-slate-400"><span class="material-symbols-outlined text-[16px]">schedule</span><span class="">Diterima: 24 Okt 2024, 10:15 WIB</span></div></nav><div class="flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm"><div class="flex flex-wrap items-center gap-3.5"><div class="w-10 h-10 rounded-xl bg-error-container text-error flex items-center justify-center"><span class="material-symbols-outlined text-[24px]">crisis_alert</span></div><div><div class="flex items-center gap-2.5"><h1 class="text-xl font-bold tracking-tight text-slate-900">#SR-2024-8042</h1><span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-error/20 text-xs font-bold ring-1 ring-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Urgent</span><span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-secondary text-xs font-semibold"><span class="material-symbols-outlined text-[14px]">visibility</span>Dibaca</span><span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium"><span class="material-symbols-outlined text-[14px]">school</span>Siswa</span></div><p class="text-xs text-slate-500 mt-1">Kasus Bullying &amp; Intimidasi • Dilaporkan anonim melalui portal siswa</p></div></div><div class="flex items-center gap-2.5"><button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-all shadow-xs" id="openRelayModalBtn" type="button"><span class="material-symbols-outlined text-[17px] text-secondary">forward_to_inbox</span>Laporkan ke Wali Kelas</button><button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-all shadow-xs" id="archiveCaseBtn" type="button"><span class="material-symbols-outlined text-[17px] text-slate-500">archive</span>Arsipkan</button></div></div><div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm"><div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-secondary">linear_scale</span><span class="text-xs font-bold uppercase tracking-wider text-slate-700">Alur &amp; Progres Penanganan Kasus</span></div><span class="text-xs text-slate-500 font-medium">Posisi Saat Ini: <strong class="text-secondary">Dibaca &amp; Diproses BK</strong></span></div><div class="grid grid-cols-1 md:grid-cols-4 gap-4"><div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/60"><div class="w-8 h-8 rounded-lg bg-secondary text-white flex items-center justify-center shrink-0 font-bold text-xs"><span class="material-symbols-outlined text-[18px]">check</span></div><div class="min-w-0"><p class="text-xs font-bold text-slate-900 truncate">1. Laporan Masuk</p><p class="text-[11px] text-slate-500">24 Okt, 10:15 WIB</p></div></div><div class="flex items-center gap-3 p-3 rounded-xl bg-blue-50/60 border border-secondary-container"><div class="w-8 h-8 rounded-lg bg-secondary text-white flex items-center justify-center shrink-0 font-bold text-xs ring-4 ring-blue-100"><span class="material-symbols-outlined text-[18px]">visibility</span></div><div class="min-w-0"><p class="text-xs font-bold text-secondary truncate">2. Dibaca &amp; Aktif</p><p class="text-[11px] text-secondary">24 Okt, 10:25 WIB</p></div></div><div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/40 opacity-75"><div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center shrink-0 font-bold text-xs"><span class="material-symbols-outlined text-[18px]">pending</span></div><div class="min-w-0"><p class="text-xs font-semibold text-slate-700 truncate">3. Tindak Lanjut</p><p class="text-[11px] text-slate-400">Proses koordinasi</p></div></div><div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/40 opacity-60"><div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-400 flex items-center justify-center shrink-0 font-bold text-xs"><span class="material-symbols-outlined text-[18px]">task_alt</span></div><div class="min-w-0"><p class="text-xs font-semibold text-slate-600 truncate">4. Selesai / Arsip</p><p class="text-[11px] text-slate-400">Menunggu hasil</p></div></div></div></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"><div class="lg:col-span-7 flex flex-col gap-6"><section class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-5"><div class="flex items-center justify-between pb-3 border-b border-slate-100"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[20px]">description</span><h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Informasi Insiden</h2></div><span class="text-xs text-slate-400 font-medium">ID: SR-2024-8042</span></div><div class="grid grid-cols-2 gap-3"><div class="p-3 rounded-xl bg-slate-50 border border-slate-100"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jenis Kejadian</span><span class="text-xs font-bold text-slate-900 mt-0.5 block">Bullying Fisik &amp; Intimidasi</span></div><div class="p-3 rounded-xl bg-slate-50 border border-slate-100"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Waktu Kejadian</span><span class="text-xs font-bold text-slate-900 mt-0.5 block">24 Okt 2024 (10:05 WIB)</span></div><div class="p-3 rounded-xl bg-slate-50 border border-slate-100"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lokasi</span><span class="text-xs font-bold text-slate-900 mt-0.5 block">Lorong Lt. 2 (Dekat Lab Biologi)</span></div><div class="p-3 rounded-xl bg-slate-50 border border-slate-100"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pihak Terlibat</span><span class="text-xs font-bold text-slate-900 mt-0.5 block">2 Siswa 9B &amp; Korban (8A)</span></div></div><div><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Deskripsi Peristiwa</span><div class="p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs leading-relaxed text-slate-800"><p class="">“Saat saya mau mengembalikan buku ke perpustakaan lantai 2 dekat lab biologi, saya dihalangi oleh dua anak kelas 9B. Mereka menarik tas saya sampai robek kecil, menumpahkan botol air, dan mengancam supaya saya tidak melapor kalau tidak mau dipukul waktu jam pulang. Ini sudah ketiga kalinya minggu ini.”</p></div></div><div><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Lampiran Bukti (AES-256)</span><div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100"><div class="flex items-center gap-3 min-w-0"><div class="w-9 h-9 rounded-lg bg-white border border-slate-200 text-secondary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[20px]">image</span></div><div class="min-w-0"><p class="text-xs font-semibold text-slate-800 truncate">bukti_tali_tas_robek_241024.png</p><p class="text-[11px] text-slate-400">1.4 MB • Terenkripsi</p></div></div><button class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg transition-colors shadow-xs" type="button"><span class="material-symbols-outlined text-[15px]">visibility</span>Buka</button></div></div></section><section class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-4"><div class="flex items-center justify-between pb-3 border-b border-slate-100"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px] text-secondary">shield_person</span><h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Identitas Pelapor</h2></div><span class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 text-secondary border border-blue-100">Terkunci Konselor</span></div><div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex flex-wrap items-center justify-between gap-4"><div><span class="text-[10px] uppercase font-bold text-slate-400 block">Nama Siswa</span><span class="text-xs font-bold text-slate-900 block mt-0.5">Rayhan Aditya (NISN: 0092182910)</span><span class="text-[11px] text-slate-500 block">Kelas 8A • Wali: Hendra S., M.Pd.</span></div><a class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-secondary text-white text-xs font-semibold hover:opacity-95 shadow-xs transition-opacity" href="https://wa.me/6281234567890" rel="noopener noreferrer" target="_blank"><span class="material-symbols-outlined text-[16px]">chat</span>Hubungi Siswa (WA)</a></div></section><section class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-5"><div class="flex items-center justify-between pb-3 border-b border-slate-100"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[20px]">forum</span><h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Komunikasi Asinkron Aman</h2></div><span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Token Terenkripsi</span></div><div class="flex flex-col gap-3.5"><div class="flex flex-col items-start gap-1 max-w-[85%]"><div class="flex items-center gap-2 text-[11px]"><span class="font-bold text-slate-800">Pelapor (Siswa)</span><span class="text-slate-400">10:15 WIB</span></div><div class="p-3 rounded-2xl rounded-tl-sm bg-slate-100 text-xs text-slate-900 leading-relaxed">Bu Sarah, saya takut nanti waktu pulang sekolah mereka cegat lagi di gerbang belakang. Tolong bantuannya Bu.</div></div><div class="flex flex-col items-end gap-1 self-end max-w-[85%]"><div class="flex items-center gap-2 text-[11px]"><span class="text-slate-400">10:28 WIB</span><span class="font-bold text-secondary">Sarah Jenkins, M.Pd. (Konselor)</span></div><div class="p-3 rounded-2xl rounded-tr-sm bg-secondary text-xs text-white leading-relaxed">Halo Rayhan, laporan sudah kami terima dan mulai ditindaklanjuti secara rahasia. Jangan khawatir, kamu aman. Tim BK akan mendampingi penjemputanmu di pos gerbang saat bel pulang berbunyi.</div></div></div><div class="pt-2 flex flex-col gap-2.5"><label class="text-xs font-bold text-slate-700" for="counselorReply">Balasan Cepat Konselor</label><textarea class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all" id="counselorReply" placeholder="Tulis respons yang menenangkan untuk siswa..." rows="2"></textarea><div class="flex items-center justify-between"><span class="text-[11px] text-slate-400">Tersinkron langsung dengan token pelapor.</span><button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">send</span>Kirim Balasan</button></div></div></section></div><div class="lg:col-span-5 flex flex-col gap-6"><section class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-4"><div class="flex items-center justify-between pb-3 border-b border-slate-100"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-[20px]">tune</span><h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Status &amp; Penugasan</h2></div><span class="w-2 h-2 rounded-full bg-emerald-500"></span></div><div class="flex flex-col gap-1.5"><label class="text-xs font-semibold text-slate-700" for="caseStatus">Status Kasus</label><div class="relative"><select class="w-full appearance-none p-2.5 pr-8 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:bg-white" id="caseStatus"><option value="unread">Belum Dibaca</option><option selected="" value="read">Dibaca (Aktif)</option><option value="in_progress">Ditindaklanjuti Tim BK</option><option value="resolved">Selesai / Teratasi</option></select><span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">arrow_drop_down</span></div></div><div class="flex flex-col gap-1.5"><label class="text-xs font-semibold text-slate-700" for="caseHandler">Konselor Penanggung Jawab</label><div class="relative"><select class="w-full appearance-none p-2.5 pr-8 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:bg-white" id="caseHandler"><option selected="" value="sarah">Sarah Jenkins, M.Pd. (Konselor Inti)</option><option value="budi">Budi Santoso, S.Psi. (Konselor Kelas 7 &amp; 8)</option><option value="ratna">Ratna Kusuma, M.Psi. (Psikolog)</option></select><span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">arrow_drop_down</span></div></div><div class="flex flex-col gap-1.5"><span class="text-xs font-semibold text-slate-700">Tingkat Urgensi</span><div class="grid grid-cols-3 gap-2" id="urgencySelector"><button class="urgency-btn py-2 px-2 rounded-lg bg-slate-50 hover:bg-emerald-50 text-xs font-medium text-slate-600 hover:text-emerald-700 border border-slate-200 transition-all shadow-xs flex items-center justify-center gap-1.5" data-urgency="rendah" type="button"><span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span><span class="">Rendah</span></button><button class="urgency-btn py-2 px-2 rounded-lg bg-slate-50 hover:bg-amber-50 text-xs font-medium text-slate-600 hover:text-amber-700 border border-slate-200 transition-all shadow-xs flex items-center justify-center gap-1.5" data-urgency="sedang" type="button"><span class="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span><span class="">Sedang</span></button><button class="urgency-btn py-2 px-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-xs font-bold text-rose-700 border border-error/20 shadow-xs flex items-center justify-center gap-1.5 transition-all ring-2 ring-rose-200" data-urgency="darurat" type="button"><span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span><span class="">Darurat</span></button></div></div><div class="text-[11px] flex items-center justify-between text-slate-500 px-0.5" id="urgencyStatusNote"><span class="">Level terpilih: <strong class="text-rose-700 font-semibold" id="urgencyLabelText">Darurat (Tindakan Segera)</strong></span></div><button class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors shadow-xs text-xs mt-1" type="button">Perbarui Kasus</button></section><section class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-4"><div class="flex items-center justify-between pb-3 border-b border-slate-100"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[19px] text-secondary">lock</span><h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Catatan Rahasia BK</h2></div><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Internal</span></div><div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1"><div class="flex items-center justify-between text-[11px]"><span class="font-bold text-slate-800">Sarah Jenkins, M.Pd.</span><span class="text-slate-400">10:27 WIB</span></div><p class="text-xs text-slate-700 leading-normal">Koordinasi dengan tim satpam pos gerbang belakang untuk standby jam 14:00 saat pulang.</p></div><div class="flex flex-col gap-2"><textarea class="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:bg-white focus:outline-none transition-all" placeholder="Tambah catatan rahasia antar konselor..." rows="2"></textarea><button class="self-end px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-colors" type="button">Simpan Catatan</button></div></section><section class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-4"><div class="flex items-center justify-between pb-3 border-b border-slate-100"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[19px] text-secondary">forward_to_inbox</span><h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">LAPORKAN ke Wali Kelas</h2></div><span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">1 Terkirim</span></div><div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1.5"><div class="flex items-center justify-between text-[11px]"><span class="font-semibold text-secondary">Hendra S., M.Pd. (Wali 8A)</span><span class="text-slate-400">10:30 WIB</span></div><p class="text-xs italic text-slate-700">“Terdapat aduan potensi gesekan antar siswa di area lorong lantai 2 dekat lab biologi saat istirahat. Mohon pengawasan piket lorong ditingkatkan.”</p><div class="flex items-center gap-1 text-[11px] text-emerald-600"><span class="material-symbols-outlined text-[14px]">check_circle</span><span class="">Sudah dibaca oleh Wali Kelas</span></div></div><button class="w-full py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5" id="quickRelayBtn" type="button"><span class="material-symbols-outlined text-[16px] text-secondary">add_circle</span>Kirim Ringkasan Baru</button></section><section class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col gap-4"><div class="flex items-center justify-between pb-3 border-b border-slate-100"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[19px] text-secondary">history</span><h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Riwayat Singkat Aktivitas</h2></div><span class="text-xs text-slate-400">Audit Trail</span></div><div class="flex flex-col gap-3 pl-4 relative before:absolute before:left-1 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-slate-200"><div class="relative flex flex-col gap-0.5"><div class="absolute -left-[19px] top-1 w-2 h-2 rounded-full bg-secondary ring-2 ring-white"></div><div class="flex items-center justify-between text-xs"><span class="font-bold text-slate-800">Eskalasi Terkirim</span><span class="text-[11px] text-slate-400">10:30 WIB</span></div><span class="text-[11px] text-slate-500">Ringkasan aman dikirim ke portal Wali Kelas 8A</span></div><div class="relative flex flex-col gap-0.5"><div class="absolute -left-[19px] top-1 w-2 h-2 rounded-full bg-secondary ring-2 ring-white"></div><div class="flex items-center justify-between text-xs"><span class="font-bold text-slate-800">Balasan Konselor</span><span class="text-[11px] text-slate-400">10:28 WIB</span></div><span class="text-[11px] text-slate-500">Sarah Jenkins, M.Pd. mengirimkan respons penenangan</span></div><div class="relative flex flex-col gap-0.5"><div class="absolute -left-[19px] top-1 w-2 h-2 rounded-full bg-slate-400 ring-2 ring-white"></div><div class="flex items-center justify-between text-xs"><span class="font-bold text-slate-800">Laporan Diterima</span><span class="text-[11px] text-slate-400">10:15 WIB</span></div><span class="text-[11px] text-slate-500">Tiket anonim #SR-2024-8042 dibuat oleh sistem</span></div></div></section><div class="flex items-center justify-between pt-1 text-xs text-slate-500"><button class="inline-flex items-center gap-1.5 text-slate-500 hover:text-amber-600 transition-colors" id="markPrankBtn" type="button"><span class="material-symbols-outlined text-[16px]">flag</span>Tandai Laporan Iseng</button><span class="text-[11px] text-slate-400">Kepatuhan Hukum: Tanpa Hapus</span></div></div></div></div></main>
+</div>
+<!-- INTERACTIVE CONFIRMATION MODAL: TANDAI ISENG -->
+<div class="fixed inset-0 z-50 hidden" id="isengModal">
+<!-- Backdrop -->
+<div class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity" id="modalBackdrop"></div>
+<!-- Modal Box -->
+<div class="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center p-4">
+<div class="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">warning</span>
+</div>
+<div class="space-y-1">
+<h3 class="text-base font-bold text-slate-900">Tandai sebagai Laporan Iseng?</h3>
+<p class="text-xs text-slate-600 leading-relaxed">
+              Laporan yang ditandai iseng akan dipindahkan dari antrean aktif ke arsip tanpa notifikasi publik. Tindakan ini tercatat dalam log audit.
+            </p>
+</div>
+</div>
+<div class="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-100">
+<button class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors" id="cancelModalBtn" type="button">
+            Batal
+          </button>
+<button class="px-4 py-2 rounded-lg text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors shadow-sm" id="confirmModalBtn" type="button">
+            Ya, Tandai Iseng
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- JAVASCRIPT LOGIC -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const selectAll = document.getElementById('selectAll');
+      const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+      const bulkActionBtn = document.getElementById('bulkActionBtn');
+      const selectionCounter = document.getElementById('selectionCounter');
+      const selectedCount = document.getElementById('selectedCount');
+      const modal = document.getElementById('isengModal');
+      const modalBackdrop = document.getElementById('modalBackdrop');
+      const cancelModalBtn = document.getElementById('cancelModalBtn');
+      const confirmModalBtn = document.getElementById('confirmModalBtn');
+
+      function updateSelectionState() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        const count = checkedBoxes.length;
+
+        if (count > 0) {
+          bulkActionBtn.removeAttribute('disabled');
+          bulkActionBtn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 cursor-pointer shadow-xs";
+          selectionCounter.classList.remove('hidden');
+          selectedCount.textContent = count;
+        } else {
+          bulkActionBtn.setAttribute('disabled', 'true');
+          bulkActionBtn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed";
+          selectionCounter.classList.add('hidden');
+        }
+
+        selectAll.checked = count > 0 && count === rowCheckboxes.length;
+        selectAll.indeterminate = count > 0 && count < rowCheckboxes.length;
+      }
+
+      selectAll.addEventListener('change', () => {
+        rowCheckboxes.forEach(cb => {
+          cb.checked = selectAll.checked;
+        });
+        updateSelectionState();
+      });
+
+      rowCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelectionState);
+      });
+
+      // Modal open
+      bulkActionBtn.addEventListener('click', () => {
+        if (!bulkActionBtn.disabled) {
+          modal.classList.remove('hidden');
+        }
+      });
+
+      // Modal close handlers
+      function closeModal() {
+        modal.classList.add('hidden');
+      }
+
+      cancelModalBtn.addEventListener('click', closeModal);
+      modalBackdrop.addEventListener('click', closeModal);
+
+      confirmModalBtn.addEventListener('click', () => {
+        // Mock mark action
+        rowCheckboxes.forEach(cb => {
+          if (cb.checked) {
+            const row = cb.closest('tr');
+            row.style.opacity = '0.35';
+            cb.checked = false;
+          }
+        });
+        closeModal();
+        updateSelectionState();
+      });
+
+      // Tab switcher interaction
+      const tabs = document.querySelectorAll('.tab-btn');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => {
+            t.classList.remove('bg-white', 'text-slate-900', 'shadow-xs', 'font-bold');
+            t.classList.add('text-slate-500', 'font-medium');
+          });
+          tab.classList.add('bg-white', 'text-slate-900', 'shadow-xs', 'font-bold');
+          tab.classList.remove('text-slate-500', 'font-medium');
+        });
+      });
+    });
+  </script>
+
+
+</body></html>

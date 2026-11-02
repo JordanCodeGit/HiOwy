@@ -1,0 +1,268 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "surface-container-lowest": "#ffffff", "surface-container-low": "#eff4ff", "surface-container": "#e5eeff", "surface-container-high": "#dce9ff", "surface": "#f8f9ff", "on-surface": "#0b1c30", "on-surface-variant": "#45464d", "primary": "#0f172a", "on-primary": "#ffffff", "secondary": "#006398", "secondary-fixed": "#cce5ff", "secondary-fixed-dim": "#93ccff", "on-secondary-fixed-variant": "#004b73", "outline": "#76777d", "outline-variant": "#c6c6cd", "on-tertiary-container": "#069669", "error": "#ba1a1a", "error-container": "#ffdad6", "on-error": "#ffffff" }, fontFamily: { sans: ["Plus Jakarta Sans", "sans-serif"], display: ["Montserrat", "sans-serif"] } } } };</script><style>body { overscroll-behavior: none; } ::-webkit-scrollbar { display: none; }</style></head><body class="bg-surface font-sans text-on-surface min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex flex-col justify-between py-6"><div class="flex flex-col"><div class="flex items-center gap-3 px-6 mb-8"><div class="w-10 h-10 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary"><span class="material-symbols-outlined text-[24px]">shield_with_heart</span></div><div class="flex flex-col"><span class="font-display font-semibold text-base text-on-surface leading-tight">HiOwy!</span></div></div><div class="px-6 mb-3"><span class="text-[11px] font-bold text-outline uppercase tracking-wider">Navigasi Utama</span></div><nav class="flex flex-col gap-1 px-4"><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" href="#"><span class="material-symbols-outlined text-[20px]">inbox</span><span class="font-medium text-sm">Laporan</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary-fixed text-secondary font-bold shadow-sm transition-all border border-secondary/30" href="#"><span class="material-symbols-outlined text-[20px] text-secondary">category</span><span class="font-bold text-sm text-secondary">Kelola</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span class="font-medium text-sm">Halaman Pelajari</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" href="#"><span class="material-symbols-outlined text-[20px]">equalizer</span><span class="font-medium text-sm">Statistik</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" href="#"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span class="font-medium text-sm">Arsip</span></a><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" href="#"><span class="material-symbols-outlined text-[20px]">history</span><span class="font-medium text-sm">Log Akses</span></a></nav></div><div class="px-4"><a class="flex items-center gap-3 px-4 py-3 rounded-xl text-error hover:bg-error-container/40 transition-all font-semibold text-sm" href="#"><span class="material-symbols-outlined text-[20px]">logout</span><span class="">Keluar</span></a></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-20 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-30 px-8 flex items-center justify-between"><div class="flex items-center gap-4"><div class="flex items-center gap-2 bg-surface-container-lowest px-3 py-1.5 rounded-full shadow-sm"><span class="w-2.5 h-2.5 rounded-full bg-on-tertiary-container animate-pulse"></span><span class="text-xs text-on-surface font-medium">Tahun Ajaran Aktif 2024/2025</span><span class="text-xs text-outline-variant">•</span><span class="text-xs text-secondary font-semibold">Semester Genap</span></div><div class="relative hidden xl:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span><input class="w-80 h-10 pl-9 pr-4 bg-surface-container-lowest text-on-surface placeholder:text-outline text-xs rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary transition-all border border-surface-container" placeholder="Cari nomor laporan, nama siswa, atau kata kunci..." type="text"></div></div><div class="flex items-center gap-4"><button class="relative w-10 h-10 rounded-xl bg-surface-container-lowest hover:bg-surface-container flex items-center justify-center text-on-surface-variant transition-colors shadow-sm" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error"></span></button><div class="flex items-center gap-3 pl-2"><div class="flex flex-col text-right"><span class="text-sm font-semibold text-on-surface leading-tight">Sarah Jenkins, S.Psi</span><span class="text-xs text-on-surface-variant">Konselor Utama BK</span></div><div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm shadow-sm">SJ</div></div></div></header><main class="w-full pt-20 bg-surface flex-1 px-8 py-6"><div class="flex flex-col w-full"><div class="flex flex-col gap-4 mb-8"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4"><div class="flex flex-col"><h1 class="font-display text-2xl font-bold text-on-surface tracking-tight">Undang &amp; Kelola Staf Sekolah</h1><p class="text-sm text-on-surface-variant mt-1">Kelola akses kolaborator unit sekolah untuk peran Tim Kesiswaan dan Wali Kelas.</p></div><div class="flex items-center gap-3 bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-sm self-start lg:self-center border border-surface-container/60"><span class="material-symbols-outlined text-secondary text-[22px]">account_balance</span><div class="flex flex-col"><span class="text-[10px] font-bold text-outline uppercase tracking-wider">Unit SEKOLAH</span><span class="text-sm font-bold text-on-surface">SMA Negeri 1 Teladan</span></div></div></div><div class="flex items-center gap-2 p-1.5 bg-surface-container-low rounded-xl w-fit mt-2"><button class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all cursor-pointer" type="button"><span class="material-symbols-outlined text-[18px]">category</span><span class="">Jenis Kejadian</span><span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary text-xs font-semibold">7</span></button><button class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all cursor-pointer" type="button"><span class="material-symbols-outlined text-[18px]">pin_drop</span><span class="">Lokasi Kejadian</span><span class="px-2 py-0.5 rounded-full bg-surface-container text-outline text-xs">8</span></button><button class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all cursor-pointer" type="button"><span class="material-symbols-outlined text-[18px]">qr_code_2</span><span class="">QR Sekolah</span><span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span></button><button class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-surface-container-lowest text-on-surface shadow-sm transition-all cursor-pointer" type="button"><span class="material-symbols-outlined text-[18px]">person_add</span><span class="">Undang Staf</span><span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-secondary text-xs font-semibold" id="badge-total-staf">2</span></button></div></div><section class="flex flex-col gap-6" id="panel-staf"><div class="w-full flex flex-col gap-5"><div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col w-full border border-surface-container/60"><div class="px-6 py-4 flex items-center justify-between bg-surface-container-low/50 border-b border-surface-container/60"><div class="flex items-center gap-2.5"><span class="text-base font-bold text-on-surface">Daftar Staf &amp; Hak Akses</span><span class="px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-xs font-semibold" id="staf-count-pill">2 Staf Terdaftar</span></div><button class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-slate-800 text-sm font-semibold transition-all shadow-sm hover:shadow active:scale-[0.99] cursor-pointer" onclick="openInviteModal()" type="button"><span class="material-symbols-outlined text-[18px]">person_add</span><span class="">Undang Staf Baru</span></button></div><div class="overflow-x-auto w-full"><table class="w-full text-left border-collapse"><thead><tr class="bg-surface-container-low text-on-surface-variant text-xs uppercase tracking-wider border-b border-surface-container/60"><th class="py-4 px-6 font-semibold">Nama &amp; Email</th><th class="py-4 px-6 font-semibold">Peran &amp; Hak Akses</th><th class="py-4 px-6 font-semibold">Tanggal Diundang</th><th class="py-4 px-6 font-semibold w-48">Status Undangan / Akun</th><th class="py-4 px-6 font-semibold text-right w-44">Aksi</th></tr></thead><tbody class="divide-y-0" id="staf-table-body"><tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60" id="row-staf-1"><td class="py-4 px-6"><div class="flex items-center gap-3.5"><div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-sm shrink-0 shadow-sm col-avatar">DR</div><div class="flex flex-col min-w-0"><span class="text-sm font-semibold text-on-surface leading-snug col-nama">Dewi Rahmawati, M.Pd.</span><span class="text-xs text-on-surface-variant col-email">dewi.rahma@sekolah.sch.id</span></div></div></td><td class="py-4 px-6 col-role"><div class="flex flex-col gap-1 items-start"><span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-xs font-semibold text-on-surface-variant role-badge"><span class="material-symbols-outlined text-[15px]">school</span><span class="role-text">Wali Kelas 8A</span></span></div></td><td class="py-4 px-6"><div class="flex flex-col"><span class="text-sm font-medium text-on-surface">02 Feb 2024</span><span class="text-xs text-outline">Terverifikasi</span></div></td><td class="py-4 px-6 col-status"><span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold w-fit status-badge"><span class="w-2 h-2 rounded-full bg-emerald-600"></span><span class="status-text">Aktif</span></span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary text-xs font-semibold transition-colors cursor-pointer" onclick="openEditModal('row-staf-1', 'Dewi Rahmawati, M.Pd.', 'dewi.rahma@sekolah.sch.id', 'walikelas', '8A', 'aktif')" type="button"><span class="material-symbols-outlined text-[16px]">tune</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error text-xs font-semibold transition-colors cursor-pointer" onclick="openDeleteModal('row-staf-1', 'Dewi Rahmawati, M.Pd.')" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr><tr class="hover:bg-surface-container-low/40 transition-colors bg-surface-container-low/20 border-b border-surface-container/60" id="row-staf-2"><td class="py-4 px-6"><div class="flex items-center gap-3.5"><div class="w-10 h-10 rounded-full bg-secondary-fixed/50 flex items-center justify-center font-bold text-secondary text-sm shrink-0 shadow-sm col-avatar">HK</div><div class="flex flex-col min-w-0"><span class="text-sm font-semibold text-on-surface leading-snug col-nama">Hendra Kurniawan, M.Pd.</span><span class="text-xs text-on-surface-variant col-email">hendra.kurniawan@sekolah.sch.id</span></div></div></td><td class="py-4 px-6 col-role"><div class="flex flex-col gap-1 items-start"><span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-xs font-semibold text-on-surface-variant role-badge"><span class="material-symbols-outlined text-[15px]">school</span><span class="role-text">Wali Kelas 9B</span></span></div></td><td class="py-4 px-6"><div class="flex flex-col"><span class="text-sm font-medium text-on-surface">Hari Ini, 09:20</span><span class="text-xs text-outline">Email Terkirim</span></div></td><td class="py-4 px-6 col-status"><span class="inline-flex items-center gap-1.5 text-secondary text-xs font-semibold px-3 py-1 rounded-full bg-secondary-fixed/50 w-fit status-badge"><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span class="status-text">Menunggu Penerimaan</span></span></td><td class="py-4 px-6 text-right"><div class="inline-flex items-center gap-2 justify-end"><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary text-xs font-semibold transition-colors cursor-pointer" onclick="openEditModal('row-staf-2', 'Hendra Kurniawan, M.Pd.', 'hendra.kurniawan@sekolah.sch.id', 'walikelas', '9B', 'pending')" type="button"><span class="material-symbols-outlined text-[16px]">tune</span><span class="">Ubah</span></button><button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error text-xs font-semibold transition-colors cursor-pointer" onclick="openDeleteModal('row-staf-2', 'Hendra Kurniawan, M.Pd.')" type="button"><span class="material-symbols-outlined text-[16px]">delete</span><span class="">Hapus</span></button></div></td></tr></tbody></table></div></div></div></section></div></main></div><div class="fixed top-6 right-6 z-[99999] transform -translate-y-16 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-surface-container-lowest text-on-surface px-5 py-3.5 rounded-2xl shadow-xl border border-surface-container-high max-w-md" id="toast-notification"><div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0" id="toast-icon-wrapper"><span class="material-symbols-outlined text-[20px]" id="toast-icon">check_circle</span></div><div class="flex flex-col flex-1"><span class="text-sm font-semibold text-on-surface leading-tight" id="toast-title">Perubahan berhasil disimpan</span><span class="text-xs text-on-surface-variant mt-0.5 leading-snug" id="toast-message">Data telah diperbarui</span></div><button class="w-7 h-7 rounded-lg flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors shrink-0 cursor-pointer" onclick="dismissToast()" type="button"><span class="material-symbols-outlined text-[16px]">close</span></button></div><div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto hidden" id="modal-edit-staf" onclick="if(event.target===this)closeModal('modal-edit-staf')"><div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full shadow-2xl flex flex-col border border-surface-container my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200" onclick="event.stopPropagation()"><div class="px-6 py-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/40"><div class="flex gap-3 items-center"><div class="w-10 h-10 rounded-xl bg-secondary-fixed text-secondary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[22px]">manage_accounts</span></div><div class="flex flex-col"><h3 class="font-display text-base font-bold text-on-surface">Ubah Data &amp; Hak Akses Staf</h3><p class="text-xs text-on-surface-variant">Perbarui identitas, peran penugasan, dan status akses akun staf.</p></div></div><button class="w-9 h-9 rounded-xl flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors shrink-0 -mr-1 cursor-pointer" onclick="closeModal('modal-edit-staf')" title="Tutup modal" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button></div><div class="p-6 flex flex-col gap-4"><input id="edit-row-id-hidden" type="hidden" value="row-staf-2"><div class="flex flex-col gap-1.5"><label class="text-xs font-semibold text-on-surface" for="edit-staf-nama">Nama Lengkap Staf <span class="text-error">*</span></label><div class="relative"><span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">badge</span><input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="edit-staf-nama" placeholder="Nama lengkap berserta gelar" type="text"></div></div><div class="flex flex-col gap-1.5"><label class="text-xs font-semibold text-on-surface" for="edit-staf-email">Email Resmi Sekolah <span class="text-error">*</span></label><div class="relative"><span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">mail</span><input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="edit-staf-email" placeholder="email.guru@sekolah.sch.id" type="email"></div></div><div class="flex flex-col gap-2"><label class="text-xs font-semibold text-on-surface">Peran &amp; Hak Akses <span class="text-error">*</span></label><div class="grid grid-cols-1 gap-2.5"><label class="flex items-start gap-3 p-3.5 rounded-xl border hover:bg-surface-container-low/40 cursor-pointer transition-all border-surface-container" id="edit-role-label-kesiswaan"><input class="mt-1 text-secondary focus:ring-secondary" id="edit-radio-kesiswaan" name="edit-role-choice" onchange="toggleEditRoleFields('kesiswaan')" type="radio" value="kesiswaan"><div class="flex flex-col"><div class="flex items-center gap-2"><span class="text-sm font-semibold text-on-surface">Tim Kesiswaan</span><span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-secondary text-[11px] font-semibold">Eskalasi Kasus</span></div><span class="text-xs text-on-surface-variant mt-0.5">Akses statistik, tindak lanjut umum, dan monitoring laporan sekolah.</span></div></label><label class="flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all border-secondary bg-surface-container-low/50" id="edit-role-label-walikelas"><input checked="checked" class="mt-1 text-secondary focus:ring-secondary" id="edit-radio-walikelas" name="edit-role-choice" onchange="toggleEditRoleFields('walikelas')" type="radio" value="walikelas"><div class="flex flex-col"><div class="flex items-center gap-2"><span class="text-sm font-semibold text-on-surface">Wali Kelas</span><span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-[11px] font-semibold">Siswa Binaan</span></div><span class="text-xs text-on-surface-variant mt-0.5">Akses khusus laporan ringkasan siswa kelas binaannya saja.</span></div></label></div></div><div class="flex flex-col gap-1.5" id="edit-wrapper-kelas-binaan"><label class="text-xs font-semibold text-on-surface" for="edit-select-kelas-binaan">Pilih Kelas Binaan <span class="text-error">*</span></label><div class="relative"><span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span><select class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 appearance-none transition-all cursor-pointer" id="edit-select-kelas-binaan"><option value="7A">Kelas 7A</option><option value="7B">Kelas 7B</option><option value="8A">Kelas 8A</option><option value="8B">Kelas 8B</option><option value="9A">Kelas 9A</option><option value="9B">Kelas 9B</option></select></div></div><div class="flex flex-col gap-1.5"><label class="text-xs font-semibold text-on-surface" for="edit-staf-status">Status Akun / Undangan</label><div class="relative"><span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span><select class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 appearance-none transition-all cursor-pointer" id="edit-staf-status"><option value="aktif">Aktif (Akses Terverifikasi)</option><option value="pending">Menunggu Penerimaan Undangan</option><option value="nonaktif">Nonaktif Sementara</option></select></div></div></div><div class="px-6 py-4 border-t border-surface-container bg-surface-container-low/30 flex items-center justify-end gap-3"><button class="px-4 py-2.5 rounded-xl border border-outline-variant/60 text-on-surface hover:bg-surface-container text-sm font-medium transition-colors cursor-pointer" onclick="closeModal('modal-edit-staf')" type="button">Batal</button><button class="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-slate-800 active:scale-[0.99] transition-all shadow-sm flex items-center gap-2 cursor-pointer" onclick="saveEditStafModal()" type="button"><span class="material-symbols-outlined text-[19px]">check</span><span class="">Simpan Perubahan</span></button></div></div></div><div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto hidden" id="modal-hapus-staf" onclick="if(event.target===this)closeModal('modal-hapus-staf')"><div class="bg-surface-container-lowest rounded-2xl max-w-md w-full shadow-2xl flex flex-col border border-surface-container my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200" onclick="event.stopPropagation()"><input id="delete-row-id-hidden" type="hidden" value="row-staf-1"><div class="p-6 flex flex-col items-center text-center gap-4"><div class="w-14 h-14 rounded-2xl bg-error-container text-error flex items-center justify-center shrink-0 shadow-sm"><span class="material-symbols-outlined text-[32px]">warning</span></div><div class="flex flex-col gap-1.5"><h3 class="font-display text-base font-bold text-on-surface">Hapus Akses Staf?</h3><p class="text-sm text-on-surface-variant leading-relaxed">Akses portal unit sekolah untuk <strong class="text-on-surface font-semibold" id="delete-staf-target-name">Dewi Rahmawati, M.Pd.</strong> akan dicabut secara permanen. Tindakan ini tidak dapat dibatalkan.</p></div><div class="w-full p-3 bg-error-container/30 border border-error/20 rounded-xl text-left flex items-start gap-2.5"><span class="material-symbols-outlined text-error text-[18px] shrink-0 mt-0.5">shield</span><span class="text-xs text-error leading-snug">Data laporan &amp; catatan riwayat tindak lanjut yang pernah ditangani staf ini tetap tersimpan aman di arsip sekolah.</span></div></div><div class="px-6 py-4 border-t border-surface-container bg-surface-container-low/30 flex items-center justify-end gap-3"><button class="px-4 py-2.5 rounded-xl border border-outline-variant/60 text-on-surface hover:bg-surface-container text-sm font-medium transition-colors cursor-pointer" onclick="closeModal('modal-hapus-staf')" type="button">Batal</button><button class="px-5 py-2.5 rounded-xl bg-error text-white text-sm font-semibold hover:bg-red-700 active:scale-[0.99] transition-all shadow-sm flex items-center gap-2 cursor-pointer" onclick="confirmDeleteStaf()" type="button"><span class="material-symbols-outlined text-[19px]">delete_forever</span><span class="">Ya, Hapus Akses</span></button></div></div></div><div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto hidden" id="modal-undang-staf" onclick="if(event.target===this)closeModal('modal-undang-staf')"><div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full shadow-2xl flex flex-col border border-surface-container my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200" onclick="event.stopPropagation()"><div class="px-6 py-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/40"><div class="flex gap-3 items-center"><div class="w-10 h-10 rounded-xl bg-secondary-fixed text-secondary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[22px]">person_add</span></div><div class="flex flex-col"><h3 class="font-display text-base font-bold text-on-surface">Undang Staf Unit Sekolah</h3><p class="text-xs text-on-surface-variant">Kirim undangan akses portal melalui email resmi guru atau tenaga pendidik.</p></div></div><button class="w-9 h-9 rounded-xl flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors shrink-0 -mr-1 cursor-pointer" onclick="closeModal('modal-undang-staf')" title="Tutup modal" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button></div><div class="p-6 flex flex-col gap-4"><div class="flex flex-col gap-1.5"><label class="text-xs font-semibold text-on-surface" for="invite-nama-input">Nama Lengkap Staf <span class="text-outline text-[11px]">(Opsional)</span></label><div class="relative"><span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">badge</span><input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="invite-nama-input" placeholder="Nama lengkap berserta gelar" type="text"></div></div><div class="flex flex-col gap-1.5"><label class="text-xs font-semibold text-on-surface" for="invite-email-input">Alamat Email Staf <span class="text-error">*</span></label><div class="relative"><span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">mail</span><input class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="invite-email-input" placeholder="nama.guru@sekolah.sch.id" type="email"></div><span class="text-xs text-on-surface-variant">Pastikan menggunakan alamat email aktif milik guru atau tenaga kependidikan.</span></div><div class="flex flex-col gap-2"><label class="text-xs font-semibold text-on-surface">Peran &amp; Hak Akses <span class="text-error">*</span></label><div class="grid grid-cols-1 gap-2.5"><label class="flex items-start gap-3 p-3.5 rounded-xl border border-secondary bg-surface-container-low/50 cursor-pointer transition-all" id="invite-role-label-kesiswaan"><input checked="checked" class="mt-1 text-secondary focus:ring-secondary" id="invite-radio-kesiswaan" name="invite-role-choice" onchange="toggleInviteRoleFields('kesiswaan')" type="radio" value="kesiswaan"><div class="flex flex-col"><div class="flex items-center gap-2"><span class="text-sm font-semibold text-on-surface">Tim Kesiswaan</span><span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-secondary text-[11px] font-semibold">Eskalasi Kasus</span></div><span class="text-xs text-on-surface-variant mt-0.5">Akses statistik, tindak lanjut umum, dan monitoring laporan sekolah.</span></div></label><label class="flex items-start gap-3 p-3.5 rounded-xl border border-surface-container hover:bg-surface-container-low/40 cursor-pointer transition-all" id="invite-role-label-walikelas"><input class="mt-1 text-secondary focus:ring-secondary" id="invite-radio-walikelas" name="invite-role-choice" onchange="toggleInviteRoleFields('walikelas')" type="radio" value="walikelas"><div class="flex flex-col"><div class="flex items-center gap-2"><span class="text-sm font-semibold text-on-surface">Wali Kelas</span><span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-[11px] font-semibold">Siswa Binaan</span></div><span class="text-xs text-on-surface-variant mt-0.5">Akses khusus laporan ringkasan siswa kelas binaannya saja.</span></div></label></div></div><div class="flex flex-col gap-1.5 hidden" id="invite-wrapper-kelas-binaan"><label class="text-xs font-semibold text-on-surface" for="invite-select-kelas-binaan">Pilih Kelas Binaan <span class="text-error">*</span></label><div class="relative"><span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span><select class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 appearance-none transition-all cursor-pointer" id="invite-select-kelas-binaan"><option value="7A">Kelas 7A</option><option value="7B">Kelas 7B</option><option value="8A">Kelas 8A</option><option value="8B">Kelas 8B</option><option value="9A">Kelas 9A</option><option value="9B">Kelas 9B</option></select></div></div><div class="p-3.5 bg-surface-container-low/70 rounded-xl border border-surface-container flex items-start gap-3"><span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">info</span><p class="text-xs text-on-surface-variant">Tautan aktivasi berlaku selama 7 hari. Rekan staf akan diarahkan membuat kata sandi secara mandiri setelah memverifikasi email.</p></div></div><div class="px-6 py-4 border-t border-surface-container bg-surface-container-low/30 flex items-center justify-end gap-3"><button class="px-4 py-2.5 rounded-xl border border-outline-variant/60 text-on-surface hover:bg-surface-container text-sm font-medium transition-colors cursor-pointer" onclick="closeModal('modal-undang-staf')" type="button">Batal</button><button class="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-slate-800 active:scale-[0.99] transition-all shadow-sm flex items-center gap-2 cursor-pointer" onclick="submitInviteStaf()" type="button"><span class="material-symbols-outlined text-[19px]">send</span><span class="">Kirim Undangan</span></button></div></div></div><script>
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal('modal-edit-staf');
+        closeModal('modal-hapus-staf');
+        closeModal('modal-undang-staf');
+      }
+    });
+
+    function showToast(title, message, isSuccess = true) {
+      const toast = document.getElementById('toast-notification');
+      if (!toast) return;
+      document.getElementById('toast-title').innerText = title;
+      document.getElementById('toast-message').innerText = message;
+      const icon = document.getElementById('toast-icon');
+      const wrapper = document.getElementById('toast-icon-wrapper');
+      if (isSuccess) {
+        icon.innerText = 'check_circle';
+        wrapper.className = 'w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0';
+      } else {
+        icon.innerText = 'delete_outline';
+        wrapper.className = 'w-9 h-9 rounded-xl bg-error-container text-error flex items-center justify-center shrink-0';
+      }
+      toast.classList.remove('-translate-y-16', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      if (window._toastTimer) clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(dismissToast, 4000);
+    }
+
+    function dismissToast() {
+      const toast = document.getElementById('toast-notification');
+      if (!toast) return;
+      toast.classList.remove('translate-y-0', 'opacity-100');
+      toast.classList.add('-translate-y-16', 'opacity-0', 'pointer-events-none');
+    }
+
+    function openEditModal(rowId, nama, email, role, kelas, status) {
+      document.getElementById('edit-row-id-hidden').value = rowId;
+      document.getElementById('edit-staf-nama').value = nama;
+      document.getElementById('edit-staf-email').value = email;
+      
+      const radioKesiswaan = document.getElementById('edit-radio-kesiswaan');
+      const radioWali = document.getElementById('edit-radio-walikelas');
+      if (role === 'kesiswaan') {
+        radioKesiswaan.checked = true;
+        toggleEditRoleFields('kesiswaan');
+      } else {
+        radioWali.checked = true;
+        toggleEditRoleFields('walikelas');
+        if (kelas) document.getElementById('edit-select-kelas-binaan').value = kelas;
+      }
+      
+      if (status) {
+        document.getElementById('edit-staf-status').value = status;
+      }
+      openModal('modal-edit-staf');
+    }
+
+    function toggleEditRoleFields(role) {
+      const wrapperKelas = document.getElementById('edit-wrapper-kelas-binaan');
+      const lblKesiswaan = document.getElementById('edit-role-label-kesiswaan');
+      const lblWali = document.getElementById('edit-role-label-walikelas');
+
+      if (role === 'walikelas') {
+        wrapperKelas.classList.remove('hidden');
+        lblWali.classList.add('border-secondary', 'bg-surface-container-low/50');
+        lblWali.classList.remove('border-surface-container');
+        lblKesiswaan.classList.remove('border-secondary', 'bg-surface-container-low/50');
+        lblKesiswaan.classList.add('border-surface-container');
+      } else {
+        wrapperKelas.classList.add('hidden');
+        lblKesiswaan.classList.add('border-secondary', 'bg-surface-container-low/50');
+        lblKesiswaan.classList.remove('border-surface-container');
+        lblWali.classList.remove('border-secondary', 'bg-surface-container-low/50');
+        lblWali.classList.add('border-surface-container');
+      }
+    }
+
+    function saveEditStafModal() {
+      const rowId = document.getElementById('edit-row-id-hidden').value;
+      const nama = document.getElementById('edit-staf-nama').value.trim();
+      const email = document.getElementById('edit-staf-email').value.trim();
+      const roleChoice = document.querySelector('input[name="edit-role-choice"]:checked')?.value || 'walikelas';
+      const kelas = document.getElementById('edit-select-kelas-binaan').value;
+      const status = document.getElementById('edit-staf-status').value;
+
+      if (!nama || !email) {
+        alert('Mohon isi nama dan email dengan lengkap.');
+        return;
+      }
+
+      const row = document.getElementById(rowId);
+      if (row) {
+        const initials = nama.split(' ').filter(Boolean).map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'ST';
+        const colAvatar = row.querySelector('.col-avatar');
+        if (colAvatar) colAvatar.innerText = initials;
+
+        const colNama = row.querySelector('.col-nama');
+        if (colNama) colNama.innerText = nama;
+
+        const colEmail = row.querySelector('.col-email');
+        if (colEmail) colEmail.innerText = email;
+
+        const roleText = row.querySelector('.role-text');
+        const roleIcon = row.querySelector('.role-badge .material-symbols-outlined');
+        if (roleChoice === 'kesiswaan') {
+          if (roleText) roleText.innerText = 'Tim Kesiswaan';
+          if (roleIcon) roleIcon.innerText = 'admin_panel_settings';
+        } else {
+          if (roleText) roleText.innerText = 'Wali Kelas ' + kelas;
+          if (roleIcon) roleIcon.innerText = 'school';
+        }
+
+        const statusCell = row.querySelector('.col-status');
+        if (statusCell) {
+          if (status === 'aktif') {
+            statusCell.innerHTML = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold w-fit status-badge"><span class="w-2 h-2 rounded-full bg-emerald-600"></span><span class="status-text">Aktif</span></span>';
+          } else if (status === 'pending') {
+            statusCell.innerHTML = '<span class="inline-flex items-center gap-1.5 text-secondary text-xs font-semibold px-3 py-1 rounded-full bg-secondary-fixed/50 w-fit status-badge"><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span><span class="status-text">Menunggu Penerimaan</span></span>';
+          } else {
+            statusCell.innerHTML = '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-200 text-slate-700 text-xs font-semibold w-fit status-badge"><span class="w-2 h-2 rounded-full bg-slate-500"></span><span class="status-text">Nonaktif</span></span>';
+          }
+        }
+      }
+
+      closeModal('modal-edit-staf');
+      showToast('Perubahan Disimpan', 'Data staf ' + nama + ' berhasil diperbarui.', true);
+    }
+
+    function openDeleteModal(rowId, nama) {
+      document.getElementById('delete-row-id-hidden').value = rowId;
+      document.getElementById('delete-staf-target-name').innerText = nama;
+      openModal('modal-hapus-staf');
+    }
+
+    function confirmDeleteStaf() {
+      const rowId = document.getElementById('delete-row-id-hidden').value;
+      const nama = document.getElementById('delete-staf-target-name').innerText;
+      const row = document.getElementById(rowId);
+      if (row) {
+        row.remove();
+        updateStaffCount();
+      }
+      closeModal('modal-hapus-staf');
+      showToast('Akses Dihapus', 'Akses untuk ' + nama + ' telah berhasil dicabut.', false);
+    }
+
+    function updateStaffCount() {
+      const rows = document.querySelectorAll('#staf-table-body tr');
+      const count = rows.length;
+      const badge = document.getElementById('badge-total-staf');
+      const pill = document.getElementById('staf-count-pill');
+      if (badge) badge.innerText = count;
+      if (pill) pill.innerText = count + ' Staf Terdaftar';
+    }
+
+    function openInviteModal() {
+      document.getElementById('invite-nama-input').value = '';
+      document.getElementById('invite-email-input').value = '';
+      document.getElementById('invite-radio-kesiswaan').checked = true;
+      toggleInviteRoleFields('kesiswaan');
+      openModal('modal-undang-staf');
+    }
+
+    function toggleInviteRoleFields(role) {
+      const wrapperKelas = document.getElementById('invite-wrapper-kelas-binaan');
+      const lblKesiswaan = document.getElementById('invite-role-label-kesiswaan');
+      const lblWali = document.getElementById('invite-role-label-walikelas');
+
+      if (role === 'walikelas') {
+        wrapperKelas.classList.remove('hidden');
+        lblWali.classList.add('border-secondary', 'bg-surface-container-low/50');
+        lblWali.classList.remove('border-surface-container');
+        lblKesiswaan.classList.remove('border-secondary', 'bg-surface-container-low/50');
+        lblKesiswaan.classList.add('border-surface-container');
+      } else {
+        wrapperKelas.classList.add('hidden');
+        lblKesiswaan.classList.add('border-secondary', 'bg-surface-container-low/50');
+        lblKesiswaan.classList.remove('border-surface-container');
+        lblWali.classList.remove('border-secondary', 'bg-surface-container-low/50');
+        lblWali.classList.add('border-surface-container');
+      }
+    }
+
+    function submitInviteStaf() {
+      const email = document.getElementById('invite-email-input').value.trim();
+      const nama = document.getElementById('invite-nama-input').value.trim() || email.split('@')[0];
+      const roleChoice = document.querySelector('input[name="invite-role-choice"]:checked')?.value || 'kesiswaan';
+      const kelas = document.getElementById('invite-select-kelas-binaan').value;
+
+      if (!email) {
+        alert('Mohon masukkan alamat email staf.');
+        return;
+      }
+
+      const tableBody = document.getElementById('staf-table-body');
+      const newRowId = 'row-staf-' + Date.now();
+      const initials = nama.split(' ').filter(Boolean).map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'ST';
+      const roleBadgeHTML = roleChoice === 'kesiswaan'
+        ? '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-xs font-semibold text-on-surface-variant role-badge"><span class="material-symbols-outlined text-[15px]">admin_panel_settings</span><span class="role-text">Tim Kesiswaan</span></span>'
+        : '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-xs font-semibold text-on-surface-variant role-badge"><span class="material-symbols-outlined text-[15px]">school</span><span class="role-text">Wali Kelas ' + kelas + '</span></span>';
+
+      const tr = document.createElement('tr');
+      tr.id = newRowId;
+      tr.className = 'hover:bg-surface-container-low/40 transition-colors bg-secondary-fixed/10 border-b border-surface-container/60';
+      tr.innerHTML = `
+        <td class="py-4 px-6">
+          <div class="flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-full bg-secondary-fixed text-secondary flex items-center justify-center font-bold text-sm shrink-0 shadow-sm col-avatar">${initials}</div>
+            <div class="flex flex-col min-w-0">
+              <span class="text-sm font-semibold text-on-surface leading-snug col-nama">${nama}</span>
+              <span class="text-xs text-on-surface-variant col-email">${email}</span>
+            </div>
+          </div>
+        </td>
+        <td class="py-4 px-6 col-role">
+          <div class="flex flex-col gap-1 items-start">
+            ${roleBadgeHTML}
+          </div>
+        </td>
+        <td class="py-4 px-6">
+          <div class="flex flex-col">
+            <span class="text-sm font-medium text-on-surface">Baru saja</span>
+            <span class="text-xs text-outline">Email Terkirim</span>
+          </div>
+        </td>
+        <td class="py-4 px-6 col-status">
+          <span class="inline-flex items-center gap-1.5 text-secondary text-xs font-semibold px-3 py-1 rounded-full bg-secondary-fixed/50 w-fit status-badge">
+            <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+            <span class="status-text">Menunggu Penerimaan</span>
+          </span>
+        </td>
+        <td class="py-4 px-6 text-right">
+          <div class="inline-flex items-center gap-2 justify-end">
+            <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary text-xs font-semibold transition-colors cursor-pointer" onclick="openEditModal('${newRowId}', '${nama}', '${email}', '${roleChoice}', '${kelas}', 'pending')" type="button">
+              <span class="material-symbols-outlined text-[16px]">tune</span>
+              <span>Ubah</span>
+            </button>
+            <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error text-xs font-semibold transition-colors cursor-pointer" onclick="openDeleteModal('${newRowId}', '${nama}')" type="button">
+              <span class="material-symbols-outlined text-[16px]">delete</span>
+              <span>Hapus</span>
+            </button>
+          </div>
+        </td>
+      `;
+
+      tableBody.appendChild(tr);
+      updateStaffCount();
+      closeModal('modal-undang-staf');
+      showToast('Undangan Terkirim', 'Email aktivasi berhasil dikirim ke ' + email, true);
+    }
+  </script>
+
+
+
+
+
+</body></html>

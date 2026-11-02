@@ -1,0 +1,789 @@
+<!DOCTYPE html><html class="h-full bg-[#f8f9ff]" lang="id"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title class="">HiOwy! Campus - Konselor BK</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#000000",
+            "background": "#f8f9ff",
+            "surface": "#ffffff",
+            "surface-dim": "#cbdbf5",
+            "surface-container-low": "#eff4ff",
+            "surface-container": "#e5eeff",
+            "surface-container-high": "#dce9ff",
+            "secondary": "#006398",
+            "on-surface": "#0f172a",
+            "on-surface-variant": "#475569"
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+    }
+    /* Custom clean scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="h-full font-sans text-on-surface antialiased bg-[#f8f9ff] flex">
+<!-- SIDEBAR NAVIGATION -->
+<aside class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200/80 z-30 flex flex-col justify-between select-none">
+<div class="flex flex-col">
+<!-- App Brand Logo -->
+<div class="px-6 py-5 flex items-center gap-3 border-b border-slate-100">
+<div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20"><span class="material-symbols-outlined text-[20px] text-white">shield</span></div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5"><span class="font-bold text-[17px] tracking-tight text-slate-900 leading-none">HiOwy!</span><span class="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200/60 leading-none">Campus</span></div>
+<span class="text-[11px] font-medium text-slate-500 mt-1">Konsol Bimbingan Konseling</span>
+</div>
+</div>
+<!-- Nav Links -->
+<div class="px-3 py-4">
+<div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigasi Utama</div>
+<nav class="space-y-1"><!-- 1. Laporan (Active) -->
+<a aria-current="page" class="flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm bg-secondary text-white shadow-sm transition-all" href="#"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-[20px] text-white fill-1">inbox</span><span class="text-white">Laporan</span></div><span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">14</span></a>
+<!-- 2. Kelola -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px] text-slate-400">tune</span>
+<span class="">Kelola</span>
+</a>
+<!-- 3. Halaman Pelajari -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px] text-slate-400">auto_stories</span>
+<span class="">Halaman Pelajari</span>
+</a>
+<!-- 4. Statistik -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px] text-slate-400">bar_chart</span>
+<span class="">Statistik</span>
+</a>
+<!-- 5. Arsip -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px] text-slate-400">archive</span>
+<span class="">Arsip</span>
+</a>
+<!-- 6. Log Akses -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px] text-slate-400">history</span>
+<span class="">Log Akses</span>
+</a></nav>
+</div>
+</div>
+<!-- Bottom Sign Out Action -->
+<div class="p-4 border-t border-slate-100">
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all" href="#">
+<span class="material-symbols-outlined text-[19px]">logout</span>
+<span class="">Keluar</span>
+</a>
+</div>
+</aside>
+<!-- MAIN WRAPPER -->
+<div class="pl-64 flex-1 flex flex-col min-w-0">
+<!-- TOP BAR -->
+<header class="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur border-b border-slate-200/80 px-8 flex items-center justify-between">
+<!-- Left: Academic Year Badge -->
+<div class="flex items-center gap-3">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 text-slate-700 text-xs font-semibold border border-slate-200">
+<span class="material-symbols-outlined text-[16px] text-slate-500">school</span>
+<span class="">Tahun Ajaran 2024/2025</span>
+</div>
+</div>
+<!-- Right: Search, Notification, Profile -->
+<div class="flex items-center gap-4"><!-- Global Quick Search -->
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all" placeholder="Pencarian cepat..." type="text">
+</div>
+<!-- Notification Bell Button & Active Popover Wrapper -->
+<div class="relative" id="notificationWrapper">
+<button aria-label="Notifikasi" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-slate-700 bg-slate-100 hover:bg-slate-200/70 transition-colors cursor-pointer" id="notifBellBtn" type="button">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
+</button>
+<!-- Notification Popover Dropdown (Active State) -->
+<div class="absolute right-0 mt-2.5 w-[380px] bg-white rounded-2xl shadow-2xl border border-slate-200/80 z-50 overflow-hidden transition-all duration-200 origin-top-right hidden" id="notificationDropdown">
+<!-- Popover Header -->
+<div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+<div class="flex items-center gap-2">
+<h3 class="text-sm font-bold text-slate-900">Notifikasi</h3>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-200">3 Baru</span>
+</div>
+<button class="text-[11px] font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors" id="markAllReadBtn" type="button">
+        Tandai Semua Dibaca
+      </button>
+</div>
+<!-- Filter Pills -->
+<div class="px-4 pt-3 pb-2 flex items-center gap-1.5 border-b border-slate-100 bg-white">
+<button class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 text-slate-900" type="button">Semua (3)</button>
+<button class="px-2.5 py-1 rounded-md text-[11px] font-semibold text-rose-700 hover:bg-rose-50 transition-colors flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span> Darurat
+      </button>
+<button class="px-2.5 py-1 rounded-md text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors" type="button">Update</button>
+</div>
+<!-- Notification Items List -->
+<div class="divide-y divide-slate-100 max-h-[360px] overflow-y-auto">
+<!-- Item 1: Urgent Report -->
+<div class="p-3.5 hover:bg-rose-50/30 transition-colors bg-rose-50/15 cursor-pointer flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5 border border-rose-200">
+<span class="material-symbols-outlined text-[18px] fill-1">e911_emergency</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="text-[10px] font-bold uppercase tracking-wider text-rose-600">Laporan Darurat Masuk!</span>
+<span class="text-[10px] text-slate-400 whitespace-nowrap">5 menit lalu</span>
+</div>
+<p class="text-xs font-semibold text-slate-900 mt-0.5 line-clamp-2 leading-snug">
+            #SR-2024-8042 - Bullying Fisik di Lorong Kelas 8
+          </p>
+<div class="mt-2 flex items-center gap-2">
+<button class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold bg-rose-600 text-white hover:bg-rose-700 transition-colors shadow-xs" type="button">
+<span class="">Buka Kasus</span>
+<span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+</button>
+<span class="w-2 h-2 rounded-full bg-rose-500" title="Belum dibaca"></span>
+</div>
+</div>
+</div>
+<!-- Item 2: Medium Priority Update -->
+<div class="p-3.5 hover:bg-slate-50 transition-colors cursor-pointer flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 mt-0.5 border border-amber-200">
+<span class="material-symbols-outlined text-[18px] fill-1">edit_note</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Pembaruan Kasus</span>
+<span class="text-[10px] text-slate-400 whitespace-nowrap">1 jam lalu</span>
+</div>
+<p class="text-xs text-slate-800 mt-0.5 leading-snug">
+<span class="font-semibold text-slate-900">#SR-2024-8036</span> - Catatan Wali Kelas ditambahkan: jadwal mediasi konseling disepakati.
+          </p>
+</div>
+</div>
+<!-- Item 3: Status / Security Log -->
+<div class="p-3.5 hover:bg-slate-50 transition-colors cursor-pointer flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 border border-blue-100">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="text-[10px] font-bold uppercase tracking-wider text-blue-700">Keamanan Akun</span>
+<span class="text-[10px] text-slate-400 whitespace-nowrap">3 jam lalu</span>
+</div>
+<p class="text-xs text-slate-700 mt-0.5 leading-snug">
+            Verifikasi 2FA berhasil dari sesi baru (Chrome macOS - Kantor BK).
+          </p>
+</div>
+</div>
+</div>
+<!-- Popover Footer -->
+<div class="p-3 border-t border-slate-100 bg-slate-50/70 text-center">
+<a class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors" href="#">
+<span class="">Lihat Semua Notifikasi di Log Akses</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<div class="h-5 w-[1px] bg-slate-200"></div>
+<!-- Counselor Profile Trigger & Dropdown Menu Wrapper -->
+<div class="relative" id="profileWrapper">
+<button class="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100/80 transition-colors cursor-pointer focus:outline-none" id="profileMenuBtn" type="button">
+<img alt="Sarah Jenkins" class="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvlX5hx9KnXITSSX3R-7IEfz2Yi7VZrAEmhjUg7Dx-d4K_EWFpD97XbJzp4MMhUJXYyTUf6LAuW78y6RKZy_dJ9yKTctYTJhU4QqJg-D22RJo-ILpV6ccZ8_8ldqlBQmm5MaNGI7qcat2nHtZ5hqQaKqBOdE-TuGRPhqCbXQfiyRM8sf80mlQHybccQTYe-RvL0my0d-AWm0jA_fYMzXIscGgYc6nDm_jG8CHUi8w">
+<div class="flex flex-col text-left">
+<span class="text-xs font-semibold text-slate-900 leading-tight">Sarah Jenkins, M.Pd.</span>
+<span class="text-[10px] text-slate-500 font-medium leading-none mt-0.5">Guru BK / Konselor Inti</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-slate-400 transition-transform group-hover:text-slate-600">expand_more</span>
+</button>
+<!-- Profile Floating Dropdown Menu (Hidden by default, interactive) -->
+<div class="absolute right-0 mt-2.5 bg-white rounded-2xl shadow-2xl border border-slate-200/80 z-50 overflow-hidden transition-all duration-200 origin-top-right w-[320px]" id="profileDropdown"><!-- Profile Header Info --><div class="p-4 border-b border-slate-100 bg-slate-50/70 flex items-center gap-3"><img alt="Sarah Jenkins" class="w-12 h-12 rounded-full object-cover ring-2 ring-blue-100 shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvlX5hx9KnXITSSX3R-7IEfz2Yi7VZrAEmhjUg7Dx-d4K_EWFpD97XbJzp4MMhUJXYyTUf6LAuW78y6RKZy_dJ9yKTctYTJhU4QqJg-D22RJo-ILpV6ccZ8_8ldqlBQmm5MaNGI7qcat2nHtZ5hqQaKqBOdE-TuGRPhqCbXQfiyRM8sf80mlQHybccQTYe-RvL0my0d-AWm0jA_fYMzXIscGgYc6nDm_jG8CHUi8w"><div class="flex flex-col min-w-0 flex-1"><span class="text-xs font-bold text-slate-900 truncate">Sarah Jenkins, M.Pd.</span><span class="text-[11px] text-slate-500 truncate">sarah.jenkins@lincoln.sch.id</span><div class="mt-1"><span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/60">Guru BK / Konselor Inti</span></div></div></div><!-- Menu Items --><div class="p-2 space-y-1"><a class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors group" href="#"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors"><span class="material-symbols-outlined text-[18px]">person</span></div><div class="flex flex-col"><span class="font-semibold text-slate-800 group-hover:text-blue-700 leading-tight">Pengaturan Profil</span><span class="text-[10px] text-slate-400 mt-0.5">Data diri &amp; info sekolah</span></div></div><span class="material-symbols-outlined text-[16px] text-slate-400 group-hover:text-slate-600">chevron_right</span></a><a class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors group" href="#"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors"><span class="material-symbols-outlined text-[18px]">security</span></div><div class="flex flex-col"><span class="font-semibold text-slate-800 group-hover:text-emerald-700 leading-tight">Keamanan &amp; 2FA</span><span class="text-[10px] text-slate-400 mt-0.5">Sandi &amp; keamanan akun</span></div></div><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>2FA Aktif</span></a><a class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors group" href="#"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors"><span class="material-symbols-outlined text-[18px]">history</span></div><div class="flex flex-col"><span class="font-semibold text-slate-800 group-hover:text-blue-700 leading-tight">Log Aktivitas Akun</span><span class="text-[10px] text-slate-400 mt-0.5">Sesi masuk terakhir</span></div></div><span class="text-[10px] text-slate-400 font-medium">Aktif</span></a></div><!-- Logout Action --><div class="border-t border-slate-100 p-2 bg-slate-50/50"><a class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors" href="#"><div class="flex items-center gap-2.5"><div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[17px]">logout</span></div><span class="">Keluar dari Akun</span></div><span class="material-symbols-outlined text-[16px] text-rose-400">arrow_forward</span></a></div></div>
+</div></div>
+</header>
+<!-- CONTENT BODY -->
+<main class="p-8 max-w-[1580px] w-full mx-auto space-y-6">
+<!-- STRIP RINGKASAN (3 METRIC CARDS) -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<!-- Card 1: Belum Dibaca -->
+<div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-center justify-between">
+<div>
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Belum Dibaca</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-3xl font-bold text-slate-900 tracking-tight">14</span>
+<span class="text-xs text-slate-500 font-medium">laporan baru</span>
+</div>
+<p class="text-[11px] text-slate-400 mt-1">Menunggu penelaahan awal konselor</p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+<span class="material-symbols-outlined text-[24px]">mark_email_unread</span>
+</div>
+</div>
+<!-- Card 2: DANGER FLAG BELUM DIBACA (DISOROT PALING KUAT) -->
+<div class="relative overflow-hidden bg-rose-50/70 rounded-xl p-5 border-2 border-rose-400 shadow-sm shadow-rose-200/50 flex items-center justify-between">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-200/40 rounded-full blur-xl pointer-events-none"></div>
+<div>
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+              Perhatian Utama
+            </div>
+<div class="text-xs font-semibold text-rose-900 mt-1.5">Danger Flag Belum Dibaca</div>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="text-3xl font-bold text-rose-600 tracking-tight">3</span>
+<span class="text-xs font-semibold text-rose-700">laporan darurat</span>
+</div>
+<p class="text-[11px] text-rose-700/90 font-medium mt-0.5">Indikasi bahaya fisik / intimidasi intens</p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-md shadow-rose-500/30">
+<span class="material-symbols-outlined text-[26px] fill-1">e911_emergency</span>
+</div>
+</div>
+<!-- Card 3: Tanpa Update > 3 Hari -->
+<div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex items-center justify-between">
+<div>
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Tanpa Update &gt; 3 Hari</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-3xl font-bold text-slate-900 tracking-tight">5</span>
+<span class="text-xs text-amber-700 font-medium">perlu tindak lanjut</span>
+</div>
+<p class="text-[11px] text-slate-400 mt-1">Penanganan belum diperbarui minggu ini</p>
+</div>
+<div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+<span class="material-symbols-outlined text-[24px]">history_toggle_off</span>
+</div>
+</div>
+</section>
+<!-- MAIN CONTAINER: TABS, TOOLBAR & TABLE -->
+<section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+<!-- TABS & BULK ACTION BAR -->
+<div class="px-6 pt-5 pb-3 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
+<!-- Status Tabs -->
+<div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg">
+<button class="tab-btn px-4 py-1.5 rounded-md text-xs transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs font-bold" type="button">
+<span class="">Belum Dibaca</span>
+<span class="px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">14</span>
+</button>
+<button class="tab-btn px-4 py-1.5 rounded-md text-xs hover:text-slate-800 transition-all flex items-center gap-1.5 text-slate-500 font-medium" type="button">
+<span class="">Sedang Ditangani</span>
+<span class="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-600 text-[10px]">8</span>
+</button>
+<button class="tab-btn px-4 py-1.5 rounded-md text-xs hover:text-slate-800 transition-all flex items-center gap-1.5 text-slate-500 font-medium" type="button">
+<span class="">Selesai</span>
+<span class="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-600 text-[10px]">27</span>
+</button>
+</div>
+<!-- Bulk Action Bar -->
+<div class="flex items-center gap-3">
+<div class="text-xs text-slate-600 font-medium hidden" id="selectionCounter">
+<span class="font-bold text-slate-900" id="selectedCount">1</span> laporan dipilih
+            </div>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed" disabled="true" id="bulkActionBtn" type="button">
+<span class="material-symbols-outlined text-[16px]">report</span>
+<span class="">Tandai Iseng</span>
+</button>
+</div>
+</div>
+<!-- TOOLBAR / FILTER ROW -->
+<div class="px-6 py-3.5 bg-slate-50/70 border-b border-slate-200/80 flex flex-wrap items-center gap-2.5"><!-- Search input -->
+<div class="relative flex-1 min-w-[240px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200/60 rounded-lg text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all" placeholder="Cari kode tiket (cth: SR-2024-8042)..." type="text">
+</div>
+<!-- Filter 1: Jenis Kejadian -->
+<div class="relative inline-flex items-center rounded-lg border border-slate-200/60 bg-white transition-all group">
+<span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">category</span>
+<select class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; outline: none; box-shadow: none;">
+<option value="">Jenis: Semua</option>
+<option value="fisik">Fisik</option>
+<option value="verbal">Ejekan &amp; Verbal</option>
+<option value="dikucilkan">Dikucilkan</option>
+<option value="cyber">Cyberbullying</option>
+<option value="pelecehan">Pelecehan</option>
+<option value="lainnya">Lainnya</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
+</div>
+<!-- Filter 2: Peran Pelapor -->
+<div class="relative inline-flex items-center rounded-lg border border-slate-200/60 bg-white transition-all group">
+<span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">badge</span>
+<select class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; outline: none; box-shadow: none;">
+<option value="">Peran: Semua</option>
+<option value="siswa">Siswa</option>
+<option value="ortu">Orang Tua</option>
+<option value="teman">Teman Korban</option>
+<option value="guru">Guru</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
+</div>
+<!-- Filter 3: Urgensi -->
+<div class="relative inline-flex items-center rounded-lg border border-slate-200/60 bg-white transition-all group">
+<span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">flag</span>
+<select class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; outline: none; box-shadow: none;">
+<option value="">Urgensi: Semua</option>
+<option value="urgent">Urgent / Darurat</option>
+<option value="medium">Medium</option>
+<option value="easy">Easy</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
+</div>
+<!-- Filter 4: Ingin Dihubungi -->
+<div class="relative inline-flex items-center rounded-lg border border-slate-200 bg-white transition-all group"><span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">contact_phone</span><select class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer border-0" style="border-width: 0; outline: none; box-shadow: none;"><option value="">Kontak: Semua</option><option value="ya">Ingin Dihubungi (Ya)</option><option value="tidak">Tidak Ingin Dihubungi</option></select><span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span></div>
+<!-- Filter 5: Rentang Tanggal -->
+<div class="relative inline-flex items-center rounded-lg border bg-white transition-all group border-slate-200">
+<span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">calendar_today</span>
+<select class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer border-0" style="border-width: 0; outline: none; box-shadow: none;">
+<option value="">Waktu: Semua</option>
+<option value="7">7 Hari Terakhir</option>
+<option value="30">30 Hari Terakhir</option>
+<option value="custom">Kustom</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
+</div></div>
+<!-- DATA TABLE -->
+<!-- Sorted by: 1st Danger Flag, 2nd Darurat, 3rd Perlu Perhatian / Menunggu Konfirmasi, 4th Biasa, 5th Belum Diklasifikasi -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-slate-200 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-500 select-none">
+<th class="py-3 px-4 w-10 text-center">
+<input class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" id="selectAll" type="checkbox">
+</th>
+<th class="py-3 px-3">Kode Tiket</th>
+<th class="py-3 px-3">Urgensi</th>
+<th class="py-3 px-3">Jenis Kejadian</th>
+<th class="py-3 px-3">Peran Pelapor</th>
+<th class="py-3 px-3 min-w-[280px]">Cuplikan Cerita</th>
+<th class="py-3 px-3 whitespace-nowrap">Waktu</th>
+<th class="py-3 px-3">Ingin Dihubungi</th>
+<th class="py-3 px-3">Ditangani Oleh</th>
+<th class="py-3 px-4 text-right">Aksi</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+<!-- ROW 1: DANGER FLAG 1 (Highest Danger) -->
+<tr class="hover:bg-rose-50/40 transition-colors bg-rose-50/20" style="opacity: 0.35;">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" type="checkbox">
+</td>
+<td class="py-3 px-3"><div class="flex items-center gap-2 font-bold text-slate-900 tracking-tight"><span class="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-blue-100" title="Belum dibaca"></span><span class="">#SR-8042</span></div></td>
+<td class="py-3 px-3 whitespace-nowrap"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-200"><span class="material-symbols-outlined text-[15px] fill-1 text-rose-600">error</span><span class="">Darurat</span></span></td>
+<td class="py-3 px-3 font-medium text-slate-800 whitespace-nowrap">
+                  Bullying Fisik
+                </td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-slate-500">person</span>
+                    Siswa
+                  </span>
+</td>
+<td class="py-3 px-3 text-slate-600">
+<p class="truncate max-w-[320px]" title="Ditarik dan diancam di lorong kelas 8 saat istirahat, pelaku membawa benda tumpul...">
+                    Ditarik dan diancam di lorong kelas 8 saat istirahat, pelaku membawa benda tumpul...
+                  </p>
+</td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap font-medium">
+                  24 Okt • Istirahat 1
+                </td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px]">chat</span>
+                    Ya (WhatsApp)
+                  </span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="text-slate-400 italic text-[11px]">Belum Ditugaskan</span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all" type="button"><span class="">Buka Laporan</span><span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+</td>
+</tr>
+<!-- ROW 2: DANGER FLAG 2 (Darurat Saran Model) -->
+<tr class="hover:bg-amber-50/30 transition-colors bg-amber-50/15">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" type="checkbox">
+</td>
+<td class="py-3 px-3"><div class="flex items-center gap-2 font-bold text-slate-900 tracking-tight"><span class="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-blue-100" title="Belum dibaca"></span><span class="">#SR-8041</span></div></td>
+<td class="py-3 px-3 whitespace-nowrap"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200"><span class="material-symbols-outlined text-[15px] fill-1 text-amber-600">warning</span><span class="">Medium</span></span></td>
+<td class="py-3 px-3 font-medium text-slate-800 whitespace-nowrap">
+                  Intimidasi Verbal
+                </td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-slate-500">group</span>
+                    Teman Korban
+                  </span>
+</td>
+<td class="py-3 px-3 text-slate-600">
+<p class="truncate max-w-[320px]" title="Ancaman kekerasan berulang di grup chat angkatan serta pemalakan di kantin belakang...">
+                    Ancaman kekerasan berulang di grup chat angkatan serta pemalakan di kantin belakang...
+                  </p>
+</td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap font-medium">
+                  24 Okt • Pagi
+                </td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px]">chat</span>
+                    Ya (WhatsApp)
+                  </span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center justify-center">SJ</span>
+<span class="font-medium text-slate-800">Sarah Jenkins</span>
+</div>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all" type="button"><span class="">Buka Laporan</span><span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+</td>
+</tr>
+<!-- ROW 3: DANGER FLAG 3 (Darurat Saran Model) -->
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" type="checkbox">
+</td>
+<td class="py-3 px-3"><div class="flex items-center gap-2 font-bold text-slate-900 tracking-tight"><span class="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-blue-100" title="Belum dibaca"></span><span class="">#SR-8039</span></div></td>
+<td class="py-3 px-3 whitespace-nowrap"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-200"><span class="material-symbols-outlined text-[15px] fill-1 text-rose-600">error</span><span class="">Darurat</span></span></td>
+<td class="py-3 px-3 font-medium text-slate-800 whitespace-nowrap">
+                  Cyberbullying
+                </td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-slate-500">family_restroom</span>
+                    Orang Tua-Wali
+                  </span>
+</td>
+<td class="py-3 px-3 text-slate-600">
+<p class="truncate max-w-[320px]" title="Penyebaran foto editan tak pantas di media sosial dengan narasi merendahkan nama baik...">
+                    Penyebaran foto editan tak pantas di media sosial dengan narasi merendahkan nama baik...
+                  </p>
+</td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap font-medium">
+                  23 Okt • Siang
+                </td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px]">chat</span>
+                    Ya (WhatsApp)
+                  </span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="text-slate-400 italic text-[11px]">Belum Ditugaskan</span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all" type="button"><span class="">Buka Laporan</span><span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+</td>
+</tr>
+<!-- ROW 4: 3rd Priority - Menunggu Konfirmasi -->
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" type="checkbox">
+</td>
+<td class="py-3 px-3"><div class="flex items-center gap-2 font-bold text-slate-900 tracking-tight"><span class="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-blue-100" title="Belum dibaca"></span><span class="">#SR-8036</span></div></td>
+<td class="py-3 px-3 whitespace-nowrap"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200"><span class="material-symbols-outlined text-[15px] fill-1 text-amber-600">warning</span><span class="">Medium</span></span></td>
+<td class="py-3 px-3 font-medium text-slate-800 whitespace-nowrap">
+                  Pengucilan
+                </td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-slate-500">visibility</span>
+                    Saksi
+                  </span>
+</td>
+<td class="py-3 px-3 text-slate-600">
+<p class="truncate max-w-[320px]" title="Siswa sengaja dikeluarkan dari seluruh kelompok belajar dan meja belajarnya disingkirkan...">
+                    Siswa sengaja dikeluarkan dari seluruh kelompok belajar dan meja belajarnya disingkirkan...
+                  </p>
+</td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap font-medium">
+                  23 Okt • Sore
+                </td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500">
+                    Tidak
+                  </span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="text-slate-400 italic text-[11px]">Belum Ditugaskan</span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all" type="button"><span class="">Buka Laporan</span><span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+</td>
+</tr>
+<!-- ROW 5: 4th Priority - Biasa (Terkonfirmasi BK) -->
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" type="checkbox">
+</td>
+<td class="py-3 px-3"><div class="flex items-center gap-2 font-bold text-slate-900 tracking-tight"><span class="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-blue-100" title="Belum dibaca"></span><span class="">#SR-8032</span></div></td>
+<td class="py-3 px-3 whitespace-nowrap"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="material-symbols-outlined text-[15px] fill-1 text-emerald-600">check_circle</span><span class="">Easy</span></span></td>
+<td class="py-3 px-3 font-medium text-slate-800 whitespace-nowrap">
+                  Ejekan &amp; Verbal
+                </td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-slate-500">person</span>
+                    Siswa
+                  </span>
+</td>
+<td class="py-3 px-3 text-slate-600">
+<p class="truncate max-w-[320px]" title="Panggilan bernada menghina kondisi fisik berulang kali saat pergantian jam pelajaran...">
+                    Panggilan bernada menghina kondisi fisik berulang kali saat pergantian jam pelajaran...
+                  </p>
+</td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap font-medium">
+                  22 Okt • Pagi
+                </td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px]">chat</span>
+                    Ya (WhatsApp)
+                  </span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center justify-center">SJ</span>
+<span class="font-medium text-slate-800">Sarah Jenkins</span>
+</div>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all" type="button"><span class="">Buka Laporan</span><span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+</td>
+</tr>
+<!-- ROW 6: 5th Priority - Belum Diklasifikasi / Oldest Days without Update -->
+<tr class="hover:bg-slate-50 transition-colors">
+<td class="py-3 px-4 text-center">
+<input class="row-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" type="checkbox">
+</td>
+<td class="py-3 px-3"><div class="flex items-center gap-2 font-bold text-slate-900 tracking-tight"><span class="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-blue-100" title="Belum dibaca"></span><span class="">#SR-8025</span></div></td>
+<td class="py-3 px-3 whitespace-nowrap"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="material-symbols-outlined text-[15px] fill-1 text-emerald-600">check_circle</span><span class="">Easy</span></span></td>
+<td class="py-3 px-3 font-medium text-slate-800 whitespace-nowrap">
+                  Lainnya
+                </td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-slate-500">school</span>
+                    Guru
+                  </span>
+</td>
+<td class="py-3 px-3 text-slate-600">
+<p class="truncate max-w-[320px]" title="Perilaku menarik diri yang drastis di area perpustakaan setelah jam pulang sekolah...">
+                    Perilaku menarik diri yang drastis di area perpustakaan setelah jam pulang sekolah...
+                  </p>
+</td>
+<td class="py-3 px-3 text-slate-600 whitespace-nowrap font-medium">
+                  20 Okt • Sore
+                </td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500">
+                    Tidak
+                  </span>
+</td>
+<td class="py-3 px-3 whitespace-nowrap">
+<span class="text-slate-400 italic text-[11px]">Belum Ditugaskan</span>
+</td>
+<td class="py-3 px-4 text-right whitespace-nowrap">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all" type="button"><span class="">Buka Laporan</span><span class="material-symbols-outlined text-[14px]">arrow_forward</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- TABLE FOOTER -->
+<div class="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500"><div class="flex items-center gap-3"><div class="flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-blue-600"></span><span class="font-medium text-slate-600">Menampilkan <span class="font-semibold text-slate-900">1-6</span> dari <span class="font-semibold text-slate-900">14</span> laporan</span></div></div><div class="flex items-center gap-1.5 select-none"><div class="flex items-center gap-3 select-none"><div class="flex items-center gap-1.5"><span class="text-slate-400 font-medium">Tampilkan:</span><div class="relative inline-flex items-center rounded-lg border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all group"><select class="appearance-none bg-transparent hover:bg-slate-50/50 text-slate-700 text-xs font-semibold rounded-lg pl-3 pr-7 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all border-0" style="border: none; outline: none; box-shadow: none;"><option value="6">6 / halaman</option><option value="10">10 / halaman</option><option value="25">25 / halaman</option></select><span class="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span></div></div><div class="flex items-center gap-1"><button class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all" disabled="" type="button"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button><span class="px-2 text-xs font-semibold text-slate-700">1 / 3</span><button class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all" type="button"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button></div></div></div></div>
+</section>
+</main>
+</div>
+<!-- INTERACTIVE CONFIRMATION MODAL: TANDAI ISENG -->
+<div class="fixed inset-0 z-50 hidden" id="isengModal">
+<!-- Backdrop -->
+<div class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity" id="modalBackdrop"></div>
+<!-- Modal Box -->
+<div class="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center p-4">
+<div class="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">warning</span>
+</div>
+<div class="space-y-1">
+<h3 class="text-base font-bold text-slate-900">Tandai sebagai Laporan Iseng?</h3>
+<p class="text-xs text-slate-600 leading-relaxed">
+              Laporan yang ditandai iseng akan dipindahkan dari antrean aktif ke arsip tanpa notifikasi publik. Tindakan ini tercatat dalam log audit.
+            </p>
+</div>
+</div>
+<div class="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-100">
+<button class="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors" id="cancelModalBtn" type="button">
+            Batal
+          </button>
+<button class="px-4 py-2 rounded-lg text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white transition-colors shadow-sm" id="confirmModalBtn" type="button">
+            Ya, Tandai Iseng
+          </button>
+</div>
+</div>
+</div>
+</div><script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const notifBtn = document.getElementById('notifBellBtn');
+    const notifDropdown = document.getElementById('notificationDropdown');
+    const notifWrapper = document.getElementById('notificationWrapper');
+
+    const profileBtn = document.getElementById('profileMenuBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+    const profileWrapper = document.getElementById('profileWrapper');
+
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+    if (notifBtn && notifDropdown) {
+      notifBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = notifDropdown.classList.contains('hidden');
+        if (isHidden) {
+          notifDropdown.classList.remove('hidden');
+          if (profileDropdown) profileDropdown.classList.add('hidden');
+        } else {
+          notifDropdown.classList.add('hidden');
+        }
+      });
+    }
+
+    if (profileBtn && profileDropdown) {
+      profileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = profileDropdown.classList.contains('hidden');
+        if (isHidden) {
+          profileDropdown.classList.remove('hidden');
+          if (notifDropdown) notifDropdown.classList.add('hidden');
+        } else {
+          profileDropdown.classList.add('hidden');
+        }
+      });
+    }
+
+    if (markAllReadBtn) {
+      markAllReadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dot = document.querySelector('#notifBellBtn span.bg-rose-500');
+        if (dot) dot.remove();
+        markAllReadBtn.textContent = 'Semua Dibaca';
+        markAllReadBtn.classList.add('text-slate-400');
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (notifDropdown && !notifWrapper.contains(e.target)) {
+        notifDropdown.classList.add('hidden');
+      }
+      if (profileDropdown && !profileWrapper.contains(e.target)) {
+        profileDropdown.classList.add('hidden');
+      }
+    });
+  });
+</script>
+<!-- JAVASCRIPT LOGIC -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const selectAll = document.getElementById('selectAll');
+      const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+      const bulkActionBtn = document.getElementById('bulkActionBtn');
+      const selectionCounter = document.getElementById('selectionCounter');
+      const selectedCount = document.getElementById('selectedCount');
+      const modal = document.getElementById('isengModal');
+      const modalBackdrop = document.getElementById('modalBackdrop');
+      const cancelModalBtn = document.getElementById('cancelModalBtn');
+      const confirmModalBtn = document.getElementById('confirmModalBtn');
+
+      function updateSelectionState() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        const count = checkedBoxes.length;
+
+        if (count > 0) {
+          bulkActionBtn.removeAttribute('disabled');
+          bulkActionBtn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 cursor-pointer shadow-xs";
+          selectionCounter.classList.remove('hidden');
+          selectedCount.textContent = count;
+        } else {
+          bulkActionBtn.setAttribute('disabled', 'true');
+          bulkActionBtn.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed";
+          selectionCounter.classList.add('hidden');
+        }
+
+        selectAll.checked = count > 0 && count === rowCheckboxes.length;
+        selectAll.indeterminate = count > 0 && count < rowCheckboxes.length;
+      }
+
+      selectAll.addEventListener('change', () => {
+        rowCheckboxes.forEach(cb => {
+          cb.checked = selectAll.checked;
+        });
+        updateSelectionState();
+      });
+
+      rowCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateSelectionState);
+      });
+
+      // Modal open
+      bulkActionBtn.addEventListener('click', () => {
+        if (!bulkActionBtn.disabled) {
+          modal.classList.remove('hidden');
+        }
+      });
+
+      // Modal close handlers
+      function closeModal() {
+        modal.classList.add('hidden');
+      }
+
+      cancelModalBtn.addEventListener('click', closeModal);
+      modalBackdrop.addEventListener('click', closeModal);
+
+      confirmModalBtn.addEventListener('click', () => {
+        // Mock mark action
+        rowCheckboxes.forEach(cb => {
+          if (cb.checked) {
+            const row = cb.closest('tr');
+            row.style.opacity = '0.35';
+            cb.checked = false;
+          }
+        });
+        closeModal();
+        updateSelectionState();
+      });
+
+      // Tab switcher interaction
+      const tabs = document.querySelectorAll('.tab-btn');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => {
+            t.classList.remove('bg-white', 'text-slate-900', 'shadow-xs', 'font-bold');
+            t.classList.add('text-slate-500', 'font-medium');
+          });
+          tab.classList.add('bg-white', 'text-slate-900', 'shadow-xs', 'font-bold');
+          tab.classList.remove('text-slate-500', 'font-medium');
+        });
+      });
+    });
+  </script>
+
+
+</body></html>
