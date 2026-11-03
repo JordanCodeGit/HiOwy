@@ -3,42 +3,49 @@ export const manageRows = {
     "categories": [
         {
             "id": "categories-1",
+            "visible_to_kesiswaan": true,
             "label": "Ejekan & Intimidasi Verbal",
             "active": true,
             "permanent": false
         },
         {
             "id": "categories-2",
+            "visible_to_kesiswaan": true,
             "label": "Perundungan Fisik & Pemukulan",
             "active": true,
             "permanent": false
         },
         {
             "id": "categories-3",
+            "visible_to_kesiswaan": true,
             "label": "Pengucilan & Diskriminasi Sosial",
             "active": true,
             "permanent": false
         },
         {
             "id": "categories-4",
+            "visible_to_kesiswaan": true,
             "label": "Pelecehan Melalui Chat & Medsos",
             "active": true,
             "permanent": false
         },
         {
             "id": "categories-5",
+            "visible_to_kesiswaan": true,
             "label": "Sentuhan atau Perilaku Tidak Pantas",
             "active": true,
             "permanent": false
         },
         {
             "id": "categories-6",
+            "visible_to_kesiswaan": false,
             "label": "Pemerasan & Tekanan Kelompok",
             "active": true,
             "permanent": false
         },
         {
             "id": "categories-7",
+            "visible_to_kesiswaan": false,
             "label": "Masalah Pribadi & Lainnya",
             "active": true,
             "permanent": true

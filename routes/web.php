@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\FrontendPreviewController;
 use App\Http\Controllers\KesiswaanPreviewController;
+use App\Http\Controllers\WaliKelasPreviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,7 +30,7 @@ Route::prefix('bk')->name('bk.')->group(function () {
 });
 
 Route::post('/frontend/{page}', FrontendPreviewController::class)
-    ->whereIn('page', ['login', 'signup', 'verify-two-factor', 'forgot-password', 'school', 'bk', 'kesiswaan'])
+    ->whereIn('page', ['login', 'signup', 'verify-two-factor', 'forgot-password', 'school', 'bk', 'kesiswaan', 'walas'])
     ->name('frontend.unavailable');
 
 Route::prefix('kesiswaan')->name('kesiswaan.')->controller(KesiswaanPreviewController::class)->group(function () {
@@ -42,3 +43,9 @@ Route::prefix('kesiswaan')->name('kesiswaan.')->controller(KesiswaanPreviewContr
 });
 
 Route::get('/s/{code}/pelajari', [KesiswaanPreviewController::class, 'publicLearn'])->name('public.learn');
+
+Route::prefix('wali-kelas')->name('walas.')->controller(WaliKelasPreviewController::class)->group(function () {
+    Route::get('/', 'dashboard')->name('dashboard');
+    Route::get('/profile', 'profile')->name('profile');
+    Route::get('/ringkasan/{summary}', 'summary')->whereNumber('summary')->name('summary');
+});

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './staff-mobile.css';
 
 @source '../views';
 @source '../js';

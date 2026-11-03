@@ -16,6 +16,7 @@ class FrontendPreviewController extends Controller
             'school' => ['onboarding.school', 'Pengaturan sekolah belum terintegrasi. Data tidak disimpan. Anda dapat melanjutkan ke pratinjau Dashboard BK.', 'bk.dashboard'],
             'bk' => ['bk.dashboard', 'Tindakan ini belum terintegrasi dengan backend. Data tidak dikirim atau disimpan.', null],
             'kesiswaan' => ['kesiswaan.dashboard', 'Tindakan ini belum terintegrasi dengan backend. Data tidak dikirim atau disimpan.', null],
+            'walas' => ['walas.dashboard', 'Tindakan ini belum terintegrasi dengan backend. Data tidak dikirim atau disimpan.', null],
             default => abort(404),
         };
 

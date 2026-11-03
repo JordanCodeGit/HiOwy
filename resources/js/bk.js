@@ -1,15 +1,15 @@
 import { manageRows } from './bk-data';
+import { lockOverlayScroll, unlockOverlayScroll } from './overlay-scroll';
 
 function modalState() {
     return {
         modal: '',
         modalTrigger: null,
-        previousOverflow: '',
         openModal(id) {
+            if (this.modal) this.closeModal();
             this.modalTrigger = document.activeElement;
-            this.previousOverflow = document.body.style.overflow;
             this.modal = id;
-            document.body.style.overflow = 'hidden';
+            lockOverlayScroll(document.getElementById(id));
             this.$nextTick(() => {
                 const dialog = document.getElementById(id);
                 (dialog?.querySelector('input:not([type="hidden"]), textarea, button') || dialog)?.focus({ preventScroll: true });
@@ -17,8 +17,8 @@ function modalState() {
         },
         closeModal() {
             if (!this.modal) return;
+            unlockOverlayScroll(document.getElementById(this.modal));
             this.modal = '';
-            document.body.style.overflow = this.previousOverflow;
             this.modalTrigger?.focus({ preventScroll: true });
         },
         trapFocus(event) {
@@ -98,8 +98,8 @@ export function registerBk(Alpine, navigateTo) {
                 this.$dispatch('bk-search', { query: this.quickSearch });
             } else {
                 this.$dispatch('auth-notice', {
-                    title: 'Pencarian laporan',
-                    message: 'Gunakan filter pencarian di halaman Laporan untuk mencari data contoh.',
+                    title: 'Pencarian data',
+                    message: 'Gunakan pencarian di halaman utama portal untuk mencari data contoh.',
                     nextUrl: url,
                 });
             }
@@ -139,7 +139,7 @@ export function registerBk(Alpine, navigateTo) {
             if (['jenis', 'lokasi', 'qr', 'staf'].includes(tab)) this.tab = tab;
         },
         startDrag(event, list, id) {
-            if (this[list].find(item => item.id === id)?.permanent) {
+            if (window.matchMedia('(max-width: 1023px)').matches || this[list].find(item => item.id === id)?.permanent) {
                 event.preventDefault();
                 return;
             }
@@ -223,6 +223,7 @@ export function registerBk(Alpine, navigateTo) {
         kind,
         query: '',
         statusTab: 0,
+        priorityFilter: '',
         filters: {},
         selected: [],
         rows: [],
@@ -260,6 +261,8 @@ export function registerBk(Alpine, navigateTo) {
         rowVisible(index) {
             const row = this.rows[index];
             if (!row || (this.kind === 'dashboard' && this.statusTab !== 0)) return false;
+            if (this.kind === 'dashboard' && this.priorityFilter === 'danger' && index > 2) return false;
+            if (this.kind === 'dashboard' && this.priorityFilter === 'overdue' && Number(row.cells[6]?.match(/\d+/)?.[0]) >= 21) return false;
             const query = normalize(this.query).replace(/^#/, '').replace(/sr-\d{4}-/g, 'sr-');
             if (!row.text.replace(/sr-\d{4}-/g, 'sr-').includes(query)) return false;
             if (this.kind === 'archive' && !this.matchesRange(row.cells[5])) return false;
@@ -363,6 +366,12 @@ export function registerBk(Alpine, navigateTo) {
             confirmation.setCustomValidity(password.value === confirmation.value ? '' : 'Konfirmasi kata sandi harus sama.');
             if (event.currentTarget.reportValidity()) this.unavailable('Perubahan kata sandi');
         },
+        submitWalasPassword(event) {
+            const password = document.getElementById('newPassword');
+            const confirmation = document.getElementById('confirmPassword');
+            confirmation.setCustomValidity(password.value === confirmation.value ? '' : 'Konfirmasi kata sandi harus sama.');
+            if (event.currentTarget.reportValidity()) this.unavailable('Perubahan kata sandi');
+        },
     }));
 
     Alpine.data('bkReport', () => ({
@@ -382,6 +391,7 @@ export function registerBk(Alpine, navigateTo) {
         archive,
         query: '',
         status: 'belum_dibaca',
+        priorityFilter: '',
         filters: { type: '', role: '', urgency: '', contact: '', reason: '' },
         period: '',
         dateFrom: '',
@@ -397,6 +407,8 @@ export function registerBk(Alpine, navigateTo) {
         rowVisible(index) {
             const row = this.rows[index];
             if (!row) return false;
+            if (!this.archive && this.priorityFilter === 'danger' && row.danger !== 'true') return false;
+            if (!this.archive && this.priorityFilter === 'overdue' && row.date >= '2024-10-21') return false;
             if (!this.archive && (this.status === 'handling' ? !['dibaca', 'ditindaklanjuti'].includes(row.status) : row.status !== this.status)) return false;
             const query = normalize(this.query).replace(/^#/, '').replace(/sr-\d{4}-/g, 'sr-');
             if (!row.text.includes(query)) return false;
@@ -408,6 +420,23 @@ export function registerBk(Alpine, navigateTo) {
         get visibleCount() { return this.visibleRows.length; },
         get allSelected() { return this.visibleCount > 0 && this.visibleRows.every(row => this.selected.includes(row.id)); },
         selectVisible(checked) { this.selected = checked ? this.visibleRows.map(row => row.id) : []; },
+    }));
+
+    Alpine.data('walasDashboard', () => ({
+        filter: 'unread',
+        query: '',
+        rows: [],
+        init() {
+            this.rows = [...this.$root.querySelectorAll('[data-summary-card]')].map(card => ({
+                status: card.dataset.status,
+                text: normalize(card.textContent),
+            }));
+        },
+        visible(index) {
+            const row = this.rows[index];
+            return !!row && (this.filter === 'all' || row.status === this.filter) && row.text.includes(normalize(this.query));
+        },
+        get visibleCount() { return this.rows.filter((row, index) => this.visible(index)).length; },
     }));
 
     Alpine.data('bkStatistics', () => ({

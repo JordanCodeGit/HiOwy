@@ -93,7 +93,7 @@
                                 <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                                 Kembali ke Login
                             </a>
-                            <button class="w-full sm:w-auto px-space-xl py-3.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 order-1 sm:order-2" id="continue-button" x-on:click="continueRole($el.dataset.schoolUrl, $el.dataset.kesiswaanUrl)" data-school-url="{{ route('onboarding.school') }}" data-kesiswaan-url="{{ route('kesiswaan.dashboard') }}" type="button">
+                            <button class="w-full sm:w-auto px-space-xl py-3.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-lg text-label-lg font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 order-1 sm:order-2" id="continue-button" x-on:click="continueRole($el.dataset.schoolUrl, $el.dataset.kesiswaanUrl, $el.dataset.walasUrl)" data-school-url="{{ route('onboarding.school') }}" data-kesiswaan-url="{{ route('kesiswaan.dashboard') }}" data-walas-url="{{ route('walas.dashboard') }}" type="button">
                                 <span id="btn-text" class="" x-text="roleButtonLabel">Lanjutkan sebagai Guru BK →</span>
                             </button>
                         </div>

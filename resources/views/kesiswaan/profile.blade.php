@@ -236,7 +236,7 @@
 <span class="font-body-sm text-body-sm text-on-surface-variant">Putuskan sambungan akun pada seluruh peramban dan perangkat</span>
 </div>
 </div>
-<button  class="px-4 py-2.5 rounded-lg bg-error-container text-on-error-container hover:bg-error hover:text-on-error transition-all font-label-md text-label-md flex items-center justify-center gap-2 shrink-0 shadow-xs" id="btnLogoutAll" type="button" @click="unavailable()">
+<button  class="px-4 py-2.5 rounded-lg bg-error-container text-on-error-container hover:bg-error hover:text-on-error transition-all font-label-md text-label-md flex items-center justify-center gap-2 shrink-0 shadow-xs" id="btnLogoutAll" type="button" @click="openModal('staff-signout')">
 <span class="material-symbols-outlined text-[18px]">logout</span>
 <span>Keluar dari Semua Perangkat</span>
 </button>
@@ -290,6 +290,7 @@
 </div>
 </template>
 </div>
+<x-kesiswaan.confirmation id="staff-signout" title="Keluar dari semua perangkat?" action="Pencabutan seluruh sesi">Konfirmasi untuk mengakhiri seluruh sesi setelah layanan terintegrasi.</x-kesiswaan.confirmation>
 </main>
 </x-layouts.bk>
 

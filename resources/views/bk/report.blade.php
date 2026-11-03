@@ -35,7 +35,7 @@
 <div class="flex items-center gap-2.5">
 <button   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-all shadow-xs" id="openRelayModalBtn" type="button" @click="openForward()">
 <span class="material-symbols-outlined text-[17px] text-secondary">forward_to_inbox</span>Laporkan ke Wali Kelas</button>
-<button  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-all shadow-xs" id="archiveCaseBtn" type="button" @click="unavailable()">
+<button  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-all shadow-xs" id="archiveCaseBtn" type="button" @click="openModal('staff-archive')">
 <span class="material-symbols-outlined text-[17px] text-slate-500">archive</span>Arsipkan</button>
 </div>
 </div>
@@ -185,7 +185,7 @@
 <textarea class="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all" id="counselorReply" placeholder="Tulis respons yang menenangkan untuk siswa..." rows="2">
 </textarea>
 <div class="flex items-center justify-between">
-<span class="text-[11px] text-slate-400">Tersinkron langsung dengan token pelapor.</span>
+<span class="text-[11px] text-slate-400">Ini bukan chat langsung.</span>
 <button  class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-colors" type="button" @click="unavailable()">
 <span class="material-symbols-outlined text-[16px]">send</span>Kirim Balasan</button>
 </div>
@@ -370,6 +370,7 @@
 </div>
 </template>
 <x-bk.forward-modal />
+<x-kesiswaan.confirmation id="staff-archive" title="Arsipkan laporan ini?" action="Pengarsipan laporan">Laporan akan dipindahkan ke arsip setelah layanan terintegrasi.</x-kesiswaan.confirmation>
 </main>
 </x-layouts.bk>
 

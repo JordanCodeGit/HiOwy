@@ -31,7 +31,7 @@
             </tr></thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
             @foreach($reports as $report)
-                <tr data-report-row data-id="{{ $report['id'] }}" data-type="{{ $report['type'] }}" data-role="{{ $report['role'] }}" data-urgency="{{ $report['urgency'] }}" data-contact="{{ $report['wants_contact'] ? 'ya' : 'tidak' }}" data-status="{{ $report['status'] }}" data-reason="{{ $report['reason'] }}" data-date="{{ $report['date'] }}" x-show="rowVisible({{ $loop->index }})" class="hover:bg-blue-50/40 transition-colors">
+                <tr data-report-row data-danger="{{ $report['danger_flag'] ? 'true' : 'false' }}" data-id="{{ $report['id'] }}" data-type="{{ $report['type'] }}" data-role="{{ $report['role'] }}" data-urgency="{{ $report['urgency'] }}" data-contact="{{ $report['wants_contact'] ? 'ya' : 'tidak' }}" data-status="{{ $report['status'] }}" data-reason="{{ $report['reason'] }}" data-date="{{ $report['date'] }}" x-show="rowVisible({{ $loop->index }})" class="hover:bg-blue-50/40 transition-colors">
                     @unless($archive)<td class="p-4"><input type="checkbox" x-model="selected" value="{{ $report['id'] }}" aria-label="Pilih {{ $report['ticket'] }}"></td>@endunless
                     <td class="px-4 py-5 font-bold whitespace-nowrap text-slate-900">#{{ $report['ticket'] }}</td>
                     @unless($archive)<td class="px-4 py-5"><x-kesiswaan.urgency :value="$report['urgency']" /></td>@endunless
@@ -49,7 +49,7 @@
         </table>
     </div>
     <p x-cloak x-show="visibleCount === 0" class="p-10 text-center text-sm text-slate-500">Tidak ada laporan yang sesuai dengan filter ini.</p>
-    <div class="border-t border-slate-100 px-6 py-4 text-xs text-slate-500">Menampilkan <span x-text="visibleCount">{{ $reports->count() }}</span> dari {{ $reports->count() }} laporan yang dapat Anda akses.</div>
+    <div class="staff-desktop-only border-t border-slate-100 px-6 py-4 text-xs text-slate-500">Menampilkan <span x-text="visibleCount">{{ $reports->count() }}</span> dari {{ $reports->count() }} laporan yang dapat Anda akses.</div>
 </section>
 @unless($archive)
 <x-kesiswaan.confirmation id="bulk-iseng" title="Tandai laporan sebagai iseng?" action="Penandaan laporan iseng">Anda memilih <span x-text="selected.length"></span> laporan. Penandaan akan memengaruhi status laporan. Konfirmasi untuk melanjutkan.</x-kesiswaan.confirmation>

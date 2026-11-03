@@ -1,4 +1,4 @@
-# HiOwy — frontend autentikasi, onboarding, dan portal BK/Kesiswaan
+# HiOwy — frontend autentikasi, onboarding, dan portal BK/Kesiswaan/Wali Kelas
 
 Konversi HTML dari `public/design_acuan` ke Blade, Tailwind CSS 4, dan Alpine.js melalui Vite. HTML dan aset acuan tetap tersedia. Font Montserrat, Plus Jakarta Sans, serta Material Symbols tetap dimuat dari Google Fonts seperti desain sumber.
 
@@ -18,7 +18,7 @@ Path `/` mengarah ke Login. Untuk pengembangan aset, jalankan `npm install` lalu
 
 - Sign Up → Setup 2FA → Pilih Peran → Pengaturan Sekolah khusus Guru BK.
 - Login → Verifikasi 2FA.
-- Tim Kesiswaan menuju pratinjau portal Kesiswaan; Wali Kelas mendapat pesan bahwa halaman tujuan belum tersedia.
+- Tim Kesiswaan dan Wali Kelas menuju pratinjau portal masing-masing.
 
 Alur ini menggantikan aturan provisioning akun oleh operator pada dokumen pendukung untuk lingkup tujuh halaman ini. Pemilihan peran hanya navigasi frontend; belum memberikan hak akses.
 
@@ -64,7 +64,7 @@ Pemilik proyek menyetujui QR per lokasi beserta jumlah akses, serta identitas/la
 
 Form dan tombol simpan, undang/hapus akses staf, kirim pesan/ringkasan, arsip, unduh/regenerasi QR, ekspor, ubah sandi, cabut sesi, dan recovery 2FA memberi pemberitahuan **belum terintegrasi**. QR sekolah merupakan ilustrasi SVG sumber, bukan QR operasional. Recovery codes tidak dibuat atau ditampilkan sebagai kode aktif. Route BK tetap berisi data contoh dan belum dilindungi autentikasi; sebelum memuat data nyata diperlukan autentikasi, otorisasi per sekolah/peran, validasi server, penyimpanan, audit log, serta endpoint operasi tersebut.
 
-Halaman verifikasi 2FA dan pengaturan sekolah menyediakan tautan **Lanjutkan pratinjau** ke Dashboard BK. Ini tidak memverifikasi login, memberi peran BK, atau menyimpan sekolah. Portal Kesiswaan tersedia pada tahap 3. Portal Wali Kelas belum tersedia.
+Halaman verifikasi 2FA dan pengaturan sekolah menyediakan tautan **Lanjutkan pratinjau** ke Dashboard BK. Ini tidak memverifikasi login, memberi peran BK, atau menyimpan sekolah. Portal Kesiswaan tersedia pada tahap 3. Portal Wali Kelas tersedia pada tahap 4.
 
 ## Tahap 3 - Portal Kesiswaan
 
@@ -84,6 +84,20 @@ Sidebar, header, tipografi, efek hover, dan transisi memakai komponen BK. Tidak 
 
 Detail selain ID 1 menggunakan informasi baris sumber; narasi lengkap yang tidak tersedia diberi keterangan. Catatan Kesiswaan belum memiliki data contoh. Filter, tab, pilihan baris, dan dialog konfirmasi berjalan lokal; simpan status/catatan, tandai iseng, arsip, serta keamanan akun tetap memberi pesan belum terintegrasi. Ini penyaringan pratinjau server, bukan implementasi autentikasi/otorisasi produksi; tidak ada data nyata atau perubahan basis data.
 
+## Tahap 4 - Portal Wali Kelas
+
+| Halaman | Path | Named route |
+| --- | --- | --- |
+| Dashboard ringkasan | `/wali-kelas` | `walas.dashboard` |
+| Profil dan keamanan | `/wali-kelas/profile` | `walas.profile` |
+| Ringkasan lengkap | `/wali-kelas/ringkasan/{id}` | `walas.summary` |
+
+Konversi memakai HTML dashboard_walas_desktop, profile_settings_walas_desktop, dan resume_walas_desktop. Pilih Peran Wali Kelas menuju dashboard. Sesuai keputusan pemilik proyek, kartu langsung membuka halaman Ringkasan; tidak ada pop-up detail. Delapan catatan, pengirim, dan waktu berasal dari sumber (3 belum dibaca, 5 sudah dibaca). Ringkasan ID 4 memakai isi lengkap halaman resume; ID lain memakai isi lengkap modalData pada HTML dashboard. Istilah waktu relatif masih mengikuti data contoh sumber.
+
+Header/sidebar memakai komponen bersama dan identitas Ibu Ratna Dewi, S.Pd., Wali Kelas 8B. Dropdown notifikasi bergaya BK berisi tiga ringkasan belum dibaca untuk kelas contoh; tidak menampilkan laporan mentah, kontak siswa, maupun notifikasi darurat BK. Sidebar hanya Ringkasan Diteruskan; pengaturan profil diakses lewat dropdown foto profil. Teks sekolah/subjudul di header serta inisial avatar ganda dihapus. Foto sumber disimpan di public/images/walas/ratna.jpg.
+
+Tab dan pencarian bekerja lokal. Status baca, penyimpanan nama/sandi, kode pemulihan, PDF terenkripsi, dan pencabutan sesi menampilkan belum terintegrasi; tidak ada simulasi penyimpanan sukses. Kode pemulihan aktif tidak dibuat. Data pratinjau dibatasi sekolah/kelas contoh dalam WaliKelasPreview; ID ringkasan yang tidak tersedia menghasilkan 404. Route masih terbuka untuk peninjauan frontend dan belum merupakan otorisasi akun produksi. Pengujian browser dilakukan pemilik proyek.
+
 ---
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
@@ -94,6 +108,14 @@ Detail selain ID 1 menggunakan informasi baris sumber; narasi lengkap yang tidak
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
+
+## Responsif portal staf
+
+BK, Kesiswaan, dan Wali Kelas menggunakan navigasi bawah pada lebar di bawah 1024 px. Menu tambahan BK tersedia melalui Lainnya; profil melalui dropdown foto. Tabel berubah menjadi kartu berlabel (satu kolom pada ponsel, dua kolom pada tablet mulai 768 px), dengan pemuatan bertahap lokal. Filter memakai bottom sheet dan pilihan massal diaktifkan melalui Pilih. Layout desktop tetap memakai sidebar dan tabel.
+
+Detail laporan mobile memakai tab sesuai hak peran dan panel Aksi. Form panjang memakai panel layar penuh, profil dibagi menjadi empat bagian buka-tutup, dan kontrol memperhitungkan safe area serta keyboard. Tersedia indikator perpindahan halaman, kondisi offline, validasi form, peringatan meninggalkan perubahan, dan pemulihan filter/posisi daftar melalui history halaman. Isi draf tidak disimpan di browser. UI sesi berakhir tersedia melalui event `staff:session-expired`; timeout dan autentikasi nyata tetap memerlukan backend.
+
+Sesuai keputusan pemilik proyek, alur QR per lokasi, Undang Staf, serta isi data/timestamp/IP/perangkat yang sekarang dipertahankan. Pembatasan akses Kesiswaan dan Wali Kelas tetap berlaku pada fixture masing-masing. Implementasi responsif mengikuti `public/design_acuan/HIOWY_MOBILE_STAFF.md` dengan keputusan tersebut dan navigasi bawah menggantikan hamburger. Pemeriksaan visual di browser/perangkat dilakukan pemilik proyek; belum diklaim tervalidasi pada semua ukuran HP.
 
 ## About Laravel
 

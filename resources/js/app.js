@@ -1,5 +1,6 @@
 import Alpine from 'alpinejs';
 import { registerBk } from './bk';
+import { setupStaffMobile } from './staff-mobile';
 
 let navigationPending = false;
 
@@ -100,7 +101,7 @@ Alpine.data('authPage', () => ({
         document.querySelectorAll('#role-selection-group [role="radio"]')[index]?.focus();
     },
 
-    continueRole(schoolUrl, kesiswaanUrl) {
+    continueRole(schoolUrl, kesiswaanUrl, walasUrl) {
         if (this.selectedRole === 'bk') {
             navigateTo(schoolUrl);
             return;
@@ -111,7 +112,9 @@ Alpine.data('authPage', () => ({
             return;
         }
 
-        this.showUnavailable('Halaman tujuan untuk peran ini belum tersedia. Pilihan peran belum disimpan.');
+        if (this.selectedRole === 'wali_kelas') {
+            navigateTo(walasUrl);
+        }
     },
 }));
 
@@ -238,3 +241,4 @@ Alpine.data('otpEntry', () => ({
 registerBk(Alpine, navigateTo);
 
 Alpine.start();
+setupStaffMobile(Alpine);

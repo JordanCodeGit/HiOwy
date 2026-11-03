@@ -87,6 +87,7 @@
 <td class="py-4 px-6">
 <span  class="font-title-md text-title-md text-on-surface font-semibold block row-label-text" x-text="item.label">
 </span>
+<span class="staff-mobile-only staff-visibility-badge" x-text="item.visible_to_kesiswaan ? 'Terlihat Kesiswaan' : 'Hanya BK'"></span>
 </td>
 <td class="py-4 px-6">
 <span class="inline-flex items-center gap-1.5 text-on-tertiary-container font-label-md text-label-md font-semibold row-status-badge">
@@ -102,9 +103,9 @@
 <span class="material-symbols-outlined text-[16px]">edit</span>
 <span>Ubah</span>
 </button>
-<button   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button" :disabled="item.permanent" @click="unavailable('Penghapusan kategori')">
-<span class="material-symbols-outlined text-[16px]">delete</span>
-<span>Hapus</span>
+<button   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button" :disabled="item.permanent" @click="unavailable(window.matchMedia('(max-width: 1023px)').matches ? (item.active ? 'Penonaktifan kategori' : 'Pengaktifan kategori') : 'Penghapusan kategori')">
+<span class="material-symbols-outlined text-[16px] staff-desktop-only">delete</span>
+<span class="staff-desktop-only">Hapus</span><span class="staff-mobile-only" x-text="item.active ? 'Nonaktifkan' : 'Aktifkan'"></span>
 </button>
 </div>
 </td>
@@ -176,9 +177,9 @@
 <span class="material-symbols-outlined text-[16px]">edit</span>
 <span>Ubah</span>
 </button>
-<button   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button" :disabled="item.permanent" @click="unavailable('Penghapusan lokasi')">
-<span class="material-symbols-outlined text-[16px]">delete</span>
-<span>Hapus</span>
+<button   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors" type="button" :disabled="item.permanent" @click="unavailable(window.matchMedia('(max-width: 1023px)').matches ? (item.active ? 'Penonaktifan lokasi' : 'Pengaktifan lokasi') : 'Penghapusan lokasi')">
+<span class="material-symbols-outlined text-[16px] staff-desktop-only">delete</span>
+<span class="staff-desktop-only">Hapus</span><span class="staff-mobile-only" x-text="item.active ? 'Nonaktifkan' : 'Aktifkan'"></span>
 </button>
 </div>
 </td>
@@ -759,6 +760,7 @@
 </div>
 <input x-model="categoryLabel" class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="modal-input-label" required maxlength="80" placeholder="Contoh: Pemalakan atau Intimidasi Kelompok" type="text">
 <span class="font-body-sm text-body-sm text-on-surface-variant">Label ini langsung ditampilkan pada daftar opsi saat siswa melapor.</span>
+<div class="staff-mobile-only rounded-xl border border-surface-container p-3"><span class="text-sm text-on-surface-variant">Pratinjau siswa</span><p class="mt-1 font-semibold break-words" x-text="categoryLabel || 'Nama jenis kejadian'"></p></div>
 </div>
 <div class="p-3.5 bg-surface-container-low/70 rounded-xl border border-surface-container flex items-center justify-between gap-4">
 <div class="flex flex-col">
@@ -798,6 +800,7 @@
 <div class="flex flex-col gap-1">
 <label for="new-loc-name" class="font-label-md text-label-md font-semibold text-on-surface">Nama Titik Lokasi</label>
 <input x-model="locationLabel" class="w-full px-3.5 py-2.5 bg-surface-container-low text-on-surface rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-secondary" id="new-loc-name" required maxlength="80" placeholder="Contoh: Perpustakaan &amp; Ruang Baca" type="text">
+<div class="staff-mobile-only rounded-xl border border-surface-container p-3"><span class="text-sm text-on-surface-variant">Pratinjau siswa</span><p class="mt-1 font-semibold break-words" x-text="locationLabel || 'Nama lokasi kejadian'"></p></div>
 </div>
 <div class="flex flex-col gap-1">
 </div>
