@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FrontendPreviewController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\KesiswaanPreviewController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\WaliKelasPreviewController;
 use Illuminate\Support\Facades\Route;
@@ -35,8 +36,13 @@ Route::get('/two-factor/setup', fn () => redirect()->route('two-factor.setup'));
 Route::post('/two-factor/verify', [AuthController::class, 'confirmTwoFactorSetup'])->name('two-factor.verify');
 Route::get('/two-factor/activate/{user}', [AuthController::class, 'showTwoFactorActivate'])->name('two-factor.activate');
 
-// Onboarding & Password Recovery
-Route::view('/forgot-password', 'auth.forgot-password')->name('password.request');
+// Password Reset Flow
+Route::get('/forgot-password', [PasswordResetController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update');
+
+// Onboarding
 Route::view('/onboarding/role', 'auth.role')->name('onboarding.role');
 Route::view('/onboarding/school', 'auth.school')->name('onboarding.school');
 
