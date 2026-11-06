@@ -141,22 +141,6 @@ Alpine.data('authNotice', () => ({
 Alpine.data('otpEntry', () => ({
     digits: ['', '', '', '', '', ''],
     recoveryOpen: false,
-    seconds: 30,
-    timer: null,
-
-    init() {
-        this.updateSeconds();
-        this.timer = window.setInterval(() => this.updateSeconds(), 1000);
-    },
-
-    destroy() {
-        window.clearInterval(this.timer);
-    },
-
-    updateSeconds() {
-        // Display the current 30-second interval; only the backend can verify a TOTP.
-        this.seconds = 30 - (Math.floor(Date.now() / 1000) % 30);
-    },
 
     inputs() {
         return Array.from(this.$root.querySelectorAll('[data-otp]'));

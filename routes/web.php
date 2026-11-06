@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FrontendPreviewController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\KesiswaanPreviewController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\WaliKelasPreviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,15 +12,35 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::view('/login', 'auth.login')->name('login');
-Route::view('/signup', 'auth.signup')->name('register');
-Route::view('/two-factor/setup', 'auth.setup-two-factor')->name('two-factor.setup');
-Route::view('/two-factor/verify', 'auth.verify-two-factor')->name('two-factor.challenge');
+// Authentication Routes
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Google OAuth
+Route::get('/auth/google', [GoogleAuthController::class, 'redirect'])->name('auth.google');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+
+// Sign Up (form web)
+Route::get('/signup', [RegisterController::class, 'showRegister'])->name('register');
+Route::post('/signup', [RegisterController::class, 'register'])->name('register.attempt');
+
+// 2FA (Halaman tunggal untuk semua alur 2FA)
+Route::get('/two-factor', [AuthController::class, 'showTwoFactorSetup'])->name('two-factor.setup');
+Route::post('/two-factor', [AuthController::class, 'confirmTwoFactorSetup'])->name('two-factor.setup.confirm');
+
+// Redirect jalur lama ke /two-factor
+Route::get('/two-factor/verify', fn () => redirect()->route('two-factor.setup'))->name('two-factor.challenge');
+Route::get('/two-factor/setup', fn () => redirect()->route('two-factor.setup'));
+Route::post('/two-factor/verify', [AuthController::class, 'confirmTwoFactorSetup'])->name('two-factor.verify');
+Route::get('/two-factor/activate/{user}', [AuthController::class, 'showTwoFactorActivate'])->name('two-factor.activate');
+
+// Onboarding & Password Recovery
 Route::view('/forgot-password', 'auth.forgot-password')->name('password.request');
 Route::view('/onboarding/role', 'auth.role')->name('onboarding.role');
 Route::view('/onboarding/school', 'auth.school')->name('onboarding.school');
 
-// These routes render source-design samples only; no authenticated records are loaded.
+// BK Portal
 Route::prefix('bk')->name('bk.')->group(function () {
     Route::view('/', 'bk.dashboard')->name('dashboard');
     Route::view('/manage', 'bk.manage')->name('manage');
@@ -29,10 +52,12 @@ Route::prefix('bk')->name('bk.')->group(function () {
     Route::view('/reports/preview', 'bk.report')->name('report');
 });
 
+// Frontend Preview Fallback
 Route::post('/frontend/{page}', FrontendPreviewController::class)
     ->whereIn('page', ['login', 'signup', 'verify-two-factor', 'forgot-password', 'school', 'bk', 'kesiswaan', 'walas'])
     ->name('frontend.unavailable');
 
+// Kesiswaan Portal
 Route::prefix('kesiswaan')->name('kesiswaan.')->controller(KesiswaanPreviewController::class)->group(function () {
     Route::get('/', 'dashboard')->name('dashboard');
     Route::get('/reports/{report}', 'report')->whereNumber('report')->name('report');
@@ -44,6 +69,7 @@ Route::prefix('kesiswaan')->name('kesiswaan.')->controller(KesiswaanPreviewContr
 
 Route::get('/s/{code}/pelajari', [KesiswaanPreviewController::class, 'publicLearn'])->name('public.learn');
 
+// Wali Kelas Portal
 Route::prefix('wali-kelas')->name('walas.')->controller(WaliKelasPreviewController::class)->group(function () {
     Route::get('/', 'dashboard')->name('dashboard');
     Route::get('/profile', 'profile')->name('profile');

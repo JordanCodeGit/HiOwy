@@ -177,15 +177,18 @@
 <div class="border-t border-slate-100 p-2"><a href="{{ route('public.learn', ['code' => 'smakita']) }}" class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-blue-50"><span class="material-symbols-outlined text-lg">auto_stories</span>Pelajari · Portal Publik</a></div>
 @endif
 <div class="border-t border-slate-100 p-2 bg-slate-50/50">
-<a class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors" href="{{ route('login') }}">
+<form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
+@csrf
+<button type="submit" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer text-left">
 <div class="flex items-center gap-2.5">
 <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
 <span class="material-symbols-outlined text-[17px]">logout</span>
 </div>
-<span>Keluar Pratinjau</span>
+<span>Keluar Akun</span>
 </div>
 <span class="material-symbols-outlined text-[16px] text-rose-400">arrow_forward</span>
-</a>
+</button>
+</form>
 </div>
 </div>
 </div>

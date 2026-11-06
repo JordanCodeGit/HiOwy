@@ -55,18 +55,26 @@
                                 Lengkapi data diri dan institusi untuk mulai mendampingi dan mengelola aduan siswa dengan aman.
                             </p>
                         </div>
+
+                        {{-- Error alert --}}
+                        @if ($errors->any())
+                            <div class="mb-5 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 flex items-start gap-3 text-body-sm shadow-xs">
+                                <span class="material-symbols-outlined text-title-md shrink-0 mt-0.5">error</span>
+                                <div class="flex-1 font-medium">{{ $errors->first() }}</div>
+                            </div>
+                        @endif
+
                         <!-- Registration Form -->
-                        <form class="source-space-y-4" method="POST" action="{{ route('frontend.unavailable', ['page' => 'signup']) }}" data-page="signup" data-next-url="{{ route('two-factor.setup') }}" x-on:submit.prevent="submitPreview($event)">
+                        <form class="source-space-y-4" method="POST" action="{{ route('register.attempt') }}">
                             @csrf
                             <!-- Nama Lengkap -->
                             <div class="flex flex-col gap-1.5">
                                 <label class="font-title-md text-label-lg text-on-surface flex items-center justify-between" for="full-name">
                                     <span class="">Nama Lengkap &amp; Gelar</span>
-
                                 </label>
                                 <div class="relative flex items-center">
                                     <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">badge</span>
-                                    <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:bg-surface-container-lowest focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="misal: Ibu Sarah Jenkins, S.Pd., M.Psi." type="text" id="full-name" name="name" autocomplete="name" required="">
+                                    <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:bg-surface-container-lowest focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="misal: Ibu Sarah Jenkins, S.Pd., M.Psi." type="text" id="full-name" name="name" autocomplete="name" required="" value="{{ old('name') }}">
                                 </div>
                             </div>
                             <!-- Grid Email & Sekolah (Dual Field on Desktop) -->
@@ -76,7 +84,7 @@
                                     <label class="font-title-md text-label-lg text-on-surface" for="email">Email</label>
                                     <div class="relative flex items-center">
                                         <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">alternate_email</span>
-                                        <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="nama@sekolah.sch.id" type="email" id="email" name="email" autocomplete="email" required="">
+                                        <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="nama@sekolah.sch.id" type="email" id="email" name="email" autocomplete="email" required="" value="{{ old('email') }}">
                                     </div>
                                 </div>
                                 <!-- Asal Sekolah -->
@@ -84,7 +92,7 @@
                                     <label class="font-title-md text-label-lg text-on-surface" for="school-name">Asal Sekolah</label>
                                     <div class="relative flex items-center">
                                         <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">account_balance</span>
-                                        <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="SMP Telkom Purwokerto" type="text" id="school-name" name="school_name" autocomplete="organization" required="">
+                                        <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="SMP Telkom Purwokerto" type="text" id="school-name" name="school_name" autocomplete="organization" required="" value="{{ old('school_name') }}">
                                     </div>
                                 </div>
                             </div>
@@ -95,7 +103,7 @@
                                     <label class="font-title-md text-label-lg text-on-surface" for="pass-input">Buat Kata Sandi</label>
                                     <div class="relative flex items-center" x-data="{ visible: false }">
                                         <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">lock</span>
-                                        <input class="w-full h-11 pl-11 pr-11 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" id="pass-input" placeholder="••••••••••••" type="password" name="password" autocomplete="new-password" x-bind:type="visible ? 'text' : 'password'" required="" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}" x-on:input="validatePasswords($el.form)">
+                                        <input class="w-full h-11 pl-11 pr-11 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" id="pass-input" placeholder="••••••••••••" name="password" autocomplete="new-password" x-bind:type="visible ? 'text' : 'password'" required="" minlength="8">
                                         <button class="absolute right-3.5 text-outline hover:text-on-surface transition-colors" type="button" x-on:click="visible = !visible" x-bind:aria-label="visible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'" x-bind:aria-pressed="visible">
                                             <span class="material-symbols-outlined text-title-lg" x-text="visible ? 'visibility_off' : 'visibility'">visibility</span>
                                         </button>
@@ -106,7 +114,7 @@
                                     <label class="font-title-md text-label-lg text-on-surface" for="confirm-pass-input">Konfirmasi Sandi</label>
                                     <div class="relative flex items-center" x-data="{ visible: false }">
                                         <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">verified_user</span>
-                                        <input class="w-full h-11 pl-11 pr-11 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" id="confirm-pass-input" placeholder="••••••••••••" type="password" name="password_confirmation" autocomplete="new-password" x-bind:type="visible ? 'text' : 'password'" required="" x-on:input="validatePasswords($el.form)">
+                                        <input class="w-full h-11 pl-11 pr-11 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" id="confirm-pass-input" placeholder="••••••••••••" name="password_confirmation" autocomplete="new-password" x-bind:type="visible ? 'text' : 'password'" required="">
                                         <button class="absolute right-3.5 text-outline hover:text-on-surface transition-colors" type="button" x-on:click="visible = !visible" x-bind:aria-label="visible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'" x-bind:aria-pressed="visible">
                                             <span class="material-symbols-outlined text-title-lg" x-text="visible ? 'visibility_off' : 'visibility'">visibility</span>
                                         </button>
@@ -121,9 +129,9 @@
                             <!-- Terms Checkbox -->
                             <div class="pt-2">
                                 <label class="flex items-start gap-3 cursor-pointer group">
-                                    <input checked="" class="mt-1 w-4 h-4 rounded-sm text-secondary focus:ring-0 focus:ring-offset-0 transition cursor-pointer" type="checkbox" name="terms" required value="1">
+                                    <input {{ old('terms') ? 'checked' : 'checked' }} class="mt-1 w-4 h-4 rounded-sm text-secondary focus:ring-0 focus:ring-offset-0 transition cursor-pointer" type="checkbox" name="terms" required value="1">
                                     <span class="font-body-md text-body-sm text-on-surface-variant leading-relaxed">
-                                        Saya menyetujui <button class="text-secondary hover:underline font-title-md" type="button" x-on:click="showUnavailable('Dokumen ini belum tersedia.')">Ketentuan Layanan</button> dan <button class="text-secondary hover:underline font-title-md" type="button" x-on:click="showUnavailable('Dokumen ini belum tersedia.')">Kebijakan Privasi Perlindungan Anak</button> dalam penanganan laporan siswa secara rahasia.
+                                        Saya menyetujui <span class="text-secondary font-title-md">Ketentuan Layanan</span> dan <span class="text-secondary font-title-md">Kebijakan Privasi Perlindungan Anak</span> dalam penanganan laporan siswa secara rahasia.
                                     </span>
                                 </label>
                             </div>
@@ -140,24 +148,24 @@
                             <div class="w-full h-[1px] bg-surface-container-highest"></div>
                             <span class="absolute bg-surface px-4 font-label-md text-label-sm text-outline tracking-wider uppercase">ATAU</span>
                         </div>
-                        <!-- Google Workspace Secondary Option -->
-                        <button class="w-full h-12 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-title-md text-body-lg rounded-xl shadow-xs flex items-center justify-center gap-3 transition-all" type="button" x-on:click="showUnavailable('Autentikasi Google belum terintegrasi.')">
+                        <!-- Google OAuth Option -->
+                        <a href="{{ route('auth.google') }}" class="w-full h-12 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-title-md text-body-lg rounded-xl shadow-xs flex items-center justify-center gap-3 transition-all border border-outline-variant/30">
                             <svg class="w-5 h-5" viewBox="0 0 24 24">
                                 <path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z" fill="#4285F4"></path>
                                 <path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z" fill="#34A853"></path>
                                 <path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z" fill="#FBBC05"></path>
                                 <path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" fill="#EA4335"></path>
                             </svg>
-                            <span class="">Daftar dengan Google</span>
-                        </button>
+                            <span>Daftar dengan Google</span>
+                        </a>
                         <!-- Reassurance Footer Tip -->
                         <div class="mt-8 text-center">
                             <p class="font-body-sm text-body-sm text-outline">
                                 Perlu bantuan pendaftaran dinas?
-                                <button class="text-secondary font-title-md hover:underline inline-flex items-center gap-0.5 ml-1" type="button" x-on:click="showUnavailable('Kontak bantuan belum tersedia.')">
+                                <a href="mailto:it-support@nusantara.sch.id" class="text-secondary font-title-md hover:underline inline-flex items-center gap-0.5 ml-1">
                                     <span class="">Hubungi Bantuan IT Sekolah</span>
                                     <span class="material-symbols-outlined text-[14px]">open_in_new</span>
-                                </button>
+                                </a>
                             </p>
                         </div>
                     </div>
