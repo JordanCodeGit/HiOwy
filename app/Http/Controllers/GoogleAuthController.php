@@ -152,7 +152,7 @@ class GoogleAuthController extends Controller
                 'email'       => $email,
                 'password'    => Hash::make(Str::random(32)),
                 'google_id'   => $googleId,
-                'school_name' => 'Sekolah Mitra',
+                'school_name' => null,
                 'role'        => 'bk',
             ]);
         }

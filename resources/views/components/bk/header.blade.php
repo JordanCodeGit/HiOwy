@@ -1,9 +1,15 @@
 @props(['portal' => 'bk', 'notifications' => []])
 @php
-    $profileName = $portal === 'walas' ? 'Ibu Ratna Dewi, S.Pd.' : 'Sarah Jenkins, M.Pd.';
-    $profileEmail = $portal === 'walas' ? 'ratna.dewi@sman1teladan.sch.id' : 'sarah.jenkins@lincoln.sch.id';
-    $profileImage = $portal === 'walas' ? 'images/walas/ratna.jpg' : 'images/bk/counselor.jpg';
-    $profileRole = ['bk' => 'Guru BK / Konselor Inti', 'kesiswaan' => 'Kesiswaan', 'walas' => 'Wali Kelas 8B'][$portal];
+    $profileName = Auth::user()->name ?? ($portal === 'walas' ? 'Ibu Ratna Dewi, S.Pd.' : 'Sarah Jenkins, M.Pd.');
+    $profileEmail = Auth::user()->email ?? ($portal === 'walas' ? 'ratna.dewi@sman1teladan.sch.id' : 'sarah.jenkins@lincoln.sch.id');
+    $userAvatar = Auth::user()?->avatar;
+    $avatarExists = $userAvatar && file_exists(public_path($userAvatar));
+    $profileImage = $avatarExists ? $userAvatar : ($portal === 'walas' ? 'images/walas/ratna.jpg' : 'images/bk/counselor.jpg');
+    $profileRole = Auth::user()?->role ? match(Auth::user()->role) {
+        'kesiswaan' => 'Kesiswaan',
+        'walas', 'wali_kelas' => 'Wali Kelas',
+        default => 'Guru BK / Konselor Inti',
+    } : (['bk' => 'Guru BK / Konselor Inti', 'kesiswaan' => 'Kesiswaan', 'walas' => 'Wali Kelas 8B'][$portal]);
 @endphp
 <header class="staff-topbar sticky top-0 z-20 min-h-16 py-2 bg-white/95 backdrop-blur border-b border-slate-200/80 px-4 lg:px-8 flex items-center justify-between">
 <div class="flex items-center gap-3">
@@ -144,19 +150,19 @@
 </div>
 <span class="material-symbols-outlined text-[16px] text-slate-400 group-hover:text-slate-600">chevron_right</span>
 </a>
-<a class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors group" href="{{ route($portal.'.profile') }}#security">
+<a class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors group" href="{{ route($portal.'.profile') }}">
 <div class="flex items-center gap-3">
 <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
 <span class="material-symbols-outlined text-[18px]">security</span>
 </div>
 <div class="flex flex-col">
-<span class="font-semibold text-slate-800 group-hover:text-emerald-700 leading-tight">Keamanan &amp; 2FA</span>
+<span class="font-semibold text-slate-800 group-hover:text-emerald-700 leading-tight">Keamanan &amp; Kata Sandi</span>
 <span class="text-[10px] text-slate-400 mt-0.5">Sandi &amp; keamanan akun</span>
 </div>
 </div>
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
 <span class="w-1.5 h-1.5 rounded-full bg-emerald-600">
-</span>2FA Aktif</span>
+</span>Aman</span>
 </a>
 @if($portal !== 'walas')
 <a class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors group" href="{{ route($portal.'.access-log') }}">

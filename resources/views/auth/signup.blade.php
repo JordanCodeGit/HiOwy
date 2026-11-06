@@ -67,33 +67,12 @@
                         <!-- Registration Form -->
                         <form class="source-space-y-4" method="POST" action="{{ route('register.attempt') }}">
                             @csrf
-                            <!-- Nama Lengkap -->
+                            <!-- Email Instansi -->
                             <div class="flex flex-col gap-1.5">
-                                <label class="font-title-md text-label-lg text-on-surface flex items-center justify-between" for="full-name">
-                                    <span class="">Nama Lengkap &amp; Gelar</span>
-                                </label>
+                                <label class="font-title-md text-label-lg text-on-surface" for="email">Email</label>
                                 <div class="relative flex items-center">
-                                    <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">badge</span>
-                                    <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:bg-surface-container-lowest focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="misal: Ibu Sarah Jenkins, S.Pd., M.Psi." type="text" id="full-name" name="name" autocomplete="name" required="" value="{{ old('name') }}">
-                                </div>
-                            </div>
-                            <!-- Grid Email & Sekolah (Dual Field on Desktop) -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Email Instansi -->
-                                <div class="flex flex-col gap-1.5">
-                                    <label class="font-title-md text-label-lg text-on-surface" for="email">Email</label>
-                                    <div class="relative flex items-center">
-                                        <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">alternate_email</span>
-                                        <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="nama@sekolah.sch.id" type="email" id="email" name="email" autocomplete="email" required="" value="{{ old('email') }}">
-                                    </div>
-                                </div>
-                                <!-- Asal Sekolah -->
-                                <div class="flex flex-col gap-1.5">
-                                    <label class="font-title-md text-label-lg text-on-surface" for="school-name">Asal Sekolah</label>
-                                    <div class="relative flex items-center">
-                                        <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">account_balance</span>
-                                        <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="SMP Telkom Purwokerto" type="text" id="school-name" name="school_name" autocomplete="organization" required="" value="{{ old('school_name') }}">
-                                    </div>
+                                    <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">alternate_email</span>
+                                    <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="nama@sekolah.sch.id" type="email" id="email" name="email" autocomplete="email" required="" value="{{ old('email') }}">
                                 </div>
                             </div>
                             <!-- Password Grid -->

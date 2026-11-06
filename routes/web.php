@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BkProfileController;
 use App\Http\Controllers\FrontendPreviewController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\KesiswaanPreviewController;
@@ -54,7 +55,12 @@ Route::prefix('bk')->name('bk.')->group(function () {
     Route::view('/statistics', 'bk.statistics')->name('statistics');
     Route::view('/archive', 'bk.archive')->name('archive');
     Route::view('/access-log', 'bk.access-log')->name('access-log');
-    Route::view('/profile', 'bk.profile')->name('profile');
+    Route::get('/profile', [BkProfileController::class, 'show'])->name('profile');
+    Route::post('/profile/update', [BkProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/complete', [BkProfileController::class, 'completeProfile'])->name('profile.complete');
+    Route::post('/profile/period', [BkProfileController::class, 'updatePeriod'])->name('profile.period');
+    Route::post('/profile/password', [BkProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/logout-all', [BkProfileController::class, 'logoutAllDevices'])->name('profile.logout-all');
     Route::view('/reports/preview', 'bk.report')->name('report');
 });
 

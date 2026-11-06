@@ -15,6 +15,7 @@ use Illuminate\Notifications\Notifiable;
     'password',
     'role',
     'school_name',
+    'avatar',
     'google_id',
     'two_factor_secret',
     'two_factor_recovery_codes',

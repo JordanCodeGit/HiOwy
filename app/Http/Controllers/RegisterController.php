@@ -32,9 +32,7 @@ class RegisterController extends Controller
     public function register(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
             'email'       => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'school_name' => ['required', 'string', 'max:255'],
             'password'    => [
                 'required',
                 'confirmed',
@@ -42,11 +40,9 @@ class RegisterController extends Controller
             ],
             'terms'       => ['required', 'accepted'],
         ], [
-            'name.required'        => 'Nama lengkap wajib diisi.',
             'email.required'       => 'Email wajib diisi.',
             'email.email'          => 'Format email tidak valid.',
             'email.unique'         => 'Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.',
-            'school_name.required' => 'Asal sekolah wajib diisi.',
             'password.required'    => 'Kata sandi wajib diisi.',
             'password.confirmed'   => 'Konfirmasi kata sandi tidak cocok.',
             'password.min'         => 'Kata sandi minimal 8 karakter.',
@@ -57,10 +53,12 @@ class RegisterController extends Controller
         $secret = $this->totp->generateSecret();
         $recoveryCodes = $this->totp->generateRecoveryCodes();
 
+        $defaultName = explode('@', $data['email'])[0];
+
         $user = User::create([
-            'name'                      => $data['name'],
+            'name'                      => $defaultName,
             'email'                     => $data['email'],
-            'school_name'               => $data['school_name'],
+            'school_name'               => null,
             'password'                  => Hash::make($data['password']),
             'role'                      => 'bk',
             'two_factor_secret'         => $secret,
