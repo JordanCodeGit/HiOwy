@@ -21,13 +21,19 @@ class AuthController extends Controller
     /**
      * Show login form.
      */
-    public function showLogin(): View|RedirectResponse
+    public function showLogin(Request $request): View|RedirectResponse
     {
         if (Auth::check()) {
             return $this->redirectBasedOnRole(Auth::user());
         }
 
-        return view('auth.login');
+        $rememberedEmail = $request->cookie('hiowy_remember_email');
+        $isRemembered = $request->hasCookie('hiowy_remember_email');
+
+        return view('auth.login', [
+            'rememberedEmail' => $rememberedEmail,
+            'isRemembered'    => $isRemembered,
+        ]);
     }
 
     /**
@@ -223,7 +229,15 @@ class AuthController extends Controller
         Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        return $this->redirectBasedOnRole($user);
+        $response = $this->redirectBasedOnRole($user);
+
+        if ($remember) {
+            $response->withCookie(cookie()->make('hiowy_remember_email', $user->email, 525600, null, null, false, false));
+        } else {
+            $response->withoutCookie('hiowy_remember_email');
+        }
+
+        return $response;
     }
 
     /**

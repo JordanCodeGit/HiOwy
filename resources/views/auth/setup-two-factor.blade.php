@@ -41,7 +41,7 @@
 
                         <!-- Header Banner & Instructions -->
                         <div class="source-space-y-2">
-                            <div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">Tahap Konfigurasi</span><span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-2.5 py-1 rounded-full"><span class="material-symbols-outlined text-sm">timer</span> Sesi: 30 Menit</span></div>
+                            <div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">Tahap Konfigurasi</span><span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-2.5 py-1 rounded-full"><span class="material-symbols-outlined text-sm">timer</span> Sesi: 1 Jam</span></div>
                             <h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Aktifkan Verifikasi 2 Langkah</h2>
                             <p class="font-body-md text-body-md text-on-surface-variant">Ikuti langkah mudah ini untuk amankan akunmu.</p></div>
 
@@ -114,7 +114,7 @@
                                     <span>Bantuan IT</span>
                                 </button>
                             </div>
-                            <p class="font-body-sm text-body-sm text-on-surface-variant text-center pt-1">Sesi otomatis selesai jika 30 menit tidak aktif.</p>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant text-center pt-1">Sesi otomatis selesai jika 1 jam tidak aktif.</p>
                         </div>
                     </form>
                     <!-- Footer Help Line -->

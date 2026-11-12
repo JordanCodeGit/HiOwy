@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BkLearnController;
 use App\Http\Controllers\BkProfileController;
 use App\Http\Controllers\FrontendPreviewController;
 use App\Http\Controllers\GoogleAuthController;
@@ -51,7 +52,11 @@ Route::view('/onboarding/school', 'auth.school')->name('onboarding.school');
 Route::prefix('bk')->name('bk.')->group(function () {
     Route::view('/', 'bk.dashboard')->name('dashboard');
     Route::view('/manage', 'bk.manage')->name('manage');
-    Route::view('/learn', 'bk.learn')->name('learn');
+    Route::get('/learn', [BkLearnController::class, 'index'])->name('learn');
+    Route::post('/learn', [BkLearnController::class, 'store'])->name('learn.store');
+    Route::put('/learn/{id}', [BkLearnController::class, 'update'])->name('learn.update');
+    Route::post('/learn/{id}/toggle', [BkLearnController::class, 'toggleVisibility'])->name('learn.toggle');
+    Route::delete('/learn/{id}', [BkLearnController::class, 'destroy'])->name('learn.destroy');
     Route::view('/statistics', 'bk.statistics')->name('statistics');
     Route::view('/archive', 'bk.archive')->name('archive');
     Route::view('/access-log', 'bk.access-log')->name('access-log');
@@ -79,7 +84,7 @@ Route::prefix('kesiswaan')->name('kesiswaan.')->controller(KesiswaanPreviewContr
     Route::get('/profile', 'profile')->name('profile');
 });
 
-Route::get('/s/{code}/pelajari', [KesiswaanPreviewController::class, 'publicLearn'])->name('public.learn');
+Route::get('/s/{code}/pelajari', [BkLearnController::class, 'showPublic'])->name('public.learn');
 
 // Wali Kelas Portal
 Route::prefix('wali-kelas')->name('walas.')->controller(WaliKelasPreviewController::class)->group(function () {

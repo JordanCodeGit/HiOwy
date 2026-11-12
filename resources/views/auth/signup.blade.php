@@ -28,7 +28,7 @@
                         <!-- 3 Feature Chips -->
                         <div class="grid grid-cols-2 gap-3 w-full max-w-sm">
                             <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container-highest/10 backdrop-blur-xs text-center"><span class="material-symbols-outlined text-secondary-container mb-1 text-[22px]">verified_user</span><span class="font-label-sm text-label-sm text-surface-dim leading-tight">Verifikasi 2 Langkah</span></div>
-                            <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container-highest/10 backdrop-blur-xs text-center"><span class="material-symbols-outlined text-tertiary-fixed mb-1 text-[22px]">timer</span><span class="font-label-sm text-label-sm text-surface-dim leading-tight">Sesi 30 Menit</span></div>
+                            <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-surface-container-highest/10 backdrop-blur-xs text-center"><span class="material-symbols-outlined text-tertiary-fixed mb-1 text-[22px]">timer</span><span class="font-label-sm text-label-sm text-surface-dim leading-tight">Sesi 1 Jam</span></div>
                     </div></div>
                     <!-- Minimal Bottom System Footer -->
                     <x-auth.version />

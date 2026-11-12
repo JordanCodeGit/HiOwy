@@ -312,44 +312,128 @@ export function registerBk(Alpine, navigateTo) {
         content: '',
         visible: true,
         audience: 'siswa',
-        initial: null,
+        isEditing: false,
+        editingId: null,
+        editingCode: '',
+        updateUrl: '',
+        filterAudience: 'all',
+        filterStatus: 'all',
+        sortBy: 'newest',
+        searchQuery: '',
         previewTitle: '',
         previewContent: '',
+        previewCode: '',
+        previewAudience: '',
+        previewAuthor: '',
+        previewDate: '',
+        toastMessage: '',
+        showToast: false,
+
         init() {
-            this.title = document.getElementById('post-title').value;
-            this.content = document.getElementById('post-content').value;
-            this.initial = { title: this.title, content: this.content };
+            const titleEl = document.getElementById('post-title');
+            const contentEl = document.getElementById('post-content');
+            if (titleEl && !this.title) this.title = titleEl.value;
+            if (contentEl && !this.content) this.content = contentEl.value;
         },
+
         newAnnouncement() {
+            this.isEditing = false;
+            this.editingId = null;
+            this.editingCode = '';
+            this.updateUrl = '';
             this.title = '';
             this.content = '';
             this.visible = true;
             this.audience = 'siswa';
-            document.getElementById('post-title').focus();
+            const titleEl = document.getElementById('post-title');
+            if (titleEl) {
+                titleEl.focus();
+                titleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         },
+
         resetAnnouncement() {
-            this.title = this.initial.title;
-            this.content = this.initial.content;
-            this.visible = true;
-            this.audience = 'siswa';
+            this.newAnnouncement();
         },
-        saveAnnouncement() {
-            if (document.getElementById('announcement-form').reportValidity()) this.unavailable('Penyimpanan pengumuman');
+
+        editItem(item) {
+            this.isEditing = true;
+            this.editingId = item.id;
+            this.editingCode = item.code;
+            this.updateUrl = item.update_url;
+            this.title = item.title;
+            this.content = item.content;
+            this.visible = Boolean(item.is_visible);
+            this.audience = item.audience;
+            const titleEl = document.getElementById('post-title');
+            if (titleEl) {
+                titleEl.focus();
+                titleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         },
-        editAnnouncement(card) {
-            if (!card) return;
-            this.title = card.querySelector('h3').textContent.trim();
-            this.content = card.querySelector('p').textContent.trim();
-            this.visible = card.querySelector('input[type="checkbox"]').checked;
-            this.audience = card.textContent.includes('Umum &') ? 'umum' : 'siswa';
-            document.getElementById('post-title').focus();
-        },
-        previewAnnouncement(card) {
-            if (!card) return;
-            this.previewTitle = card.querySelector('h3').textContent.trim();
-            this.previewContent = card.querySelector('p').textContent.trim();
+
+        previewItem(item) {
+            this.previewTitle = item.title;
+            this.previewContent = item.content;
+            this.previewCode = item.code;
+            this.previewAudience = item.audience_label;
+            this.previewAuthor = item.author_name;
+            this.previewDate = item.date;
             this.openModal('text-preview');
         },
+
+        async toggleItemVisibility(item, event) {
+            const checkbox = event.target;
+            const originalState = !checkbox.checked;
+            try {
+                const response = await fetch(item.toggle_url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({}),
+                });
+                const data = await response.json();
+                if (data.success) {
+                    item.is_visible = data.is_visible;
+                    this.notify(data.message);
+                } else {
+                    checkbox.checked = originalState;
+                    alert('Gagal memperbarui status tayang materi.');
+                }
+            } catch (err) {
+                checkbox.checked = originalState;
+                console.error(err);
+            }
+        },
+
+        notify(msg) {
+            this.toastMessage = msg;
+            this.showToast = true;
+            setTimeout(() => { this.showToast = false; }, 3500);
+        },
+
+        matchesFilter(item) {
+            if (this.filterAudience !== 'all' && item.audience !== this.filterAudience) {
+                return false;
+            }
+            if (this.filterStatus === 'active' && !item.is_visible) {
+                return false;
+            }
+            if (this.filterStatus === 'hidden' && item.is_visible) {
+                return false;
+            }
+            if (this.searchQuery.trim()) {
+                const q = this.searchQuery.toLowerCase();
+                const titleMatch = (item.title || '').toLowerCase().includes(q);
+                const contentMatch = (item.content || '').toLowerCase().includes(q);
+                const codeMatch = (item.code || '').toLowerCase().includes(q);
+                if (!titleMatch && !contentMatch && !codeMatch) return false;
+            }
+            return true;
+        }
     }));
 
     Alpine.data('bkProfile', () => ({

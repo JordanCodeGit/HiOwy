@@ -27,7 +27,7 @@
                                 <span class="material-symbols-outlined text-body-md text-secondary-fixed">verified_user</span> 2FA Wajib
                             </span>
                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-highest/15 text-surface-bright font-label-sm text-label-sm">
-                                <span class="material-symbols-outlined text-body-md text-secondary-fixed">timer</span> Sesi 30 Menit
+                                <span class="material-symbols-outlined text-body-md text-secondary-fixed">timer</span> Sesi 1 Jam
                             </span>
                         </div>
                     </div>
@@ -143,7 +143,7 @@
 
                     <!-- Session Reminder Footer -->
                     <div class="w-full text-center pt-8 text-on-surface-variant font-body-sm text-body-sm">
-                        Sesi keluar otomatis setelah 30 menit tidak aktif
+                        Sesi keluar otomatis setelah 1 jam tidak aktif
                     </div>
                 </div>
             </div>

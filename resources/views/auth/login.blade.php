@@ -35,7 +35,7 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="material-symbols-outlined text-title-md text-primary-fixed-dim">timer</span>
-                                    <span>Sesi 30 Menit</span>
+                                    <span>Sesi 1 Jam</span>
                                 </div>
                             </div>
                         </div>
@@ -73,7 +73,26 @@
                         @endif
 
                         <!-- Form Elements -->
-                        <form class="flex flex-col gap-5 mt-1" method="POST" action="{{ route('login.attempt') }}">
+                        <form class="flex flex-col gap-5 mt-1" method="POST" action="{{ route('login.attempt') }}" x-data="{
+                            email: @js(old('email', $rememberedEmail ?? '')),
+                            remember: {{ old('remember', ($isRemembered ?? true) ? 'true' : 'false') }},
+                            init() {
+                                if (!this.email) {
+                                    const savedEmail = localStorage.getItem('hiowy_remember_email');
+                                    if (savedEmail) {
+                                        this.email = savedEmail;
+                                        this.remember = true;
+                                    }
+                                }
+                            },
+                            onSubmit() {
+                                if (this.remember && this.email) {
+                                    localStorage.setItem('hiowy_remember_email', this.email);
+                                } else if (!this.remember) {
+                                    localStorage.removeItem('hiowy_remember_email');
+                                }
+                            }
+                        }" @submit="onSubmit">
                             @csrf
                             <!-- Email Input -->
                             <div class="flex flex-col gap-1.5">
@@ -82,7 +101,7 @@
                                 </label>
                                 <div class="relative flex items-center">
                                     <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-md pointer-events-none">alternate_email</span>
-                                    <input class="w-full pl-11 pr-4 py-3 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-xl outline-hidden shadow-xs focus:shadow-md transition-all placeholder:text-outline-variant border border-outline-variant/30 focus:border-secondary" id="counselor-email" placeholder="konselor.sarah@nusantara.sch.id" required="" type="email" name="email" value="{{ old('email', 'konselor.sarah@nusantara.sch.id') }}" autocomplete="username">
+                                    <input class="w-full pl-11 pr-4 py-3 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-xl outline-hidden shadow-xs focus:shadow-md transition-all placeholder:text-outline-variant border border-outline-variant/30 focus:border-secondary" id="counselor-email" placeholder="konselor.sarah@nusantara.sch.id" required="" type="email" name="email" x-model="email" autocomplete="username">
                                 </div>
                             </div>
 
@@ -103,8 +122,8 @@
 
                             <!-- Remember me -->
                             <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
-                                <label class="flex items-center gap-2.5 cursor-pointer select-none">
-                                    <input class="w-4 h-4 rounded-sm text-secondary focus:ring-0 cursor-pointer" type="checkbox" name="remember" value="1" {{ old('remember', true) ? 'checked' : '' }}>
+                                <label class="flex items-center gap-2.5 cursor-pointer select-none" for="remember-me">
+                                    <input class="w-4 h-4 rounded-sm text-secondary focus:ring-0 cursor-pointer" type="checkbox" name="remember" id="remember-me" value="1" x-model="remember">
                                     <span class="font-body-sm text-body-sm text-on-surface">Ingat saya di perangkat ini</span>
                                 </label>
                             </div>
