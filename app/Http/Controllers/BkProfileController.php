@@ -29,7 +29,7 @@ class BkProfileController extends Controller
 
         $roleLabel = match ($user->role ?? 'bk') {
             'kesiswaan' => 'Kesiswaan',
-            'wali_kelas', 'walas' => 'Wali Kelas',
+            'wali_kelas', 'walas', 'walikelas' => 'Wali Kelas',
             default => 'Guru BK / Konselor Inti',
         };
 

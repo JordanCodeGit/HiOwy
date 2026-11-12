@@ -245,11 +245,29 @@ class AuthController extends Controller
      */
     private function redirectBasedOnRole(User $user): RedirectResponse
     {
-        return match ($user->role) {
-            'kesiswaan' => redirect()->intended(route('kesiswaan.dashboard')),
-            'wali_kelas', 'walas' => redirect()->intended(route('walas.dashboard')),
-            default => redirect()->intended(route('bk.dashboard')),
+        $targetRoute = match ($user->role) {
+            'kesiswaan' => route('kesiswaan.dashboard'),
+            'wali_kelas', 'walas', 'walikelas' => route('walas.dashboard'),
+            default => route('bk.dashboard'),
         };
+
+        $intended = session()->get('url.intended');
+        if ($intended) {
+            if ($user->role === 'kesiswaan' && !str_contains($intended, '/kesiswaan')) {
+                session()->forget('url.intended');
+                return redirect($targetRoute);
+            }
+            if (in_array($user->role, ['wali_kelas', 'walas', 'walikelas'], true) && !str_contains($intended, '/wali-kelas')) {
+                session()->forget('url.intended');
+                return redirect($targetRoute);
+            }
+            if ($user->role === 'bk' && (str_contains($intended, '/wali-kelas') || str_contains($intended, '/kesiswaan'))) {
+                session()->forget('url.intended');
+                return redirect($targetRoute);
+            }
+        }
+
+        return redirect()->intended($targetRoute);
     }
 
     /**

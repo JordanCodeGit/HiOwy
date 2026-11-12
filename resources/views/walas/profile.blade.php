@@ -20,14 +20,35 @@
 <div class="flex flex-wrap items-center gap-space-sm self-start md:self-auto">
 <div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-high text-on-tertiary-container shadow-xs">
 <span class="material-symbols-outlined text-[16px] text-on-tertiary-container" style="font-variation-settings: 'FILL' 1;">verified</span>
-<span class="font-label-md text-label-md font-bold">PRATINJAU AKUN</span>
+<span class="font-label-md text-label-md font-bold">AKUN DINAS AKTIF</span>
 </div>
 <div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-low text-secondary font-label-md text-label-md shadow-xs">
 <span class="material-symbols-outlined text-[16px]">domain_verification</span>
-<span class="">Unit Terisolasi: <strong>Kelas 8B</strong></span>
+<span class="">Unit Terisolasi: <strong>Kelas {{ $className ?? '7B' }}</strong></span>
 </div>
 </div>
 </div>
+
+@if (session('status'))
+    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3">
+        <span class="material-symbols-outlined text-emerald-600 text-xl">check_circle</span>
+        <span class="font-medium">{{ session('status') }}</span>
+    </div>
+@endif
+
+@if ($errors->any())
+    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-start gap-3">
+        <span class="material-symbols-outlined text-red-600 text-xl shrink-0 mt-0.5">error</span>
+        <div class="flex flex-col gap-1">
+            <span class="font-bold">Terjadi kendala saat menyimpan:</span>
+            <ul class="list-disc list-inside text-xs">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+@endif
 
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
 
@@ -42,8 +63,8 @@
 </span>
 </div>
 <div class="flex flex-col min-w-0">
-<span class="font-title-lg text-title-lg text-on-surface truncate">Ibu Ratna Dewi, S.Pd.</span>
-<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Wali Kelas 8B</span>
+<span class="font-title-lg text-title-lg text-on-surface truncate">{{ Auth::user()?->name ?? 'Ibu Ratna Dewi, S.Pd.' }}</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Wali Kelas {{ $className ?? '8B' }}</span>
 <span class="font-body-sm text-body-sm text-on-surface-variant">ID: WLK-8B-2024</span>
 </div>
 </div>
@@ -56,13 +77,13 @@
 <span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container-low px-space-sm py-0.5 rounded-full">Dinas Aktif</span>
 </div>
 
-<form method="POST" action="{{ route('frontend.unavailable', ['page' => 'walas']) }}" @submit.prevent="submitUnavailable($event)" class="flex flex-col gap-space-md">
+<form method="POST" action="{{ route('walas.profile.update') }}" class="flex flex-col gap-space-md">
 @csrf
 
 <div class="flex flex-col gap-space-xs">
 <label class="font-label-md text-label-md text-on-surface" for="fullName">Nama Lengkap &amp; Gelar</label>
 <div class="relative flex items-center">
-<input class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md px-space-md py-2.5 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-secondary/40 transition" id="fullName" required maxlength="120" type="text" value="Ibu Ratna Dewi, S.Pd.">
+<input class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md px-space-md py-2.5 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-secondary/40 transition" id="fullName" name="name" required maxlength="120" type="text" value="{{ Auth::user()?->name ?? 'Ibu Ratna Dewi, S.Pd.' }}">
 <span class="material-symbols-outlined text-outline text-[18px] absolute right-3 pointer-events-none">edit</span>
 </div>
 </div>
@@ -76,7 +97,7 @@
 </div>
 <div class="flex items-center bg-surface-container-low px-space-md py-2.5 rounded-lg text-on-surface-variant font-body-md text-body-md shadow-xs">
 <span class="material-symbols-outlined text-[18px] text-outline mr-space-xs">mail</span>
-<span class="truncate font-medium text-on-surface">ratna.dewi@sman1teladan.sch.id</span>
+<span class="truncate font-medium text-on-surface">{{ Auth::user()?->email ?? 'ratna.dewi@sman1teladan.sch.id' }}</span>
 </div>
 
 </div>
@@ -90,7 +111,7 @@
 </div>
 <div class="flex flex-col">
 <span class="font-title-md text-title-md text-on-surface">Wali Kelas</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Pendampingan Siswa Kelas 8B</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Pendampingan Siswa Kelas {{ $className ?? '7B' }}</span>
 </div>
 </div>
 <span class="font-label-sm text-label-sm bg-surface-container-highest px-space-sm py-1 rounded-full text-on-secondary-container font-semibold">Aktif</span>
@@ -105,8 +126,8 @@
 <span class="material-symbols-outlined text-[20px]">apartment</span>
 </div>
 <div class="flex flex-col">
-<span class="font-title-md text-title-md text-on-surface">SMA Negeri 1 Teladan</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">NPSN: 20107281 • DKI Jakarta</span>
+<span class="font-title-md text-title-md text-on-surface">{{ Auth::user()?->school_name ?? ($schoolName ?? 'SMP Telkom Purwokerto') }}</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Sistem Terpadu Antiperundungan HiOwy!</span>
 </div>
 </div>
 <span class="material-symbols-outlined text-[18px] text-outline">verified</span>
@@ -114,7 +135,7 @@
 </div>
 
 <div class="pt-space-sm">
-<button class="w-full bg-primary-container text-on-primary hover:bg-on-primary-fixed transition-colors font-label-lg text-label-lg py-3 px-space-lg rounded-lg shadow-xs flex items-center justify-center gap-space-sm" type="submit">
+<button class="w-full bg-primary-container text-on-primary hover:bg-on-primary-fixed transition-colors font-label-lg text-label-lg py-3 px-space-lg rounded-lg shadow-xs flex items-center justify-center gap-space-sm cursor-pointer" type="submit">
 <span class="material-symbols-outlined text-[18px]">check_circle</span>
 <span class="">Simpan Perubahan Nama</span>
 </button>
@@ -140,14 +161,14 @@
 <span class="material-symbols-outlined text-[14px]">shield</span> Terlindungi
             </span>
 </div>
-<form method="POST" action="{{ route('frontend.unavailable', ['page' => 'walas']) }}" @submit.prevent="submitWalasPassword($event)" class="flex flex-col gap-space-md">
+<form method="POST" action="{{ route('walas.profile.password') }}" class="flex flex-col gap-space-md">
 @csrf
 
 <div class="flex flex-col gap-space-xs">
 <label class="font-label-md text-label-md text-on-surface" for="oldPassword">Kata Sandi Saat Ini</label>
 <div class="relative flex items-center">
-<input class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md px-space-md py-2.5 pr-10 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-secondary/40 transition placeholder:text-outline" id="oldPassword" required autocomplete="current-password" placeholder="Masukkan kata sandi lama" type="password">
-<button aria-label="Tampilkan sandi" class="absolute right-3 text-outline hover:text-on-surface transition-colors p-1" @click="togglePassword($el)" :aria-pressed="$el.parentElement.querySelector('input').type === 'text'" type="button">
+<input class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md px-space-md py-2.5 pr-10 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-secondary/40 transition placeholder:text-outline" id="oldPassword" name="current_password" required autocomplete="current-password" placeholder="Masukkan kata sandi lama" type="password">
+<button aria-label="Tampilkan sandi" class="absolute right-3 text-outline hover:text-on-surface transition-colors p-1 cursor-pointer" @click="togglePassword($el)" :aria-pressed="$el.parentElement.querySelector('input').type === 'text'" type="button">
 <span class="material-symbols-outlined text-[20px]" id="toggleOldIcon">visibility_off</span>
 </button>
 </div>
@@ -157,8 +178,8 @@
 <div class="flex flex-col gap-space-xs">
 <label class="font-label-md text-label-md text-on-surface" for="newPassword">Kata Sandi Baru</label>
 <div class="relative flex items-center">
-<input class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md px-space-md py-2.5 pr-10 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-secondary/40 transition placeholder:text-outline" id="newPassword" @input="document.getElementById('confirmPassword').setCustomValidity('')" required minlength="8" autocomplete="new-password" pattern="(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}" placeholder="Minimal 8 karakter" type="password">
-<button aria-label="Tampilkan sandi" class="absolute right-3 text-outline hover:text-on-surface transition-colors p-1" @click="togglePassword($el)" :aria-pressed="$el.parentElement.querySelector('input').type === 'text'" type="button">
+<input class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md px-space-md py-2.5 pr-10 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-secondary/40 transition placeholder:text-outline" id="newPassword" name="password" @input="document.getElementById('confirmPassword').setCustomValidity('')" required minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter" type="password">
+<button aria-label="Tampilkan sandi" class="absolute right-3 text-outline hover:text-on-surface transition-colors p-1 cursor-pointer" @click="togglePassword($el)" :aria-pressed="$el.parentElement.querySelector('input').type === 'text'" type="button">
 <span class="material-symbols-outlined text-[20px]" id="toggleNewIcon">visibility_off</span>
 </button>
 </div>
@@ -166,8 +187,8 @@
 <div class="flex flex-col gap-space-xs">
 <label class="font-label-md text-label-md text-on-surface" for="confirmPassword">Konfirmasi Kata Sandi Baru</label>
 <div class="relative flex items-center">
-<input class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md px-space-md py-2.5 pr-10 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-secondary/40 transition placeholder:text-outline" id="confirmPassword" required autocomplete="new-password" @input="$el.setCustomValidity('')" placeholder="Ulangi kata sandi baru" type="password">
-<button aria-label="Tampilkan sandi" class="absolute right-3 text-outline hover:text-on-surface transition-colors p-1" @click="togglePassword($el)" :aria-pressed="$el.parentElement.querySelector('input').type === 'text'" type="button">
+<input class="w-full bg-surface-container-lowest text-on-surface font-body-md text-body-md px-space-md py-2.5 pr-10 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-secondary/40 transition placeholder:text-outline" id="confirmPassword" name="password_confirmation" required autocomplete="new-password" @input="$el.setCustomValidity('')" placeholder="Ulangi kata sandi baru" type="password">
+<button aria-label="Tampilkan sandi" class="absolute right-3 text-outline hover:text-on-surface transition-colors p-1 cursor-pointer" @click="togglePassword($el)" :aria-pressed="$el.parentElement.querySelector('input').type === 'text'" type="button">
 <span class="material-symbols-outlined text-[20px]" id="toggleConfirmIcon">visibility_off</span>
 </button>
 </div>
@@ -177,13 +198,13 @@
 <div class="bg-surface-container-low/70 p-space-sm rounded-lg flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
 <span class="flex items-center gap-1.5">
 <span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span>
-                Kombinasi minimal 8 karakter (huruf kapital, angka &amp; simbol)
+                Kombinasi minimal 8 karakter aman
               </span>
 
 </div>
 
 <div class="flex justify-end pt-space-xs">
-<button class="bg-primary-container text-on-primary hover:bg-on-primary-fixed transition-colors font-label-lg text-label-lg py-2.5 px-space-lg rounded-lg shadow-xs flex items-center gap-space-sm" type="submit">
+<button class="bg-primary-container text-on-primary hover:bg-on-primary-fixed transition-colors font-label-lg text-label-lg py-2.5 px-space-lg rounded-lg shadow-xs flex items-center gap-space-sm cursor-pointer" type="submit">
 <span class="material-symbols-outlined text-[18px]">key</span>
 <span class="">Perbarui Kata Sandi</span>
 </button>

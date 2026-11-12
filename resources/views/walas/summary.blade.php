@@ -1,5 +1,38 @@
 <x-layouts.bk title="Ringkasan Pendampingan Wali Kelas" page="summary" portal="walas" :report-count="$unreadCount" :notifications="$notifications">
-<main  class="bg-background min-h-screen"><div class="flex flex-col w-full">
+<main x-data="{
+    status: '{{ $summary['status'] }}',
+    readAt: '{{ $summary['read_at'] ?? '' }}',
+    loading: false,
+    async toggleStatus() {
+        if (this.loading) return;
+        this.loading = true;
+        try {
+            const res = await fetch('{{ route('walas.summary.toggle-read', $summary['id']) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+            const data = await res.json();
+            if (data.success) {
+                this.status = data.status;
+                this.readAt = data.read_at || '';
+                window.dispatchEvent(new CustomEvent('auth-notice', {
+                    detail: {
+                        title: 'Status Diperbarui',
+                        message: data.message
+                    }
+                }));
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            this.loading = false;
+        }
+    }
+}" class="bg-background min-h-screen"><div class="flex flex-col w-full">
 <div class="max-w-5xl mx-auto w-full px-4 lg:px-gutter-lg py-space-xl flex flex-col gap-space-lg">
 
 <div class="flex flex-wrap items-center justify-between gap-space-md">
@@ -9,10 +42,11 @@
 </a>
 <div class="flex items-center gap-space-sm">
 
-<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
-<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-          {{ $summary['status'] === 'read' ? 'Sudah Dibaca' : 'Belum Dibaca' }}
-        </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-label-sm text-label-sm transition-all"
+      :class="status === 'read' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-blue-50 text-blue-800 border border-blue-200'">
+    <span class="w-1.5 h-1.5 rounded-full" :class="status === 'read' ? 'bg-emerald-600' : 'bg-blue-600 animate-pulse'"></span>
+    <span x-text="status === 'read' ? 'Sudah Dibaca' : 'Belum Dibaca'"></span>
+</span>
 </div>
 </div>
 
@@ -29,7 +63,7 @@
 <span class="material-symbols-outlined text-[18px] text-on-surface-variant">schedule</span>
 <div class="flex flex-col">
 <span class="font-label-sm text-label-sm text-on-surface-variant">Status Akses</span>
-<span class="font-label-md text-label-md text-on-surface">{{ $summary['read_at'] ? 'Dibaca pada: '.$summary['read_at'] : 'Belum ditandai dibaca' }}</span>
+<span class="font-label-md text-label-md text-on-surface" x-text="status === 'read' ? (readAt ? 'Dibaca: ' + readAt : 'Sudah Ditandai Dibaca') : 'Belum ditandai dibaca'">{{ $summary['read_at'] ? 'Dibaca pada: '.$summary['read_at'] : 'Belum ditandai dibaca' }}</span>
 </div>
 </div>
 </div>
@@ -54,7 +88,7 @@
 </div>
 <div class="flex flex-col min-w-0">
 <span class="font-label-sm text-label-sm text-on-surface-variant">Target Pendampingan</span>
-<span class="font-title-md text-title-md text-on-surface">Kelas 8B</span>
+<span class="font-title-md text-title-md text-on-surface">Kelas {{ $className ?? '7B' }}</span>
 <span class="font-label-sm text-label-sm text-on-surface-variant">Semester Genap 2024/2025</span>
 </div>
 </div>
@@ -129,12 +163,12 @@
 <div class="p-space-lg bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-md">
 <div class="flex items-center flex-wrap gap-space-sm w-full sm:w-auto">
 
-<button type="button" @click="unavailable('Perubahan status baca ringkasan')" class="inline-flex items-center justify-center gap-space-xs px-space-lg py-2.5 rounded-xl bg-on-tertiary-container text-on-tertiary font-label-lg text-label-lg shadow-xs hover:opacity-95 transition-all"><span class="material-symbols-outlined text-[18px]">{{ $summary['status'] === 'read' ? 'check_circle' : 'mark_email_read' }}</span><span>{{ $summary['status'] === 'read' ? 'Sudah Ditandai Dibaca' : 'Tandai Sudah Dibaca' }}</span></button>
+<button type="button" @click="toggleStatus()" :disabled="loading" class="inline-flex items-center justify-center gap-space-xs px-space-lg py-2.5 rounded-xl font-label-lg text-label-lg shadow-xs hover:opacity-95 transition-all cursor-pointer" :class="status === 'read' ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-on-tertiary-container text-on-tertiary'"><span class="material-symbols-outlined text-[18px]" x-text="status === 'read' ? 'check_circle' : 'mark_email_read'"></span><span x-text="status === 'read' ? 'Tandai Belum Dibaca' : 'Tandai Sudah Dibaca'"></span></button>
 
-<button class="inline-flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-lg text-label-lg transition-colors shadow-xs" id="downloadPdfBtn" @click="unavailable('Pembuatan PDF terenkripsi')" type="button">
+<a href="{{ route('walas.summary.pdf', $summary['id']) }}" target="_blank" class="inline-flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-xl bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-lg text-label-lg transition-colors shadow-xs" id="downloadPdfBtn">
 <span class="material-symbols-outlined text-[18px]">download_for_offline</span>
 <span class="">Simpan PDF Terenkripsi</span>
-</button>
+</a>
 </div>
 <a class="inline-flex items-center gap-space-xs text-on-surface-variant hover:text-on-surface font-label-md text-label-md py-space-xs px-space-sm rounded-lg hover:bg-surface-container transition-colors" href="{{ route('walas.dashboard') }}">
 <span class="material-symbols-outlined text-[18px]">list_alt</span>

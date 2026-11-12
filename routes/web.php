@@ -50,7 +50,7 @@ Route::view('/onboarding/role', 'auth.role')->name('onboarding.role');
 Route::view('/onboarding/school', 'auth.school')->name('onboarding.school');
 
 // BK Portal
-Route::prefix('bk')->name('bk.')->group(function () {
+Route::prefix('bk')->name('bk.')->middleware('role:bk')->group(function () {
     Route::view('/', 'bk.dashboard')->name('dashboard');
     Route::get('/manage', [BkManageController::class, 'index'])->name('manage');
     Route::post('/manage/categories', [BkManageController::class, 'storeCategory'])->name('manage.categories.store');
@@ -95,7 +95,7 @@ Route::post('/frontend/{page}', FrontendPreviewController::class)
     ->name('frontend.unavailable');
 
 // Kesiswaan Portal
-Route::prefix('kesiswaan')->name('kesiswaan.')->controller(KesiswaanPreviewController::class)->group(function () {
+Route::prefix('kesiswaan')->name('kesiswaan.')->middleware('role:kesiswaan')->controller(KesiswaanPreviewController::class)->group(function () {
     Route::get('/', 'dashboard')->name('dashboard');
     Route::get('/reports/{report}', 'report')->whereNumber('report')->name('report');
     Route::get('/archive', 'archive')->name('archive');
@@ -111,8 +111,15 @@ Route::get('/s/{code}/qr', [BkManageController::class, 'handleQrScan']);
 Route::get('/s/{code}/lapor', [BkManageController::class, 'showPublicReport']);
 
 // Wali Kelas Portal
-Route::prefix('wali-kelas')->name('walas.')->controller(WaliKelasPreviewController::class)->group(function () {
+Route::prefix('wali-kelas')->name('walas.')->middleware('role:walas')->controller(WaliKelasPreviewController::class)->group(function () {
     Route::get('/', 'dashboard')->name('dashboard');
-    Route::get('/profile', 'profile')->name('profile');
     Route::get('/ringkasan/{summary}', 'summary')->whereNumber('summary')->name('summary');
+    Route::post('/ringkasan/{summary}/toggle-read', 'toggleRead')->whereNumber('summary')->name('summary.toggle-read');
+    Route::post('/ringkasan/mark-all-read', 'markAllRead')->name('summary.mark-all-read');
+    Route::get('/ringkasan/{summary}/pdf', 'downloadPdf')->whereNumber('summary')->name('summary.pdf');
+    Route::get('/poster', 'downloadPoster')->name('poster');
+
+    Route::get('/profile', 'profile')->name('profile');
+    Route::post('/profile/update', 'updateProfile')->name('profile.update');
+    Route::post('/profile/password', 'updatePassword')->name('profile.password');
 });

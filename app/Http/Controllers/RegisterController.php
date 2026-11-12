@@ -54,13 +54,44 @@ class RegisterController extends Controller
         $recoveryCodes = $this->totp->generateRecoveryCodes();
 
         $defaultName = explode('@', $data['email'])[0];
+        $role = 'bk';
+        $schoolName = null;
+
+        // Cek apakah email terdaftar sebagai staf yang diundang
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('staff_members')) {
+                $staff = \App\Models\StaffMember::where('email', strtolower($data['email']))->first();
+                if ($staff) {
+                    $role = $staff->role;
+                    $defaultName = $staff->name ?: $defaultName;
+                    $staff->status = 'aktif';
+                    $staff->save();
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        if ($role === 'bk') {
+            $file = storage_path('framework/staff_members.json');
+            if (file_exists($file)) {
+                $existing = json_decode(file_get_contents($file), true) ?: [];
+                foreach ($existing as &$item) {
+                    if (strtolower($item['email']) === strtolower($data['email'])) {
+                        $role = $item['role'] ?? 'bk';
+                        $defaultName = $item['name'] ?: $defaultName;
+                        $item['status'] = 'aktif';
+                        break;
+                    }
+                }
+                @file_put_contents($file, json_encode($existing, JSON_PRETTY_PRINT));
+            }
+        }
 
         $user = User::create([
             'name'                      => $defaultName,
             'email'                     => $data['email'],
-            'school_name'               => null,
+            'school_name'               => $schoolName,
             'password'                  => Hash::make($data['password']),
-            'role'                      => 'bk',
+            'role'                      => $role,
             'two_factor_secret'         => $secret,
             'two_factor_recovery_codes' => json_encode($recoveryCodes),
         ]);

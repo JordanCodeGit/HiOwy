@@ -5,9 +5,14 @@
     $userAvatar = Auth::user()?->avatar;
     $avatarExists = $userAvatar && file_exists(public_path($userAvatar));
     $profileImage = $avatarExists ? $userAvatar : ($portal === 'walas' ? 'images/walas/ratna.jpg' : 'images/bk/counselor.jpg');
+    $walasStaff = Auth::check() && in_array(Auth::user()->role, ['walas', 'wali_kelas', 'walikelas'], true)
+        ? rescue(fn() => \Illuminate\Support\Facades\DB::table('staff_members')->where('email', Auth::user()->email)->first(), null, false)
+        : null;
+    $walasTitle = $walasStaff && !empty($walasStaff->class_name) ? 'Wali Kelas ' . $walasStaff->class_name : 'Wali Kelas';
+
     $profileRole = Auth::user()?->role ? match(Auth::user()->role) {
         'kesiswaan' => 'Kesiswaan',
-        'walas', 'wali_kelas' => 'Wali Kelas',
+        'walas', 'wali_kelas', 'walikelas' => $walasTitle,
         default => 'Guru BK / Konselor Inti',
     } : (['bk' => 'Guru BK / Konselor Inti', 'kesiswaan' => 'Kesiswaan', 'walas' => 'Wali Kelas 8B'][$portal]);
 @endphp

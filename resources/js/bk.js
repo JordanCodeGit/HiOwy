@@ -930,12 +930,26 @@ export function registerBk(Alpine, navigateTo) {
         selectVisible(checked) { this.selected = checked ? this.visibleRows.map(row => row.id) : []; },
     }));
 
-    Alpine.data('walasDashboard', () => ({
+    Alpine.data('walasDashboard', (config = {}) => ({
         filter: 'unread',
         query: '',
         rows: [],
+        qrModalOpen: false,
+        qrSvgHtml: '',
+        reportUrl: config.reportUrl || (window.location.origin + '/s/lapor'),
+        qrScanUrl: config.qrScanUrl || (window.location.origin + '/s/qr'),
+        className: config.className || '7B',
+
         init() {
+            this.refreshRows();
+            this.renderQrCode();
+            if (window.location.hash === '#qr') {
+                this.qrModalOpen = true;
+            }
+        },
+        refreshRows() {
             this.rows = [...this.$root.querySelectorAll('[data-summary-card]')].map(card => ({
+                id: card.dataset.id,
                 status: card.dataset.status,
                 text: normalize(card.textContent),
             }));
@@ -944,7 +958,86 @@ export function registerBk(Alpine, navigateTo) {
             const row = this.rows[index];
             return !!row && (this.filter === 'all' || row.status === this.filter) && row.text.includes(normalize(this.query));
         },
-        get visibleCount() { return this.rows.filter((row, index) => this.visible(index)).length; },
+        get visibleCount() {
+            return this.rows.filter((row, index) => this.visible(index)).length;
+        },
+        renderQrCode() {
+            try {
+                if (typeof QRCode !== 'undefined') {
+                    const qr = new QRCode(0, 'M');
+                    qr.addData(this.qrScanUrl);
+                    qr.make();
+                    this.qrSvgHtml = qr.createSvg(200, 4);
+                }
+            } catch (e) {
+                console.error('Failed to generate Walas QR', e);
+            }
+        },
+        copyReportUrl() {
+            navigator.clipboard.writeText(this.reportUrl).then(() => {
+                window.dispatchEvent(new CustomEvent('auth-notice', {
+                    detail: { title: 'Tautan Tersalin', message: 'Tautan aduan siswa kelas berhasil disalin.' }
+                }));
+            }).catch(() => {
+                window.dispatchEvent(new CustomEvent('auth-notice', {
+                    detail: { title: 'Belum tersalin', message: 'Pilih dan salin tautan secara manual.' }
+                }));
+            });
+        },
+        downloadQrPng() {
+            const svg = document.querySelector('#walas-qr-svg svg');
+            if (!svg) {
+                window.dispatchEvent(new CustomEvent('auth-notice', {
+                    detail: { title: 'Gagal', message: 'Elemen gambar QR tidak ditemukan.' }
+                }));
+                return;
+            }
+            try {
+                const svgData = new XMLSerializer().serializeToString(svg);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                canvas.width = 1200;
+                canvas.height = 1200;
+                const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(svgBlob);
+                img.onload = () => {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, 1200, 1200);
+                    ctx.drawImage(img, 60, 60, 1080, 1080);
+                    URL.revokeObjectURL(url);
+                    const a = document.createElement('a');
+                    a.download = `QR-Pengaduan-Kelas-${this.className}.png`;
+                    a.href = canvas.toDataURL('image/png');
+                    a.click();
+                };
+                img.src = url;
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        async quickToggleRead(id, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            try {
+                const res = await fetch(`/wali-kelas/ringkasan/${id}/toggle-read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.reload();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
     }));
 
     Alpine.data('bkStatistics', () => ({
