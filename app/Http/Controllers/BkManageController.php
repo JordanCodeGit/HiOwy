@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\StaffInvitationMail;
 use App\Models\IncidentCategory;
 use App\Models\IncidentLocation;
 use App\Models\SchoolSetting;
@@ -10,6 +11,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
@@ -49,18 +52,18 @@ class BkManageController extends Controller
 
                 $categories = IncidentCategory::orderBy('order_index')->orderBy('id')->get();
                 $locations = IncidentLocation::orderBy('order_index')->orderBy('id')->get();
-                $staffMembers = StaffMember::orderBy('id', 'desc')->get();
+                $staffMembers = $this->getStaffMembersCollection(true);
             } catch (\Throwable $e) {
                 $hasTables = false;
                 $categories = collect($this->getDefaultCategoriesFallback());
                 $locations = collect($this->getDefaultLocationsFallback());
-                $staffMembers = collect($this->getDefaultStaffFallback());
+                $staffMembers = $this->getStaffMembersCollection(false);
             }
         } else {
             // In-memory fallbacks sebelum migrasi dijalankan
             $categories = collect($this->getDefaultCategoriesFallback());
             $locations = collect($this->getDefaultLocationsFallback());
-            $staffMembers = collect($this->getDefaultStaffFallback());
+            $staffMembers = $this->getStaffMembersCollection(false);
         }
 
         $qrTotalScans = self::getQrScansCount();
@@ -339,16 +342,62 @@ class BkManageController extends Controller
             $name = ucwords(str_replace(['.', '_', '-'], ' ', $name));
         }
 
-        $staff = StaffMember::create([
+        $staffData = [
             'name'       => $name,
             'email'      => strtolower(trim($validated['email'])),
             'role'       => $validated['role'],
             'class_name' => $validated['role'] === 'walikelas' ? ($validated['class_name'] ?? '7A') : null,
             'status'     => 'pending',
-            'invited_at' => now(),
-        ]);
+            'invited_at' => now()->toIso8601String(),
+        ];
 
-        $message = "Undangan akses staf berhasil dikirim ke {$staff->email}.";
+        $staff = null;
+        try {
+            if (Schema::hasTable('staff_members')) {
+                $staff = StaffMember::create([
+                    'name'       => $staffData['name'],
+                    'email'      => $staffData['email'],
+                    'role'       => $staffData['role'],
+                    'class_name' => $staffData['class_name'],
+                    'status'     => $staffData['status'],
+                    'invited_at' => now(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Gagal menyimpan staf ke database, beralih ke fallback file: " . $e->getMessage());
+        }
+
+        if (!$staff) {
+            $file = storage_path('framework/staff_members.json');
+            $existing = file_exists($file) ? (json_decode(file_get_contents($file), true) ?: []) : $this->getDefaultStaffFallback();
+            $newId = count($existing) > 0 ? (max(array_column($existing, 'id')) + 1) : 1;
+            
+            $words = preg_split('/\s+/', trim($name));
+            $initials = count($words) === 1 ? strtoupper(substr($words[0], 0, 2)) : strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+            
+            $staff = (object) array_merge($staffData, [
+                'id'          => $newId,
+                'initials'    => $initials,
+                'invited_fmt' => 'Hari Ini, ' . now()->format('H:i'),
+            ]);
+            array_unshift($existing, (array) $staff);
+            @file_put_contents($file, json_encode($existing, JSON_PRETTY_PRINT));
+        }
+
+        // Kirim email undangan via SMTP
+        $schoolName = Auth::user()->school_name ?? 'SMP Telkom Purwokerto';
+        $emailSent = false;
+        try {
+            $invitationUrl = route('register', ['email' => $staff->email]);
+            Mail::to($staff->email)->send(new StaffInvitationMail($staff, $schoolName, $invitationUrl));
+            $emailSent = true;
+        } catch (\Throwable $e) {
+            Log::warning("Gagal mengirim email undangan staf ke {$staff->email}: " . $e->getMessage());
+        }
+
+        $message = $emailSent 
+            ? "Undangan akses staf berhasil dikirim ke {$staff->email}."
+            : "Data staf {$staff->name} berhasil ditambahkan dan siap digunakan.";
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
@@ -360,10 +409,11 @@ class BkManageController extends Controller
                     'role'        => $staff->role,
                     'class_name'  => $staff->class_name,
                     'status'      => $staff->status,
-                    'initials'    => $staff->initials,
+                    'initials'    => $staff->initials ?? 'ST',
                     'invited_fmt' => 'Hari Ini, ' . now()->format('H:i'),
                 ],
-                'message' => $message,
+                'email_sent' => $emailSent,
+                'message'    => $message,
             ]);
         }
 
@@ -372,8 +422,6 @@ class BkManageController extends Controller
 
     public function updateStaff(Request $request, int $id): JsonResponse|RedirectResponse
     {
-        $staff = StaffMember::findOrFail($id);
-
         $validated = $request->validate([
             'name'       => ['required', 'string', 'max:120'],
             'email'      => ['required', 'email', 'max:120'],
@@ -382,27 +430,55 @@ class BkManageController extends Controller
             'status'     => ['required', 'string', 'in:aktif,pending,nonaktif'],
         ]);
 
-        $staff->name = trim($validated['name']);
-        $staff->email = strtolower(trim($validated['email']));
-        $staff->role = $validated['role'];
-        $staff->class_name = $validated['role'] === 'walikelas' ? ($validated['class_name'] ?? '7A') : null;
-        $staff->status = $validated['status'];
-        $staff->save();
+        $updatedStaff = null;
+        try {
+            if (Schema::hasTable('staff_members')) {
+                $staff = StaffMember::find($id);
+                if ($staff) {
+                    $staff->name = trim($validated['name']);
+                    $staff->email = strtolower(trim($validated['email']));
+                    $staff->role = $validated['role'];
+                    $staff->class_name = $validated['role'] === 'walikelas' ? ($validated['class_name'] ?? '7A') : null;
+                    $staff->status = $validated['status'];
+                    $staff->save();
+                    $updatedStaff = $staff;
+                }
+            }
+        } catch (\Throwable $e) {}
 
-        $message = "Data dan hak akses {$staff->name} berhasil diperbarui.";
+        if (!$updatedStaff) {
+            $file = storage_path('framework/staff_members.json');
+            $existing = file_exists($file) ? (json_decode(file_get_contents($file), true) ?: []) : $this->getDefaultStaffFallback();
+            foreach ($existing as &$item) {
+                if ($item['id'] == $id) {
+                    $item['name'] = trim($validated['name']);
+                    $item['email'] = strtolower(trim($validated['email']));
+                    $item['role'] = $validated['role'];
+                    $item['class_name'] = $validated['role'] === 'walikelas' ? ($validated['class_name'] ?? '7A') : null;
+                    $item['status'] = $validated['status'];
+                    $words = preg_split('/\s+/', $item['name']);
+                    $item['initials'] = count($words) === 1 ? strtoupper(substr($words[0], 0, 2)) : strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));
+                    $updatedStaff = (object) $item;
+                    break;
+                }
+            }
+            @file_put_contents($file, json_encode($existing, JSON_PRETTY_PRINT));
+        }
+
+        $message = "Data dan hak akses {$validated['name']} berhasil diperbarui.";
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
                 'staff'   => [
-                    'id'          => $staff->id,
-                    'name'        => $staff->name,
-                    'email'       => $staff->email,
-                    'role'        => $staff->role,
-                    'class_name'  => $staff->class_name,
-                    'status'      => $staff->status,
-                    'initials'    => $staff->initials,
-                    'invited_fmt' => $staff->invited_at ? $staff->invited_at->format('d M Y') : '-',
+                    'id'          => $updatedStaff->id ?? $id,
+                    'name'        => $updatedStaff->name ?? $validated['name'],
+                    'email'       => $updatedStaff->email ?? $validated['email'],
+                    'role'        => $updatedStaff->role ?? $validated['role'],
+                    'class_name'  => $updatedStaff->class_name ?? null,
+                    'status'      => $updatedStaff->status ?? $validated['status'],
+                    'initials'    => $updatedStaff->initials ?? 'ST',
+                    'invited_fmt' => isset($updatedStaff->invited_at) ? (is_object($updatedStaff->invited_at) ? $updatedStaff->invited_at->format('d M Y') : date('d M Y', strtotime($updatedStaff->invited_at))) : '-',
                 ],
                 'message' => $message,
             ]);
@@ -413,9 +489,30 @@ class BkManageController extends Controller
 
     public function destroyStaff(Request $request, int $id): JsonResponse|RedirectResponse
     {
-        $staff = StaffMember::findOrFail($id);
-        $name = $staff->name;
-        $staff->delete();
+        $name = 'Staf';
+        try {
+            if (Schema::hasTable('staff_members')) {
+                $staff = StaffMember::find($id);
+                if ($staff) {
+                    $name = $staff->name;
+                    $staff->delete();
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        $file = storage_path('framework/staff_members.json');
+        if (file_exists($file)) {
+            $existing = json_decode(file_get_contents($file), true) ?: [];
+            $filtered = [];
+            foreach ($existing as $item) {
+                if ($item['id'] == $id) {
+                    $name = $item['name'];
+                } else {
+                    $filtered[] = $item;
+                }
+            }
+            @file_put_contents($file, json_encode($filtered, JSON_PRETTY_PRINT));
+        }
 
         $message = "Akses staf {$name} berhasil dicabut dan dihapus.";
 
@@ -427,6 +524,49 @@ class BkManageController extends Controller
         }
 
         return redirect()->route('bk.manage', ['#staf'])->with('frontend_notice', $message);
+    }
+
+    public function resendStaffInvite(Request $request, int $id): JsonResponse
+    {
+        $staff = null;
+        try {
+            if (Schema::hasTable('staff_members')) {
+                $staff = StaffMember::find($id);
+            }
+        } catch (\Throwable $e) {}
+
+        if (!$staff) {
+            $file = storage_path('framework/staff_members.json');
+            if (file_exists($file)) {
+                $existing = json_decode(file_get_contents($file), true) ?: [];
+                foreach ($existing as $item) {
+                    if ($item['id'] == $id) {
+                        $staff = (object) $item;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!$staff) {
+            return response()->json(['success' => false, 'message' => 'Data staf tidak ditemukan.'], 404);
+        }
+
+        $schoolName = Auth::user()->school_name ?? 'SMP Telkom Purwokerto';
+        try {
+            $invitationUrl = route('register', ['email' => $staff->email]);
+            Mail::to($staff->email)->send(new StaffInvitationMail($staff, $schoolName, $invitationUrl));
+            return response()->json([
+                'success' => true,
+                'message' => "Undangan akses berhasil dikirim ulang ke {$staff->email}.",
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning("Gagal mengirim ulang email undangan staf: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => "Gagal mengirim email undangan ke {$staff->email}. Periksa koneksi internet / SMTP.",
+            ], 200);
+        }
     }
 
     // =========================================================================
@@ -640,6 +780,30 @@ class BkManageController extends Controller
             (object)['id' => 6, 'label' => 'Perjalanan ke / dari Sekolah', 'active' => true, 'permanent' => false, 'order_index' => 6],
             (object)['id' => 7, 'label' => 'Daring (Chat & Media Sosial)', 'active' => true, 'permanent' => false, 'order_index' => 7],
         ];
+    }
+
+    private function getStaffMembersCollection(bool $hasTables): \Illuminate\Support\Collection
+    {
+        if ($hasTables) {
+            try {
+                if (StaffMember::count() === 0) {
+                    $this->seedDefaultStaff();
+                }
+                return StaffMember::orderBy('id', 'desc')->get();
+            } catch (\Throwable $e) {}
+        }
+
+        $file = storage_path('framework/staff_members.json');
+        if (file_exists($file)) {
+            $data = json_decode(file_get_contents($file), true);
+            if (is_array($data) && count($data) > 0) {
+                return collect($data)->map(fn($item) => (object) $item);
+            }
+        }
+
+        $defaults = $this->getDefaultStaffFallback();
+        @file_put_contents($file, json_encode($defaults, JSON_PRETTY_PRINT));
+        return collect($defaults);
     }
 
     private function getDefaultStaffFallback(): array

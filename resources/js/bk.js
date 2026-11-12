@@ -546,6 +546,30 @@ export function registerBk(Alpine, navigateTo) {
                 this.saving = false;
             }
         },
+        async resendInvite(item) {
+            if (this.saving) return;
+            this.saving = true;
+            try {
+                const res = await fetch(`/bk/manage/staff/${item.id}/resend`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showNotice('Undangan Terkirim', data.message);
+                } else {
+                    this.showNotice('Gagal Mengirim', data.message || 'Gagal mengirim ulang undangan.');
+                }
+            } catch (err) {
+                console.error(err);
+                this.showNotice('Terjadi Kesalahan', 'Gagal menghubungi server.');
+            } finally {
+                this.saving = false;
+            }
+        },
 
         // --- QR Code & Downloads ---
         renderQrCode() {

@@ -406,6 +406,10 @@
 </td>
 <td class="py-4 px-6 text-right">
 <div class="inline-flex items-center gap-2 justify-end">
+<button x-show="item.status === 'pending'" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-secondary-fixed text-secondary text-xs font-semibold transition-colors cursor-pointer" type="button" @click="resendInvite(item)" title="Kirim ulang email undangan">
+<span class="material-symbols-outlined text-[16px]">forward_to_inbox</span>
+<span>Kirim Ulang</span>
+</button>
 <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary text-xs font-semibold transition-colors cursor-pointer" type="button" @click="openEditStaff(item)">
 <span class="material-symbols-outlined text-[16px]">tune</span>
 <span>Ubah</span>

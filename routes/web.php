@@ -68,6 +68,7 @@ Route::prefix('bk')->name('bk.')->group(function () {
     Route::post('/manage/staff', [BkManageController::class, 'storeStaff'])->name('manage.staff.store');
     Route::put('/manage/staff/{id}', [BkManageController::class, 'updateStaff'])->name('manage.staff.update');
     Route::delete('/manage/staff/{id}', [BkManageController::class, 'destroyStaff'])->name('manage.staff.destroy');
+    Route::post('/manage/staff/{id}/resend', [BkManageController::class, 'resendStaffInvite'])->name('manage.staff.resend');
 
     Route::get('/manage/poster', [BkManageController::class, 'downloadPoster'])->name('manage.poster');
     Route::get('/manage/qr/stats', [BkManageController::class, 'getQrStats'])->name('manage.qr.stats');

@@ -72,7 +72,7 @@
                                 <label class="font-title-md text-label-lg text-on-surface" for="email">Email</label>
                                 <div class="relative flex items-center">
                                     <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-lg pointer-events-none">alternate_email</span>
-                                    <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="nama@sekolah.sch.id" type="email" id="email" name="email" autocomplete="email" required="" value="{{ old('email') }}">
+                                    <input class="w-full h-11 pl-11 pr-4 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline-variant shadow-xs focus:outline-hidden focus:shadow-[0_0_0_3px_rgba(0,99,152,0.18)] transition-all" placeholder="nama@sekolah.sch.id" type="email" id="email" name="email" autocomplete="email" required="" value="{{ old('email', request('email')) }}">
                                 </div>
                             </div>
                             <!-- Password Grid -->
