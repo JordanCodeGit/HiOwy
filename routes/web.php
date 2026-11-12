@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BkLearnController;
+use App\Http\Controllers\BkManageController;
 use App\Http\Controllers\BkProfileController;
 use App\Http\Controllers\FrontendPreviewController;
 use App\Http\Controllers\GoogleAuthController;
@@ -51,7 +52,25 @@ Route::view('/onboarding/school', 'auth.school')->name('onboarding.school');
 // BK Portal
 Route::prefix('bk')->name('bk.')->group(function () {
     Route::view('/', 'bk.dashboard')->name('dashboard');
-    Route::view('/manage', 'bk.manage')->name('manage');
+    Route::get('/manage', [BkManageController::class, 'index'])->name('manage');
+    Route::post('/manage/categories', [BkManageController::class, 'storeCategory'])->name('manage.categories.store');
+    Route::put('/manage/categories/{id}', [BkManageController::class, 'updateCategory'])->name('manage.categories.update');
+    Route::post('/manage/categories/{id}/toggle', [BkManageController::class, 'toggleCategory'])->name('manage.categories.toggle');
+    Route::delete('/manage/categories/{id}', [BkManageController::class, 'destroyCategory'])->name('manage.categories.destroy');
+    Route::post('/manage/categories/reorder', [BkManageController::class, 'reorderCategories'])->name('manage.categories.reorder');
+
+    Route::post('/manage/locations', [BkManageController::class, 'storeLocation'])->name('manage.locations.store');
+    Route::put('/manage/locations/{id}', [BkManageController::class, 'updateLocation'])->name('manage.locations.update');
+    Route::post('/manage/locations/{id}/toggle', [BkManageController::class, 'toggleLocation'])->name('manage.locations.toggle');
+    Route::delete('/manage/locations/{id}', [BkManageController::class, 'destroyLocation'])->name('manage.locations.destroy');
+    Route::post('/manage/locations/reorder', [BkManageController::class, 'reorderLocations'])->name('manage.locations.reorder');
+
+    Route::post('/manage/staff', [BkManageController::class, 'storeStaff'])->name('manage.staff.store');
+    Route::put('/manage/staff/{id}', [BkManageController::class, 'updateStaff'])->name('manage.staff.update');
+    Route::delete('/manage/staff/{id}', [BkManageController::class, 'destroyStaff'])->name('manage.staff.destroy');
+
+    Route::get('/manage/poster', [BkManageController::class, 'downloadPoster'])->name('manage.poster');
+    Route::get('/manage/qr/stats', [BkManageController::class, 'getQrStats'])->name('manage.qr.stats');
     Route::get('/learn', [BkLearnController::class, 'index'])->name('learn');
     Route::post('/learn', [BkLearnController::class, 'store'])->name('learn.store');
     Route::put('/learn/{id}', [BkLearnController::class, 'update'])->name('learn.update');
@@ -84,7 +103,11 @@ Route::prefix('kesiswaan')->name('kesiswaan.')->controller(KesiswaanPreviewContr
     Route::get('/profile', 'profile')->name('profile');
 });
 
+Route::get('/s/qr', [BkManageController::class, 'handleQrScan'])->name('public.qr');
+Route::get('/s/lapor', [BkManageController::class, 'showPublicReport'])->name('public.report');
 Route::get('/s/{code}/pelajari', [BkLearnController::class, 'showPublic'])->name('public.learn');
+Route::get('/s/{code}/qr', [BkManageController::class, 'handleQrScan']);
+Route::get('/s/{code}/lapor', [BkManageController::class, 'showPublicReport']);
 
 // Wali Kelas Portal
 Route::prefix('wali-kelas')->name('walas.')->controller(WaliKelasPreviewController::class)->group(function () {

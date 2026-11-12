@@ -1,4 +1,5 @@
 import { manageRows } from './bk-data';
+import { QRCode } from './qrcode';
 import { lockOverlayScroll, unlockOverlayScroll } from './overlay-scroll';
 
 function modalState() {
@@ -114,30 +115,67 @@ export function registerBk(Alpine, navigateTo) {
         },
     }));
 
-    Alpine.data('bkManage', () => ({
+    Alpine.data('bkManage', (initialData = {}) => ({
         ...modalState(),
         tab: 'jenis',
-        categories: structuredClone(manageRows.categories),
-        locations: structuredClone(manageRows.locations),
+        categories: initialData.categories ? [...initialData.categories] : structuredClone(manageRows.categories),
+        locations: initialData.locations ? [...initialData.locations] : structuredClone(manageRows.locations),
+        staffMembers: initialData.staffMembers ? [...initialData.staffMembers] : [],
+        qrTotalScans: initialData.qrTotalScans ?? 0,
+        reportUrl: initialData.reportUrl || (window.location.origin + '/s/lapor'),
+        qrScanUrl: initialData.qrScanUrl || (window.location.origin + '/s/qr'),
+        qrSvgHtml: '',
         dragging: null,
         dropTarget: '',
         orderMessage: '',
         editing: false,
+        editingId: null,
         categoryLabel: '',
         categoryActive: true,
         categoryPermanent: false,
+        categoryVisibleKesiswaan: true,
         locationLabel: '',
+        locationActive: true,
+        staffId: null,
         staffName: '',
         staffEmail: '',
         staffRole: 'kesiswaan',
         staffClass: '7A',
         staffStatus: 'pending',
         qrQuery: '',
+        staffQuery: '',
+        saving: false,
+
+        get csrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        },
 
         init() {
-            const tab = window.location.hash.slice(1);
-            if (['jenis', 'lokasi', 'qr', 'staf'].includes(tab)) this.tab = tab;
+            const hash = window.location.hash.slice(1);
+            if (['jenis', 'lokasi', 'qr', 'staf'].includes(hash)) this.tab = hash;
+            window.addEventListener('hashchange', () => {
+                const h = window.location.hash.slice(1);
+                if (['jenis', 'lokasi', 'qr', 'staf'].includes(h)) this.tab = h;
+            });
+            this.renderQrCode();
+            window.addEventListener('focus', () => {
+                if (this.tab === 'qr') this.fetchQrStats();
+            });
+            setInterval(() => {
+                if (this.tab === 'qr' && !document.hidden) this.fetchQrStats();
+            }, 6000);
         },
+
+        setTab(tab) {
+            this.tab = tab;
+            window.location.hash = tab;
+        },
+
+        showNotice(title, message) {
+            window.dispatchEvent(new CustomEvent('auth-notice', { detail: { title, message } }));
+        },
+
+        // --- Drag & Drop / Reordering ---
         startDrag(event, list, id) {
             if (window.matchMedia('(max-width: 1023px)').matches || this[list].find(item => item.id === id)?.permanent) {
                 event.preventDefault();
@@ -161,31 +199,229 @@ export function registerBk(Alpine, navigateTo) {
             const index = this[list].findIndex(item => item.id === id);
             this.reorder(list, index, index + direction);
         },
-        reorder(list, from, to) {
+        async reorder(list, from, to) {
             if (from < 0 || to < 0 || to >= this[list].length || from === to || this[list][from].permanent || this[list][to].permanent) return;
             const rows = [...this[list]];
             const [item] = rows.splice(from, 1);
             rows.splice(to, 0, item);
             this[list] = rows;
-            this.orderMessage = `${item.label} dipindahkan ke urutan ${to + 1}. Urutan ini hanya untuk pratinjau dan kembali saat halaman dimuat ulang.`;
+            this.orderMessage = `${item.label} dipindahkan ke urutan ${to + 1}.`;
+
+            try {
+                const endpoint = list === 'categories' ? '/bk/manage/categories/reorder' : '/bk/manage/locations/reorder';
+                await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ order: this[list].map(r => r.id) }),
+                });
+            } catch (e) {
+                console.error('Failed to sync reorder', e);
+            }
         },
         endDrag() {
             this.dragging = null;
             this.dropTarget = '';
         },
+
+        // --- Category CRUD ---
         openCategory(item = null) {
             this.editing = !!item;
+            this.editingId = item ? item.id : null;
             this.categoryLabel = item?.label || '';
             this.categoryActive = item?.active ?? true;
             this.categoryPermanent = item?.permanent ?? false;
+            this.categoryVisibleKesiswaan = item?.visible_to_kesiswaan ?? true;
             this.openModal('modal-kategori');
         },
+        async saveCategory() {
+            if (!this.categoryLabel.trim()) {
+                this.showNotice('Validasi Gagal', 'Nama jenis kejadian wajib diisi.');
+                return;
+            }
+            this.saving = true;
+            try {
+                const url = this.editing ? `/bk/manage/categories/${this.editingId}` : '/bk/manage/categories';
+                const method = this.editing ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        label: this.categoryLabel.trim(),
+                        active: this.categoryActive,
+                        visible_to_kesiswaan: this.categoryVisibleKesiswaan,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (this.editing) {
+                        const idx = this.categories.findIndex(c => c.id === this.editingId);
+                        if (idx !== -1) {
+                            this.categories[idx].label = this.categoryLabel.trim();
+                            this.categories[idx].active = this.categoryActive;
+                            this.categories[idx].visible_to_kesiswaan = this.categoryVisibleKesiswaan;
+                        }
+                    } else if (data.category) {
+                        this.categories.push(data.category);
+                    }
+                    this.closeModal();
+                    this.showNotice('Berhasil', data.message || 'Kategori aduan berhasil disimpan.');
+                } else {
+                    this.showNotice('Gagal', data.message || 'Terjadi kesalahan saat menyimpan.');
+                }
+            } catch (err) {
+                console.error(err);
+                this.showNotice('Terjadi Kesalahan', 'Gagal menghubungkan ke server.');
+            } finally {
+                this.saving = false;
+            }
+        },
+        async toggleCategory(item) {
+            if (item.permanent) return;
+            try {
+                const res = await fetch(`/bk/manage/categories/${item.id}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    item.active = data.active;
+                    this.showNotice('Status Berubah', data.message);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        async deleteCategory(item) {
+            if (item.permanent) {
+                this.showNotice('Dilindungi', 'Kategori ini dilindungi sistem dan tidak dapat dihapus.');
+                return;
+            }
+            if (!confirm(`Hapus kategori aduan "${item.label}"?`)) return;
+
+            try {
+                const res = await fetch(`/bk/manage/categories/${item.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.categories = this.categories.filter(c => c.id !== item.id);
+                    this.showNotice('Berhasil Dihapus', data.message);
+                } else {
+                    this.showNotice('Gagal', data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                this.showNotice('Terjadi Kesalahan', 'Gagal menghapus kategori.');
+            }
+        },
+
+        // --- Location CRUD ---
         openLocation(item = null) {
             this.editing = !!item;
+            this.editingId = item ? item.id : null;
             this.locationLabel = item?.label || '';
             this.openModal('modal-tambah-lokasi');
         },
+        async saveLocation() {
+            if (!this.locationLabel.trim()) {
+                this.showNotice('Validasi Gagal', 'Nama titik lokasi wajib diisi.');
+                return;
+            }
+            this.saving = true;
+            try {
+                const url = this.editing ? `/bk/manage/locations/${this.editingId}` : '/bk/manage/locations';
+                const method = this.editing ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        label: this.locationLabel.trim(),
+                        active: true,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (this.editing) {
+                        const idx = this.locations.findIndex(l => l.id === this.editingId);
+                        if (idx !== -1) this.locations[idx].label = this.locationLabel.trim();
+                    } else if (data.location) {
+                        this.locations.push(data.location);
+                    }
+                    this.closeModal();
+                    this.showNotice('Berhasil', data.message || 'Titik lokasi berhasil disimpan.');
+                } else {
+                    this.showNotice('Gagal', data.message || 'Terjadi kesalahan saat menyimpan.');
+                }
+            } catch (err) {
+                console.error(err);
+                this.showNotice('Terjadi Kesalahan', 'Gagal menghubungkan ke server.');
+            } finally {
+                this.saving = false;
+            }
+        },
+        async toggleLocation(item) {
+            try {
+                const res = await fetch(`/bk/manage/locations/${item.id}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    item.active = data.active;
+                    this.showNotice('Status Berubah', data.message);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        async deleteLocation(item) {
+            if (!confirm(`Hapus titik lokasi "${item.label}"?`)) return;
+            try {
+                const res = await fetch(`/bk/manage/locations/${item.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.locations = this.locations.filter(l => l.id !== item.id);
+                    this.showNotice('Berhasil Dihapus', data.message);
+                } else {
+                    this.showNotice('Gagal', data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                this.showNotice('Terjadi Kesalahan', 'Gagal menghapus lokasi.');
+            }
+        },
+
+        // --- Staff CRUD ---
         openInvite() {
+            this.staffId = null;
             this.staffName = '';
             this.staffEmail = '';
             this.staffRole = 'kesiswaan';
@@ -193,28 +429,192 @@ export function registerBk(Alpine, navigateTo) {
             this.staffStatus = 'pending';
             this.openModal('modal-undang-staf');
         },
-        editStaff(row) {
-            this.staffName = row.querySelector('.col-nama').textContent.trim();
-            this.staffEmail = row.querySelector('.col-email').textContent.trim();
-            const role = row.querySelector('.role-text').textContent;
-            this.staffRole = role.includes('Wali') ? 'walikelas' : 'kesiswaan';
-            this.staffClass = role.match(/\d+[A-Z]/)?.[0] || '7A';
-            this.staffStatus = row.querySelector('.status-text').textContent.trim() === 'Aktif' ? 'aktif' : 'pending';
+        async submitInvite() {
+            if (!this.staffEmail.trim() || !this.staffEmail.includes('@')) {
+                this.showNotice('Validasi Gagal', 'Alamat email staf wajib diisi dengan benar.');
+                return;
+            }
+            this.saving = true;
+            try {
+                const res = await fetch('/bk/manage/staff', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: this.staffName.trim(),
+                        email: this.staffEmail.trim(),
+                        role: this.staffRole,
+                        class_name: this.staffRole === 'walikelas' ? this.staffClass : null,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.staff) {
+                        this.staffMembers.unshift(data.staff);
+                    }
+                    this.closeModal();
+                    this.showNotice('Undangan Terkirim', data.message);
+                } else {
+                    this.showNotice('Gagal Mengirim', data.message || 'Terjadi kesalahan.');
+                }
+            } catch (err) {
+                console.error(err);
+                this.showNotice('Terjadi Kesalahan', 'Gagal mengirim undangan staf.');
+            } finally {
+                this.saving = false;
+            }
+        },
+        openEditStaff(item) {
+            this.staffId = item.id;
+            this.staffName = item.name || '';
+            this.staffEmail = item.email || '';
+            this.staffRole = item.role || 'kesiswaan';
+            this.staffClass = item.class_name || '7A';
+            this.staffStatus = item.status || 'pending';
             this.openModal('modal-edit-staf');
         },
-        deleteStaff(row) {
-            this.staffName = row.querySelector('.col-nama').textContent.trim();
+        async saveStaff() {
+            if (!this.staffName.trim() || !this.staffEmail.trim()) {
+                this.showNotice('Validasi Gagal', 'Nama lengkap dan email wajib diisi.');
+                return;
+            }
+            this.saving = true;
+            try {
+                const res = await fetch(`/bk/manage/staff/${this.staffId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: this.staffName.trim(),
+                        email: this.staffEmail.trim(),
+                        role: this.staffRole,
+                        class_name: this.staffRole === 'walikelas' ? this.staffClass : null,
+                        status: this.staffStatus,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const idx = this.staffMembers.findIndex(s => s.id === this.staffId);
+                    if (idx !== -1 && data.staff) {
+                        this.staffMembers[idx] = data.staff;
+                    }
+                    this.closeModal();
+                    this.showNotice('Berhasil Diperbarui', data.message);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Terjadi kesalahan.');
+                }
+            } catch (err) {
+                console.error(err);
+                this.showNotice('Terjadi Kesalahan', 'Gagal memperbarui staf.');
+            } finally {
+                this.saving = false;
+            }
+        },
+        openDeleteStaff(item) {
+            this.staffId = item.id;
+            this.staffName = item.name || 'Staf';
             this.openModal('modal-hapus-staf');
         },
-        validModal() {
-            return [...document.getElementById(this.modal).querySelectorAll('input:not([type="hidden"]), select')]
-                .filter(input => input.offsetParent !== null).every(input => input.reportValidity());
+        async confirmDeleteStaff() {
+            this.saving = true;
+            try {
+                const res = await fetch(`/bk/manage/staff/${this.staffId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.staffMembers = this.staffMembers.filter(s => s.id !== this.staffId);
+                    this.closeModal();
+                    this.showNotice('Akses Dicabut', data.message);
+                } else {
+                    this.showNotice('Gagal', data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                this.showNotice('Terjadi Kesalahan', 'Gagal mencabut akses staf.');
+            } finally {
+                this.saving = false;
+            }
         },
-        saveModal() {
-            if (this.validModal()) this.unavailable('Penyimpanan perubahan');
+
+        // --- QR Code & Downloads ---
+        renderQrCode() {
+            try {
+                const qr = new QRCode(0, 'M');
+                qr.addData(this.qrScanUrl);
+                qr.make();
+                this.qrSvgHtml = qr.createSvg(220, 4);
+            } catch (e) {
+                console.error('Failed to generate QR', e);
+            }
         },
-        submitInvite() {
-            if (this.validModal()) this.unavailable('Pengiriman undangan staf');
+        async fetchQrStats() {
+            try {
+                const res = await fetch('/bk/manage/qr/stats');
+                const data = await res.json();
+                if (data.success && typeof data.total_scans === 'number') {
+                    this.qrTotalScans = data.total_scans;
+                }
+            } catch (e) {
+                // silent
+            }
+        },
+        testScanQr() {
+            window.open(this.qrScanUrl, '_blank');
+            setTimeout(() => this.fetchQrStats(), 1000);
+            this.showNotice('Memindai QR', 'Simulasi pemindaian QR sedang berjalan di tab baru.');
+        },
+        copyReportUrl() {
+            navigator.clipboard.writeText(this.reportUrl).then(() => {
+                this.showNotice('Tautan Tersalin', 'Tautan formulir pelaporan siswa telah disalin ke papan klip.');
+            }).catch(() => {
+                this.showNotice('Belum tersalin', 'Pilih dan salin tautan secara manual.');
+            });
+        },
+        downloadQrPng() {
+            const svg = document.querySelector('#panel-qr svg');
+            if (!svg) {
+                this.showNotice('Gagal', 'Elemen gambar QR tidak ditemukan.');
+                return;
+            }
+            try {
+                const svgData = new XMLSerializer().serializeToString(svg);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                canvas.width = 1200;
+                canvas.height = 1200;
+                const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(svgBlob);
+                img.onload = () => {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, 1200, 1200);
+                    ctx.drawImage(img, 60, 60, 1080, 1080);
+                    URL.revokeObjectURL(url);
+                    const a = document.createElement('a');
+                    a.download = 'QR-Pengaduan-Sekolah.png';
+                    a.href = canvas.toDataURL('image/png');
+                    a.click();
+                    this.showNotice('Berhasil', 'Gambar QR Code resmi (PNG 300 DPI) berhasil diunduh.');
+                };
+                img.src = url;
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Gagal', 'Gagal membuat gambar PNG dari QR.');
+            }
+        },
+        openPosterA4() {
+            window.open('/bk/manage/poster', '_blank');
         },
     }));
 

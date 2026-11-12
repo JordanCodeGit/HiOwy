@@ -1,6 +1,9 @@
 import Alpine from 'alpinejs';
+import { QRCode } from './qrcode';
 import { registerBk } from './bk';
 import { setupStaffMobile } from './staff-mobile';
+
+window.QRCode = QRCode;
 
 let navigationPending = false;
 
