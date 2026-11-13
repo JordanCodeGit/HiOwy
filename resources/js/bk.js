@@ -35,6 +35,17 @@ function modalState() {
                 first?.focus();
             }
         },
+        showNotice(title, message) {
+            window.dispatchEvent(new CustomEvent('auth-notice', { detail: { title, message } }));
+        },
+        unavailable(feature = 'Fitur') {
+            window.dispatchEvent(new CustomEvent('auth-notice', {
+                detail: {
+                    title: 'Pratinjau Frontend',
+                    message: `${feature} disimulasikan pada prototipe antarmuka ini.`,
+                },
+            }));
+        },
     };
 }
 
@@ -648,61 +659,153 @@ export function registerBk(Alpine, navigateTo) {
         query: '',
         statusTab: 0,
         priorityFilter: '',
+        categoryFilter: '',
+        roleFilter: '',
+        urgencyFilter: '',
+        contactFilter: '',
+        timeFilter: '',
         filters: {},
         selected: [],
         rows: [],
-        pageSize: 25,
+        currentPage: 1,
+        pageSize: 10,
         dateFrom: '',
         dateTo: '',
+        dateFilterOpen: false,
 
         init() {
             this.rows = [...this.$root.querySelectorAll('[data-preview-row]')].map((row, index) => ({
                 index,
-                text: normalize(row.textContent),
+                id: row.dataset.id || String(index),
+                status: row.dataset.status || 'unread',
+                urgency: row.dataset.urgency || '',
+                category: row.dataset.category || '',
+                role: row.dataset.role || '',
+                contact: row.dataset.contact || '',
+                stale: row.dataset.stale === '1',
+                date: row.dataset.date || '',
+                text: normalize(row.textContent).replace(/sr-\d{4}-/g, 'sr-'),
                 cells: [...row.cells].map(cell => normalize(cell.textContent)),
             }));
         },
+        get filteredRows() {
+            return this.rows.filter(row => {
+                if (this.kind === 'dashboard') {
+                    // Status Tab: 0 = unread, 1 = in_progress, 2 = resolved
+                    if (this.statusTab === 0 && row.status !== 'unread') return false;
+                    if (this.statusTab === 1 && row.status !== 'in_progress') return false;
+                    if (this.statusTab === 2 && row.status !== 'resolved') return false;
+
+                    // Priority filters from top cards
+                    if (this.priorityFilter === 'danger' && row.urgency !== 'urgent') return false;
+                    if (this.priorityFilter === 'overdue' && !row.stale) return false;
+
+                    // Dropdown filters
+                    if (this.categoryFilter && row.category !== this.categoryFilter) return false;
+                    if (this.roleFilter && row.role !== this.roleFilter) return false;
+                    if (this.urgencyFilter && row.urgency !== this.urgencyFilter) return false;
+                    if (this.contactFilter && row.contact !== this.contactFilter) return false;
+
+                    // Time filter
+                    if (this.timeFilter && row.date) {
+                        const now = new Date();
+                        const rowDate = new Date(row.date);
+                        const diffDays = Math.floor((now - rowDate) / (1000 * 60 * 60 * 24));
+                        if (this.timeFilter === '7' && diffDays > 7) return false;
+                        if (this.timeFilter === '30' && diffDays > 30) return false;
+                    }
+                }
+
+                // Query search
+                if (this.query) {
+                    const q = normalize(this.query).replace(/^#/, '').replace(/sr-\d{4}-/g, 'sr-');
+                    if (!row.text.includes(q)) return false;
+                }
+
+                // Custom date range
+                if (this.dateFrom && row.date && row.date < this.dateFrom) return false;
+                if (this.dateTo && row.date && row.date > this.dateTo) return false;
+
+                // Legacy filters fallback for archive / other pages
+                if (this.kind !== 'dashboard') {
+                    if (this.kind === 'archive' && !this.matchesRange(row.cells[5])) return false;
+                    if (!Object.entries(this.filters).every(([key, filter]) => this.matchesFilter(row, Number(key), filter))) return false;
+                }
+
+                return true;
+            });
+        },
+        get filteredCount() {
+            return this.filteredRows.length;
+        },
         get visibleCount() {
-            return this.rows.filter(row => this.rowVisible(row.index)).length;
+            return this.filteredCount;
+        },
+        get totalPages() {
+            return Math.ceil(this.filteredRows.length / this.pageSize) || 1;
+        },
+        get pageStart() {
+            return this.filteredRows.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+        },
+        get pageEnd() {
+            return Math.min(this.currentPage * this.pageSize, this.filteredRows.length);
+        },
+        get paginatedRows() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            return this.filteredRows.slice(start, start + this.pageSize);
+        },
+        rowVisible(index) {
+            if (this.kind === 'dashboard') {
+                return this.paginatedRows.some(row => row.index === index);
+            }
+            const row = this.rows[index];
+            if (!row) return false;
+            const query = normalize(this.query).replace(/^#/, '').replace(/sr-\d{4}-/g, 'sr-');
+            if (!row.text.includes(query)) return false;
+            return Object.entries(this.filters).every(([key, filter]) => this.matchesFilter(row, Number(key), filter));
+        },
+        pageSizeChanged(event) {
+            this.pageSize = Number.parseInt(event.target.value, 10) || 10;
+            this.currentPage = 1;
+            this.selected = [];
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.selected = [];
+            }
+        },
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+                this.selected = [];
+            }
         },
         get allSelected() {
-            const visible = this.rows.filter(row => this.rowVisible(row.index));
-            return visible.length > 0 && visible.every(row => this.selected.includes(String(row.index)));
+            const visibleIds = this.paginatedRows.map(row => String(row.id));
+            return visibleIds.length > 0 && visibleIds.every(id => this.selected.includes(id));
         },
         selectVisible(checked) {
-            this.selected = checked ? this.rows.filter(row => this.rowVisible(row.index)).map(row => String(row.index)) : [];
+            const visibleIds = this.paginatedRows.map(row => String(row.id));
+            if (checked) {
+                this.selected = Array.from(new Set([...this.selected, ...visibleIds]));
+            } else {
+                this.selected = this.selected.filter(id => !visibleIds.includes(id));
+            }
         },
         filterChanged(event) {
             const select = event.target;
             if (select.options[0]?.textContent.includes('/ halaman')) {
-                this.pageSize = Number.parseInt(select.selectedOptions[0].textContent, 10) || 25;
+                this.pageSize = Number.parseInt(select.selectedOptions[0].textContent, 10) || 10;
+                this.currentPage = 1;
             } else {
                 const index = [...this.$root.querySelectorAll('select')].indexOf(select);
                 this.filters[index] = { value: select.value, label: normalize(select.selectedOptions[0].textContent) };
             }
             this.selected = [];
         },
-        rowVisible(index) {
-            const row = this.rows[index];
-            if (!row || (this.kind === 'dashboard' && this.statusTab !== 0)) return false;
-            if (this.kind === 'dashboard' && this.priorityFilter === 'danger' && index > 2) return false;
-            if (this.kind === 'dashboard' && this.priorityFilter === 'overdue' && Number(row.cells[6]?.match(/\d+/)?.[0]) >= 21) return false;
-            const query = normalize(this.query).replace(/^#/, '').replace(/sr-\d{4}-/g, 'sr-');
-            if (!row.text.replace(/sr-\d{4}-/g, 'sr-').includes(query)) return false;
-            if (this.kind === 'archive' && !this.matchesRange(row.cells[5])) return false;
-            return Object.entries(this.filters).every(([key, filter]) => this.matchesFilter(row, Number(key), filter));
-        },
         matchesFilter(row, index, { value, label }) {
             if (!value || value === 'all' || label.includes('semua')) return true;
-            if (this.kind === 'dashboard') {
-                const terms = {
-                    fisik: 'fisik', verbal: 'verbal', dikucilkan: 'pengucilan', cyber: 'cyber', pelecehan: 'pelecehan', lainnya: 'lainnya',
-                    siswa: 'siswa', ortu: 'orang tua', teman: 'teman korban', guru: 'guru', urgent: 'darurat', medium: 'medium', easy: 'easy',
-                    ya: 'ya (', tidak: 'tidak',
-                };
-                if (index < 4) return (row.cells[[3, 4, 2, 7][index]] || '').includes(terms[value] || label);
-                return this.matchesDate(row.cells[6], value);
-            }
             if (this.kind === 'archive') {
                 if (index === 0) return row.cells[4].includes(label);
                 return row.cells[2].includes(label);
@@ -712,7 +815,6 @@ export function registerBk(Alpine, navigateTo) {
             return true;
         },
         matchesDate(text, value, label = '') {
-            // Dates are relative to the latest source sample, 24 October 2024.
             const day = Number(text.match(/\b\d{1,2}\b/)?.[0]);
             if (value === 'today' || label === 'hari ini') return day === 24;
             if (value === '7' || label.includes('7 hari')) return day >= 18;
@@ -727,7 +829,32 @@ export function registerBk(Alpine, navigateTo) {
             const date = `${match[3]}-${months[match[2]] || '01'}-${match[1].padStart(2, '0')}`;
             return (!this.dateFrom || date >= this.dateFrom) && (!this.dateTo || date <= this.dateTo);
         },
-        dateFilterOpen: false,
+        async submitBulkIseng() {
+            if (this.selected.length === 0) return;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch('/bk/reports/bulk-iseng', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ ids: this.selected }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.closeModal();
+                    this.showNotice('Berhasil', data.message || 'Laporan berhasil ditandai sebagai iseng.');
+                    setTimeout(() => window.location.reload(), 1200);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal menandai laporan.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan sistem saat menandai laporan.');
+            }
+        },
     }));
 
     Alpine.data('bkLearn', () => ({
@@ -882,13 +1009,220 @@ export function registerBk(Alpine, navigateTo) {
         },
     }));
 
-    Alpine.data('bkReport', () => ({
+    Alpine.data('bkReport', (config = {}) => ({
         ...modalState(),
-        urgency: 'Darurat',
+        reportId: config.reportId || null,
+        urgency: config.urgency || 'Darurat',
+        caseStatus: config.caseStatus || 'read',
+        caseHandler: config.caseHandler || '',
         summary: '',
+        walasClass: config.walasClass || '7B',
+        counselorReply: '',
+        internalNote: '',
+        loading: false,
+
         openForward() {
             this.summary = '';
             this.openModal('forward-modal');
+        },
+
+        async updateCase(id = null) {
+            const reportId = id || this.reportId;
+            if (!reportId) return;
+            this.loading = true;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/bk/reports/${reportId}/status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        status: this.caseStatus,
+                        urgency: this.urgency,
+                        assigned_counselor: this.caseHandler,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showNotice('Berhasil', data.message || 'Status dan penugasan laporan berhasil diperbarui.');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal memperbarui status kasus.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan sistem saat memperbarui status laporan.');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async sendReply(id = null) {
+            const reportId = id || this.reportId;
+            if (!this.counselorReply.trim()) {
+                this.showNotice('Perhatian', 'Harap tulis balasan sebelum mengirim.');
+                return;
+            }
+            this.loading = true;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/bk/reports/${reportId}/reply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        counselor_reply: this.counselorReply,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showNotice('Terkirim', data.message || 'Balasan resmi konselor berhasil dikirimkan.');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal mengirim balasan.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan sistem saat mengirim balasan.');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async saveInternalNote(id = null) {
+            const reportId = id || this.reportId;
+            if (!this.internalNote.trim()) {
+                this.showNotice('Perhatian', 'Harap tulis catatan sebelum menyimpan.');
+                return;
+            }
+            this.loading = true;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/bk/reports/${reportId}/note`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        note: this.internalNote,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showNotice('Tersimpan', data.message || 'Catatan rahasia berhasil disimpan.');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal menyimpan catatan.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan sistem saat menyimpan catatan.');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async submitForward(id = null) {
+            const reportId = id || this.reportId;
+            if (!this.summary.trim()) {
+                this.showNotice('Perhatian', 'Tuliskan ringkasan terlebih dahulu.');
+                return;
+            }
+            this.loading = true;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/bk/reports/${reportId}/forward`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        summary: this.summary,
+                        walas_class: this.walasClass,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.closeModal();
+                    this.showNotice('Berhasil', data.message || 'Ringkasan aman berhasil dikirim ke Wali Kelas.');
+                    setTimeout(() => window.location.reload(), 1200);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal meneruskan ringkasan.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan sistem saat meneruskan ke Wali Kelas.');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async confirmMarkIseng(id = null) {
+            const reportId = id || this.reportId;
+            this.loading = true;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/bk/reports/${reportId}/iseng`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.closeModal();
+                    this.showNotice('Berhasil', data.message || 'Laporan telah ditandai iseng.');
+                    setTimeout(() => window.location.href = '/bk', 1200);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal menandai laporan.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan saat memproses laporan.');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async confirmArchive(id = null) {
+            const reportId = id || this.reportId;
+            this.loading = true;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/bk/reports/${reportId}/archive`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.closeModal();
+                    this.showNotice('Berhasil', data.message || 'Laporan berhasil diarsipkan.');
+                    setTimeout(() => window.location.href = '/bk', 1200);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal mengarsipkan laporan.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan saat mengarsipkan laporan.');
+            } finally {
+                this.loading = false;
+            }
         },
     }));
 

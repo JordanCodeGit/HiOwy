@@ -57,7 +57,7 @@
 
             <!-- Feed List of Summaries -->
             <div class="flex flex-col gap-space-md" id="feed-container">
-                @foreach($summaries as $item)
+                @forelse($summaries as $item)
                 <div data-summary-card data-id="{{ $item['id'] }}" data-status="{{ $item['status'] }}" x-show="visible({{ $loop->index }})" class="summary-card bk-hover-card group relative block bg-surface-container-lowest rounded-xl p-space-lg shadow-xs hover:shadow-md transition-all duration-200 border border-slate-100">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs pb-space-sm mb-space-sm border-b border-slate-100/80">
                         <div class="flex items-center gap-space-sm">
@@ -110,7 +110,15 @@
                         </a>
                     </div>
                 </div>
-                @endforeach
+                @empty
+                <div class="bg-white rounded-xl p-8 border border-slate-200/80 text-center flex flex-col items-center justify-center gap-2">
+                    <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                        <span class="material-symbols-outlined text-[24px]">inbox</span>
+                    </div>
+                    <span class="text-sm font-bold text-slate-800">Belum Ada Ringkasan Binaan</span>
+                    <p class="text-xs text-slate-500 max-w-sm">Ringkasan aman dari konselor BK untuk siswa kelas Anda akan muncul di sini setelah diteruskan oleh Guru BK.</p>
+                </div>
+                @endforelse
             </div>
 
             <!-- Empty State -->

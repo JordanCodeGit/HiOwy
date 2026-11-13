@@ -44,9 +44,6 @@ class BkManageController extends Controller
                 if (IncidentLocation::count() === 0) {
                     $this->seedDefaultLocations();
                 }
-                if (StaffMember::count() === 0) {
-                    $this->seedDefaultStaff();
-                }
                 $existingQrCount = SchoolSetting::where('key', 'qr_scans_count')->first();
                 if (!$existingQrCount || (int)$existingQrCount->value === 379) {
                     SchoolSetting::set('qr_scans_count', 0);
@@ -906,28 +903,7 @@ class BkManageController extends Controller
 
     private function seedDefaultStaff(): void
     {
-        $defaults = [
-            [
-                'name'       => 'Dewi Rahmawati, M.Pd.',
-                'email'      => 'dewi.rahma@sekolah.sch.id',
-                'role'       => 'walikelas',
-                'class_name' => '8A',
-                'status'     => 'aktif',
-                'invited_at' => now()->subDays(10),
-            ],
-            [
-                'name'       => 'Hendra Kurniawan, M.Pd.',
-                'email'      => 'hendra.kurniawan@sekolah.sch.id',
-                'role'       => 'walikelas',
-                'class_name' => '9B',
-                'status'     => 'pending',
-                'invited_at' => now(),
-            ],
-        ];
-
-        foreach ($defaults as $staff) {
-            StaffMember::firstOrCreate(['email' => $staff['email']], $staff);
-        }
+        // No dummy seeding
     }
 
     private function getDefaultCategoriesFallback(): array
@@ -960,9 +936,6 @@ class BkManageController extends Controller
     {
         if ($hasTables) {
             try {
-                if (StaffMember::count() === 0) {
-                    $this->seedDefaultStaff();
-                }
                 return StaffMember::orderBy('id', 'desc')->get();
             } catch (\Throwable $e) {}
         }
@@ -970,41 +943,16 @@ class BkManageController extends Controller
         $file = storage_path('framework/staff_members.json');
         if (file_exists($file)) {
             $data = json_decode(file_get_contents($file), true);
-            if (is_array($data) && count($data) > 0) {
+            if (is_array($data)) {
                 return collect($data)->map(fn($item) => (object) $item);
             }
         }
 
-        $defaults = $this->getDefaultStaffFallback();
-        @file_put_contents($file, json_encode($defaults, JSON_PRETTY_PRINT));
-        return collect($defaults);
+        return collect([]);
     }
 
     private function getDefaultStaffFallback(): array
     {
-        return [
-            (object)[
-                'id'          => 1,
-                'name'        => 'Dewi Rahmawati, M.Pd.',
-                'email'       => 'dewi.rahma@sekolah.sch.id',
-                'role'        => 'walikelas',
-                'class_name'  => '8A',
-                'status'      => 'aktif',
-                'initials'    => 'DR',
-                'invited_at'  => now()->subDays(10),
-                'invited_fmt' => '02 Feb 2024',
-            ],
-            (object)[
-                'id'          => 2,
-                'name'        => 'Hendra Kurniawan, M.Pd.',
-                'email'       => 'hendra.kurniawan@sekolah.sch.id',
-                'role'        => 'walikelas',
-                'class_name'  => '9B',
-                'status'      => 'pending',
-                'initials'    => 'HK',
-                'invited_at'  => now(),
-                'invited_fmt' => 'Hari Ini, 09:20',
-            ],
-        ];
+        return [];
     }
 }

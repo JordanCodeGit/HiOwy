@@ -324,7 +324,62 @@
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[11px] font-bold text-slate-700">Kelas</label>
-                                <input type="text" x-model="reporterClass" placeholder="Contoh: 7B / 8A" class="w-full px-3 py-2 bg-white rounded-lg text-xs border border-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                <div class="relative">
+                                    <select x-model="reporterClass" class="w-full px-3 py-2 bg-white rounded-lg text-xs border border-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none appearance-none pr-8 cursor-pointer text-slate-800">
+                                        <option value="">-- Pilih Kelas --</option>
+                                        <optgroup label="Kelas 7 (Tujuh)">
+                                            <option value="7A">Kelas 7A</option>
+                                            <option value="7B">Kelas 7B</option>
+                                            <option value="7C">Kelas 7C</option>
+                                            <option value="7D">Kelas 7D</option>
+                                            <option value="7E">Kelas 7E</option>
+                                            <option value="7F">Kelas 7F</option>
+                                            <option value="7G">Kelas 7G</option>
+                                            <option value="7H">Kelas 7H</option>
+                                            <option value="7I">Kelas 7I</option>
+                                            <option value="7J">Kelas 7J</option>
+                                        </optgroup>
+                                        <optgroup label="Kelas 8 (Delapan)">
+                                            <option value="8A">Kelas 8A</option>
+                                            <option value="8B">Kelas 8B</option>
+                                            <option value="8C">Kelas 8C</option>
+                                            <option value="8D">Kelas 8D</option>
+                                            <option value="8E">Kelas 8E</option>
+                                            <option value="8F">Kelas 8F</option>
+                                            <option value="8G">Kelas 8G</option>
+                                            <option value="8H">Kelas 8H</option>
+                                            <option value="8I">Kelas 8I</option>
+                                            <option value="8J">Kelas 8J</option>
+                                        </optgroup>
+                                        <optgroup label="Kelas 9 (Sembilan)">
+                                            <option value="9A">Kelas 9A</option>
+                                            <option value="9B">Kelas 9B</option>
+                                            <option value="9C">Kelas 9C</option>
+                                            <option value="9D">Kelas 9D</option>
+                                            <option value="9E">Kelas 9E</option>
+                                            <option value="9F">Kelas 9F</option>
+                                            <option value="9G">Kelas 9G</option>
+                                            <option value="9H">Kelas 9H</option>
+                                            <option value="9I">Kelas 9I</option>
+                                            <option value="9J">Kelas 9J</option>
+                                        </optgroup>
+                                        <optgroup label="Tingkat Lanjutan (SMA / SMK)">
+                                            <option value="10A">Kelas 10A</option>
+                                            <option value="10B">Kelas 10B</option>
+                                            <option value="11A">Kelas 11A</option>
+                                            <option value="11B">Kelas 11B</option>
+                                            <option value="12A">Kelas 12A</option>
+                                            <option value="12B">Kelas 12B</option>
+                                        </optgroup>
+                                        <optgroup label="Lainnya">
+                                            <option value="Alumni">Alumni</option>
+                                            <option value="Guru / Staf">Guru / Staf</option>
+                                            <option value="Orang Tua">Orang Tua / Wali Siswa</option>
+                                            <option value="Lainnya">Lainnya / Luar Sekolah</option>
+                                        </optgroup>
+                                    </select>
+                                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">expand_more</span>
+                                </div>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <label class="text-[11px] font-bold text-slate-700">No. WhatsApp / Kontak</label>

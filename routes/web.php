@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BkLearnController;
 use App\Http\Controllers\BkManageController;
 use App\Http\Controllers\BkProfileController;
+use App\Http\Controllers\BkReportController;
 use App\Http\Controllers\FrontendPreviewController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\KesiswaanPreviewController;
@@ -51,7 +52,17 @@ Route::view('/onboarding/school', 'auth.school')->name('onboarding.school');
 
 // BK Portal
 Route::prefix('bk')->name('bk.')->middleware('role:bk')->group(function () {
-    Route::view('/', 'bk.dashboard')->name('dashboard');
+    Route::get('/', [BkReportController::class, 'dashboard'])->name('dashboard');
+    Route::post('/reports/bulk-iseng', [BkReportController::class, 'bulkMarkIseng'])->name('reports.bulk-iseng');
+    Route::get('/reports/preview', [BkReportController::class, 'preview'])->name('report');
+    Route::get('/reports/{id}', [BkReportController::class, 'show'])->name('reports.show');
+    Route::post('/reports/{id}/status', [BkReportController::class, 'updateStatus'])->name('reports.status');
+    Route::post('/reports/{id}/reply', [BkReportController::class, 'storeCounselorReply'])->name('reports.reply');
+    Route::post('/reports/{id}/note', [BkReportController::class, 'storeInternalNote'])->name('reports.note');
+    Route::post('/reports/{id}/forward', [BkReportController::class, 'forwardToWalas'])->name('reports.forward');
+    Route::post('/reports/{id}/archive', [BkReportController::class, 'archive'])->name('reports.archive');
+    Route::post('/reports/{id}/iseng', [BkReportController::class, 'markIseng'])->name('reports.iseng');
+
     Route::get('/manage', [BkManageController::class, 'index'])->name('manage');
     Route::post('/manage/categories', [BkManageController::class, 'storeCategory'])->name('manage.categories.store');
     Route::put('/manage/categories/{id}', [BkManageController::class, 'updateCategory'])->name('manage.categories.update');
@@ -86,7 +97,6 @@ Route::prefix('bk')->name('bk.')->middleware('role:bk')->group(function () {
     Route::post('/profile/period', [BkProfileController::class, 'updatePeriod'])->name('profile.period');
     Route::post('/profile/password', [BkProfileController::class, 'updatePassword'])->name('profile.password');
     Route::post('/profile/logout-all', [BkProfileController::class, 'logoutAllDevices'])->name('profile.logout-all');
-    Route::view('/reports/preview', 'bk.report')->name('report');
 });
 
 // Frontend Preview Fallback

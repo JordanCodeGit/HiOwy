@@ -312,7 +312,7 @@
 <div class="pt-4 border-t border-surface-container/60 flex flex-col sm:flex-row items-center gap-3">
 <button class="w-full sm:w-auto flex-1 px-5 py-3.5 bg-primary hover:bg-inverse-surface text-on-primary rounded-xl font-title-md text-title-md font-semibold transition-all shadow-xs flex items-center justify-center gap-2.5 cursor-pointer" type="button" @click="openPosterA4()">
 <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-<span>Unduh Poster Panduan PDF (A4)</span>
+<span>Unduh Poster Panduan PDF (A4 Landscape)</span>
 </button>
 <button class="w-full sm:w-auto flex-1 px-5 py-3.5 bg-secondary-fixed text-on-secondary-fixed-variant hover:bg-secondary-fixed-dim rounded-xl font-title-md text-title-md font-semibold transition-all flex items-center justify-center gap-2.5 cursor-pointer" type="button" @click="downloadQrPng()">
 <span class="material-symbols-outlined text-[20px]">image</span>
@@ -596,15 +596,47 @@
 <div class="relative">
 <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
 <select x-model="staffClass" class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 appearance-none transition-all cursor-pointer" id="edit-select-kelas-binaan">
+<optgroup label="Kelas 7">
 <option value="7A">Kelas 7A</option>
 <option value="7B">Kelas 7B</option>
+<option value="7C">Kelas 7C</option>
+<option value="7D">Kelas 7D</option>
+<option value="7E">Kelas 7E</option>
+<option value="7F">Kelas 7F</option>
+<option value="7G">Kelas 7G</option>
+<option value="7H">Kelas 7H</option>
+<option value="7I">Kelas 7I</option>
+<option value="7J">Kelas 7J</option>
+</optgroup>
+<optgroup label="Kelas 8">
 <option value="8A">Kelas 8A</option>
 <option value="8B">Kelas 8B</option>
+<option value="8C">Kelas 8C</option>
+<option value="8D">Kelas 8D</option>
+<option value="8E">Kelas 8E</option>
+<option value="8F">Kelas 8F</option>
+<option value="8G">Kelas 8G</option>
+<option value="8H">Kelas 8H</option>
+<option value="8I">Kelas 8I</option>
+<option value="8J">Kelas 8J</option>
+</optgroup>
+<optgroup label="Kelas 9">
 <option value="9A">Kelas 9A</option>
 <option value="9B">Kelas 9B</option>
+<option value="9C">Kelas 9C</option>
+<option value="9D">Kelas 9D</option>
+<option value="9E">Kelas 9E</option>
+<option value="9F">Kelas 9F</option>
+<option value="9G">Kelas 9G</option>
+<option value="9H">Kelas 9H</option>
+<option value="9I">Kelas 9I</option>
+<option value="9J">Kelas 9J</option>
+</optgroup>
+<optgroup label="Kelas Lanjutan">
 <option value="10A">Kelas 10A</option>
 <option value="11A">Kelas 11A</option>
 <option value="12A">Kelas 12A</option>
+</optgroup>
 </select>
 </div>
 </div>
@@ -731,15 +763,47 @@
 <div class="relative">
 <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
 <select x-model="staffClass" class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 appearance-none transition-all cursor-pointer" id="invite-select-kelas-binaan">
+<optgroup label="Kelas 7">
 <option value="7A">Kelas 7A</option>
 <option value="7B">Kelas 7B</option>
+<option value="7C">Kelas 7C</option>
+<option value="7D">Kelas 7D</option>
+<option value="7E">Kelas 7E</option>
+<option value="7F">Kelas 7F</option>
+<option value="7G">Kelas 7G</option>
+<option value="7H">Kelas 7H</option>
+<option value="7I">Kelas 7I</option>
+<option value="7J">Kelas 7J</option>
+</optgroup>
+<optgroup label="Kelas 8">
 <option value="8A">Kelas 8A</option>
 <option value="8B">Kelas 8B</option>
+<option value="8C">Kelas 8C</option>
+<option value="8D">Kelas 8D</option>
+<option value="8E">Kelas 8E</option>
+<option value="8F">Kelas 8F</option>
+<option value="8G">Kelas 8G</option>
+<option value="8H">Kelas 8H</option>
+<option value="8I">Kelas 8I</option>
+<option value="8J">Kelas 8J</option>
+</optgroup>
+<optgroup label="Kelas 9">
 <option value="9A">Kelas 9A</option>
 <option value="9B">Kelas 9B</option>
+<option value="9C">Kelas 9C</option>
+<option value="9D">Kelas 9D</option>
+<option value="9E">Kelas 9E</option>
+<option value="9F">Kelas 9F</option>
+<option value="9G">Kelas 9G</option>
+<option value="9H">Kelas 9H</option>
+<option value="9I">Kelas 9I</option>
+<option value="9J">Kelas 9J</option>
+</optgroup>
+<optgroup label="Kelas Lanjutan">
 <option value="10A">Kelas 10A</option>
 <option value="11A">Kelas 11A</option>
 <option value="12A">Kelas 12A</option>
+</optgroup>
 </select>
 </div>
 </div>
