@@ -106,9 +106,13 @@ Route::prefix('kesiswaan')->name('kesiswaan.')->middleware('role:kesiswaan')->co
 
 Route::get('/s/qr', [BkManageController::class, 'handleQrScan'])->name('public.qr');
 Route::get('/s/lapor', [BkManageController::class, 'showPublicReport'])->name('public.report');
+Route::post('/s/lapor', [BkManageController::class, 'storePublicReport'])->name('public.report.store');
+Route::match(['get', 'post'], '/s/lapor/track', [BkManageController::class, 'trackReport'])->name('public.report.track');
+Route::get('/s/pelajari', [BkLearnController::class, 'showPublic'])->name('public.learn.default');
 Route::get('/s/{code}/pelajari', [BkLearnController::class, 'showPublic'])->name('public.learn');
 Route::get('/s/{code}/qr', [BkManageController::class, 'handleQrScan']);
 Route::get('/s/{code}/lapor', [BkManageController::class, 'showPublicReport']);
+Route::post('/s/{code}/lapor', [BkManageController::class, 'storePublicReport']);
 
 // Wali Kelas Portal
 Route::prefix('wali-kelas')->name('walas.')->middleware('role:walas')->controller(WaliKelasPreviewController::class)->group(function () {

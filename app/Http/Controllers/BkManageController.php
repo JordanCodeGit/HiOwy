@@ -7,6 +7,7 @@ use App\Models\IncidentCategory;
 use App\Models\IncidentLocation;
 use App\Models\SchoolSetting;
 use App\Models\StaffMember;
+use App\Models\StudentReport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class BkManageController extends Controller
@@ -675,6 +677,178 @@ class BkManageController extends Controller
             'categories' => $categories,
             'locations'  => $locations,
             'fromQr'     => $fromQr,
+        ]);
+    }
+
+    /**
+     * Menyimpan aduan siswa publik secara aman.
+     */
+    public function storePublicReport(Request $request): JsonResponse|RedirectResponse
+    {
+        $request->validate([
+            'category'         => ['required', 'string', 'max:120'],
+            'location'         => ['required', 'string', 'max:120'],
+            'story'            => ['required', 'string', 'min:5'],
+            'urgency'          => ['nullable', 'string', 'max:32'],
+            'reporter_role'    => ['nullable', 'string', 'max:64'],
+            'incident_time'    => ['nullable', 'string', 'max:120'],
+            'is_anonymous'     => ['nullable'],
+            'reporter_name'    => ['nullable', 'string', 'max:120'],
+            'reporter_class'   => ['nullable', 'string', 'max:32'],
+            'reporter_contact' => ['nullable', 'string', 'max:64'],
+            'attachment'       => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
+        ], [
+            'category.required' => 'Pilih jenis kejadian yang terjadi.',
+            'location.required' => 'Pilih titik lokasi kejadian.',
+            'story.required'    => 'Ceritakan apa yang terjadi pada kolom cerita.',
+            'story.min'         => 'Ceritakan kejadian dengan sedikit lebih rinci (minimal 5 karakter).',
+            'attachment.max'    => 'Ukuran berkas lampiran maksimal 5MB.',
+            'attachment.mimes'  => 'Format lampiran harus berupa JPG, PNG, WEBP, atau PDF.',
+        ]);
+
+        $isAnonymous = filter_var($request->input('is_anonymous', true), FILTER_VALIDATE_BOOLEAN);
+        $schoolName = Auth::user()->school_name ?? 'SMP Telkom Purwokerto';
+        $fromQr = (bool) $request->input('from_qr', session('from_qr', false));
+
+        // Generate Ticket Code, e.g. SR-2026-8043
+        $ticketCode = 'SR-' . date('Y') . '-' . mt_rand(1000, 9999);
+
+        // Handle attachment upload
+        $attachmentPath = null;
+        if ($request->hasFile('attachment') && $request->file('attachment')->isValid()) {
+            $file = $request->file('attachment');
+            $filename = 'report_' . time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/reports'), $filename);
+            $attachmentPath = 'uploads/reports/' . $filename;
+        }
+
+        $reportData = [
+            'ticket_code'      => $ticketCode,
+            'school_name'      => $schoolName,
+            'category'         => $request->input('category'),
+            'location'         => $request->input('location'),
+            'urgency'          => $request->input('urgency', 'Sedang'),
+            'reporter_role'    => $request->input('reporter_role', 'Siswa (Korban Langsung)'),
+            'incident_time'    => $request->input('incident_time', 'Hari ini'),
+            'story'            => $request->input('story'),
+            'is_anonymous'     => $isAnonymous,
+            'reporter_name'    => $isAnonymous ? null : $request->input('reporter_name'),
+            'reporter_class'   => $isAnonymous ? null : $request->input('reporter_class'),
+            'reporter_contact' => $isAnonymous ? null : $request->input('reporter_contact'),
+            'attachment_path'  => $attachmentPath,
+            'status'           => 'belum_dibaca',
+            'notes'            => null,
+            'from_qr'          => $fromQr,
+            'ip_address'       => $request->ip(),
+            'created_at'       => now()->toDateTimeString(),
+            'updated_at'       => now()->toDateTimeString(),
+        ];
+
+        // Save to MySQL DB if available
+        try {
+            if (Schema::hasTable('student_reports')) {
+                StudentReport::create($reportData);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Gagal menyimpan StudentReport ke DB: ' . $e->getMessage());
+        }
+
+        // Always save to JSON fallback storage
+        $jsonPath = storage_path('framework/student_reports.json');
+        $existing = [];
+        if (file_exists($jsonPath)) {
+            $existing = json_decode(file_get_contents($jsonPath), true) ?: [];
+        }
+        $existing[] = $reportData;
+        @file_put_contents($jsonPath, json_encode($existing, JSON_PRETTY_PRINT));
+
+        $message = 'Aduanmu telah berhasil dikirimkan ke Guru BK. Identitasmu terjaga aman.';
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success'     => true,
+                'message'     => $message,
+                'ticket_code' => $ticketCode,
+                'data'        => [
+                    'ticket_code'   => $ticketCode,
+                    'category'      => $reportData['category'],
+                    'location'      => $reportData['location'],
+                    'urgency'       => $reportData['urgency'],
+                    'is_anonymous'  => $isAnonymous,
+                    'created_at'    => now()->translatedFormat('d M Y, H:i') . ' WIB',
+                ],
+            ]);
+        }
+
+        return redirect()->route('public.report')->with([
+            'submitted_ticket' => $ticketCode,
+            'submitted_category' => $reportData['category'],
+            'submitted_location' => $reportData['location'],
+            'submitted_urgency'  => $reportData['urgency'],
+            'status' => $message,
+        ]);
+    }
+
+    /**
+     * Cek status tindak lanjut aduan siswa berdasarkan kode tiket.
+     */
+    public function trackReport(Request $request): JsonResponse
+    {
+        $rawCode = trim((string) $request->input('ticket_code', ''));
+        $ticketCode = strtoupper($rawCode);
+        if (!str_starts_with($ticketCode, 'SR-') && !str_starts_with($ticketCode, '#SR-')) {
+            $ticketCode = 'SR-' . ltrim($ticketCode, '#');
+        }
+        $cleanCode = ltrim($ticketCode, '#');
+
+        $report = null;
+
+        try {
+            if (Schema::hasTable('student_reports')) {
+                $report = StudentReport::where('ticket_code', $cleanCode)->first();
+            }
+        } catch (\Throwable $e) {}
+
+        if (!$report) {
+            $jsonPath = storage_path('framework/student_reports.json');
+            if (file_exists($jsonPath)) {
+                $existing = json_decode(file_get_contents($jsonPath), true) ?: [];
+                foreach ($existing as $item) {
+                    if (strtoupper($item['ticket_code']) === strtoupper($cleanCode)) {
+                        $report = (object) $item;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!$report) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode tiket ' . e($rawCode) . ' tidak ditemukan. Periksa kembali kode tiket Anda.',
+            ], 404);
+        }
+
+        $statusLabels = [
+            'belum_dibaca'    => 'Menunggu Telaah Konselor',
+            'sedang_diproses' => 'Sedang Ditindaklanjuti Tim BK',
+            'selesai'         => 'Penanganan Selesai',
+            'iseng'           => 'Tidak Valid / Diarsipkan',
+        ];
+
+        return response()->json([
+            'success' => true,
+            'ticket'  => [
+                'code'          => $report->ticket_code,
+                'status'        => $report->status,
+                'status_label'  => $statusLabels[$report->status] ?? 'Sedang Diproses',
+                'category'      => $report->category,
+                'location'      => $report->location,
+                'urgency'       => $report->urgency,
+                'incident_time' => $report->incident_time ?? 'Tidak disebutkan',
+                'created_at'    => date('d M Y, H:i', strtotime($report->created_at ?? now())) . ' WIB',
+                'notes'         => !empty($report->notes) ? $report->notes : 'Tim Guru BK telah mengagendakan observasi tertutup.',
+            ],
         ]);
     }
 
