@@ -108,7 +108,7 @@
 </div>
 <div class="p-3 rounded-lg bg-surface-container flex flex-col gap-1">
 <span class="font-label-sm text-label-sm text-on-surface-variant">Instansi Sekolah</span>
-<span class="font-label-md text-label-md text-on-surface font-semibold truncate">{{ $user->school_name ?? 'SMA Lincoln Senior High' }}</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">{{ $schoolName ?? 'SMP Telkom Purwokerto' }}</span>
 </div>
 </div>
 
@@ -228,7 +228,7 @@
 <div class="flex flex-col gap-1.5">
 <label class="font-label-md text-label-md text-on-surface font-medium" for="newPass">Kata Sandi Baru</label>
 <div class="relative">
-<input class="w-full pl-3.5 pr-10 py-2.5 bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-md text-body-md rounded-lg shadow-xs focus:outline-none border border-outline-variant/40 focus:border-secondary transition-all" id="newPass" name="password" minlength="8" autocomplete="new-password" placeholder="Minimal 8 karakter" required="" type="password">
+<input class="w-full pl-3.5 pr-10 py-2.5 bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-md text-body-md rounded-lg shadow-xs focus:outline-none border border-outline-variant/40 focus:border-secondary transition-all" id="newPass" name="password" minlength="10" autocomplete="new-password" placeholder="Minimal 10 karakter" required="" type="password">
 <button aria-label="Tampilkan kata sandi baru" class="absolute right-3 top-2.5 text-outline hover:text-on-surface transition-colors cursor-pointer" type="button" @click="togglePassword($el)">
 <span class="material-symbols-outlined text-[20px]">visibility</span>
 </button>
@@ -248,7 +248,7 @@
 
 <div class="p-3 rounded-lg bg-surface-container text-on-surface-variant font-body-sm text-body-sm flex items-center gap-2">
 <span class="material-symbols-outlined text-outline text-[18px]">verified</span>
-<span>Kriteria ketat: Minimal 8 karakter kombinasi huruf kapital, kecil, angka, dan simbol khusus.</span>
+<span>Kriteria ketat: Minimal 10 karakter kombinasi huruf kapital, kecil, angka, dan simbol khusus.</span>
 </div>
 
 <div class="pt-2 flex justify-end">

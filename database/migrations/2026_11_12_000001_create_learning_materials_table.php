@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('audience')->default('siswa'); // siswa, orang_tua, umum
             $table->text('content');
             $table->boolean('is_visible')->default(true);
-            $table->string('author_name')->default('Sarah Jenkins, M.Pd.');
+            $table->string('author_name')->default('Guru BK');
             $table->foreignId('author_id')->nullable()->constrained('users')->nullOnDelete();
             $table->unsignedInteger('views_count')->default(0);
             $table->timestamps();

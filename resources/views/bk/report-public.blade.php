@@ -40,6 +40,15 @@
 
     <!-- Main Container -->
     <main class="max-w-2xl w-full mx-auto p-4 sm:p-6 my-4 sm:my-6 flex-1 flex flex-col gap-5">
+        @if(!empty($trainingMode))
+        <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center gap-2.5 shadow-xs">
+            <span class="material-symbols-outlined text-lg text-amber-700 shrink-0">science</span>
+            <div>
+                <strong class="font-bold">Mode Latihan / Simulasi Aktif:</strong>
+                <span>Laporan uji coba yang kamu kirim saat ini tidak akan masuk ke daftar aduan asli sekolah maupun mengirim peringatan darurat.</span>
+            </div>
+        </div>
+        @endif
 
         <!-- Navigation Tabs: Buat Aduan vs Lacak Tiket -->
         <div class="flex items-center justify-center p-1 bg-surface-container-low rounded-2xl max-w-sm mx-auto w-full shadow-2xs border border-surface-container">
@@ -131,19 +140,6 @@
                     </p>
                 </div>
 
-                <!-- QR Origin Notice -->
-                @if ($fromQr)
-                <div class="p-3.5 bg-secondary-fixed/20 border border-secondary/30 rounded-xl flex items-center gap-3">
-                    <span class="material-symbols-outlined text-secondary text-[24px]">qr_code_scanner</span>
-                    <div class="flex flex-col">
-                        <span class="text-xs font-bold text-on-surface">Terhubung melalui Kode QR Resmi Sekolah</span>
-                        <p class="text-[11px] text-on-surface-variant leading-snug">
-                            Kanal pelaporan ini otomatis disinkronkan ke ruang konselor {{ $schoolName }}.
-                        </p>
-                    </div>
-                </div>
-                @endif
-
                 <!-- Feedback Error Banner -->
                 <div x-cloak x-show="errorMessage" class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-lg shrink-0">error</span>
@@ -153,7 +149,10 @@
                 <!-- Form -->
                 <form @submit.prevent="submitReport()" class="flex flex-col gap-5">
                     @csrf
-                    <input type="hidden" name="from_qr" value="{{ $fromQr ? '1' : '0' }}">
+                    <div class="hidden" aria-hidden="true">
+                        <label for="website-field">Website</label>
+                        <input id="website-field" type="text" name="website" x-model="website" tabindex="-1" autocomplete="off">
+                    </div>
 
                     <!-- 1. Jenis Kejadian -->
                     <div class="flex flex-col gap-1.5">
@@ -220,6 +219,14 @@
                                 </div>
                             </label>
                         </div>
+                        <div x-cloak x-show="urgency === 'Darurat'" x-transition class="mt-1 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900">
+                            <label class="flex items-start gap-2.5 text-xs cursor-pointer">
+                                <input type="checkbox" x-model="dangerConfirmed" class="mt-0.5 rounded text-rose-600 focus:ring-rose-500 border-rose-300">
+                                <span>
+                                    <strong class="font-bold">Konfirmasi Darurat:</strong> Saya menyatakan kejadian ini melibatkan ancaman fisik atau bahaya mendesak yang perlu notifikasi segera ke Guru BK.
+                                </span>
+                            </label>
+                        </div>
                     </div>
 
                     <!-- 4. Peran Pelapor & Waktu Kejadian -->
@@ -246,56 +253,21 @@
                         </div>
                     </div>
 
-                    <!-- 5. Cerita Kejadian -->
+                    <!-- 5. Pihak Terlibat (Opsional) -->
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center justify-between">
+                            <span>Pihak yang Terlibat / Saksi <span class="text-[11px] font-normal text-slate-400 normal-case">(Opsional)</span></span>
+                        </label>
+                        <input type="text" x-model="involvedParties" placeholder="Misal: Kakak kelas, teman sekelas, atau nama jika ingin disebutkan" class="w-full px-4 py-3 bg-surface-container-low text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/40 focus:ring-2 focus:ring-secondary focus:outline-none">
+                    </div>
+
+                    <!-- 6. Cerita Kejadian -->
                     <div class="flex flex-col gap-1.5">
                         <div class="flex items-center justify-between">
                             <label class="text-xs font-bold text-on-surface uppercase tracking-wider">Ceritakan Apa yang Terjadi <span class="text-red-500">*</span></label>
                             <span class="text-[11px] text-slate-400" x-text="story.length + ' karakter'"></span>
                         </div>
                         <textarea x-model="story" required rows="5" placeholder="Tuliskan dengan tenang apa yang kamu rasakan atau saksikan. Ceritakan apa adanya, tim konselor mendengarkan tanpa menghakimi..." class="w-full p-4 bg-surface-container-low text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/40 focus:ring-2 focus:ring-secondary focus:outline-none leading-relaxed transition-all"></textarea>
-                    </div>
-
-                    <!-- 6. Lampiran Bukti / Screenshot Chat (Opsional) -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center justify-between">
-                            <span>Lampiran Foto Bukti / Screenshot Chat <span class="text-[11px] font-normal text-slate-400 normal-case">(Opsional)</span></span>
-                        </label>
-                        <div class="p-3.5 bg-surface-container-low rounded-xl border border-dashed border-slate-300 flex flex-col items-center justify-center text-center gap-2">
-                            <!-- Preview if file selected -->
-                            <template x-if="attachmentPreview">
-                                <div class="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200 w-full max-w-sm">
-                                    <template x-if="attachmentIsImage">
-                                        <img :src="attachmentPreview" alt="Preview Lampiran" class="w-12 h-12 object-cover rounded-md border border-slate-100">
-                                    </template>
-                                    <template x-if="!attachmentIsImage">
-                                        <div class="w-12 h-12 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                                            <span class="material-symbols-outlined text-xl">description</span>
-                                        </div>
-                                    </template>
-                                    <div class="flex-1 min-w-0 text-left">
-                                        <p class="text-xs font-semibold text-slate-800 truncate" x-text="attachmentName"></p>
-                                        <p class="text-[10px] text-slate-400" x-text="attachmentSize"></p>
-                                    </div>
-                                    <button type="button" @click="removeAttachment()" class="text-slate-400 hover:text-red-600 p-1 rounded-md transition-colors cursor-pointer" title="Hapus berkas">
-                                        <span class="material-symbols-outlined text-lg">close</span>
-                                    </button>
-                                </div>
-                            </template>
-
-                            <!-- Input file trigger if no file -->
-                            <template x-if="!attachmentPreview">
-                                <div class="flex flex-col items-center gap-1.5 py-1">
-                                    <span class="material-symbols-outlined text-2xl text-slate-400">upload_file</span>
-                                    <p class="text-xs text-slate-600 font-medium">Unggah bukti screenshot chat, foto kejadian, atau surat</p>
-                                    <p class="text-[10px] text-slate-400">Format JPG, PNG, WEBP, PDF. Maksimal 5MB.</p>
-                                    <button type="button" @click="$refs.attachmentInput.click()" class="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold shadow-2xs transition-all cursor-pointer">
-                                        <span class="material-symbols-outlined text-sm text-blue-600">add_photo_alternate</span>
-                                        <span>Pilih Berkas Lampiran</span>
-                                    </button>
-                                </div>
-                            </template>
-                            <input type="file" x-ref="attachmentInput" @change="handleAttachment($event)" accept="image/png,image/jpeg,image/webp,application/pdf" class="hidden">
-                        </div>
                     </div>
 
                     <!-- 7. Pengaturan Anonimitas -->
@@ -388,8 +360,15 @@
                         </div>
                     </div>
 
+                    @if(!empty($turnstileSiteKey))
+                    <div class="pt-1">
+                        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                        <div class="cf-turnstile" data-sitekey="{{ $turnstileSiteKey }}"></div>
+                    </div>
+                    @endif
+
                     <!-- Submit Button -->
-                    <button type="submit" :disabled="submitting" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-75 text-white rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer mt-1">
+                    <button type="submit" :disabled="submitting || (urgency === 'Darurat' && !dangerConfirmed)" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer mt-1">
                         <template x-if="submitting">
                             <span class="inline-flex items-center gap-2">
                                 <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
@@ -426,7 +405,7 @@
             <form @submit.prevent="searchTicket()" class="flex flex-col sm:flex-row gap-2.5">
                 <div class="relative flex-1">
                     <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">tag</span>
-                    <input type="text" x-model="searchCode" required placeholder="Masukkan nomor tiket (contoh: SR-2026-8042)" class="w-full pl-10 pr-4 py-3 bg-surface-container-low text-slate-800 rounded-xl text-xs sm:text-sm border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase font-mono tracking-wider">
+                    <input type="text" x-model="searchCode" required maxlength="16" placeholder="Masukkan 10 karakter kode laporan (cth: 7K9M4P2WXR)" class="w-full pl-10 pr-4 py-3 bg-surface-container-low text-slate-800 rounded-xl text-xs sm:text-sm border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase font-mono tracking-wider">
                 </div>
                 <button type="submit" :disabled="tracking" class="py-3 px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-2xs">
                     <template x-if="tracking">
@@ -445,56 +424,65 @@
                 <span x-text="trackError"></span>
             </div>
 
-            <!-- Tracking Result Box -->
+            <!-- Tracking Result Box (hanya status & pesan BK <-> Pelapor) -->
             <div x-cloak x-show="ticketData" class="p-5 rounded-2xl bg-surface-container-low border border-slate-200 flex flex-col gap-4 animate-in fade-in duration-200">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-400 font-medium">Tiket Terverifikasi:</span>
-                        <span class="font-mono font-bold text-sm text-slate-900" x-text="'#' + ticketData?.code"></span>
+                        <span class="text-xs text-slate-500 font-medium">Status Penanganan Laporan</span>
                     </div>
                     <span class="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
                           :class="{
                               'bg-amber-100 text-amber-800 border border-amber-200': ticketData?.status === 'belum_dibaca',
-                              'bg-blue-100 text-blue-800 border border-blue-200': ticketData?.status === 'sedang_diproses',
-                              'bg-emerald-100 text-emerald-800 border border-emerald-200': ticketData?.status === 'selesai',
-                              'bg-slate-100 text-slate-700': ticketData?.status === 'iseng'
+                              'bg-sky-100 text-sky-800 border border-sky-200': ticketData?.status === 'dibaca',
+                              'bg-blue-100 text-blue-800 border border-blue-200': ticketData?.status === 'ditindaklanjuti',
+                              'bg-emerald-100 text-emerald-800 border border-emerald-200': ticketData?.status === 'selesai'
                           }">
                         <span class="w-1.5 h-1.5 rounded-full"
                               :class="{
                                   'bg-amber-600': ticketData?.status === 'belum_dibaca',
-                                  'bg-blue-600 animate-pulse': ticketData?.status === 'sedang_diproses',
-                                  'bg-emerald-600': ticketData?.status === 'selesai',
-                                  'bg-slate-400': ticketData?.status === 'iseng'
+                                  'bg-sky-600': ticketData?.status === 'dibaca',
+                                  'bg-blue-600 animate-pulse': ticketData?.status === 'ditindaklanjuti',
+                                  'bg-emerald-600': ticketData?.status === 'selesai'
                               }"></span>
                         <span x-text="ticketData?.status_label"></span>
                     </span>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div>
-                        <span class="text-slate-400 block">Kategori</span>
-                        <span class="font-semibold text-slate-800 block truncate" x-text="ticketData?.category"></span>
-                    </div>
-                    <div>
-                        <span class="text-slate-400 block">Lokasi</span>
-                        <span class="font-semibold text-slate-800 block truncate" x-text="ticketData?.location"></span>
-                    </div>
-                    <div>
-                        <span class="text-slate-400 block">Tingkat Urgensi</span>
-                        <span class="font-semibold text-slate-800 block" x-text="ticketData?.urgency"></span>
-                    </div>
-                    <div>
-                        <span class="text-slate-400 block">Tanggal Masuk</span>
-                        <span class="font-semibold text-slate-800 block truncate" x-text="ticketData?.created_at"></span>
-                    </div>
-                </div>
-
-                <div class="p-3.5 bg-white rounded-xl border border-slate-200/80 flex flex-col gap-1">
+                <div class="flex flex-col gap-2.5">
                     <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[15px] text-blue-600">support_agent</span>
-                        <span>Catatan Perkembangan Tim BK</span>
+                        <span class="material-symbols-outlined text-[15px] text-blue-600">forum</span>
+                        <span>Pesan Guru BK &amp; Pelapor</span>
                     </span>
-                    <p class="text-xs text-slate-600 leading-relaxed" x-text="ticketData?.notes || 'Tim Konselor telah mencatat laporanmu dan menjadwalkan pemantauan tertutup.'"></p>
+
+                    <template x-if="!ticketData?.messages || ticketData.messages.length === 0">
+                        <div class="p-3.5 bg-white rounded-xl border border-slate-200/80 text-xs text-slate-500">
+                            Belum ada pesan dari Guru BK.
+                        </div>
+                    </template>
+
+                    <template x-for="(msg, idx) in (ticketData?.messages || [])" :key="idx">
+                        <div class="p-3.5 rounded-xl border flex flex-col gap-1"
+                             :class="msg.sender === 'bk' ? 'bg-white border-blue-200/80' : 'bg-blue-50/60 border-blue-200'">
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="font-bold" :class="msg.sender === 'bk' ? 'text-blue-700' : 'text-slate-800'" x-text="msg.sender_label"></span>
+                                <span class="text-slate-400" x-text="msg.date"></span>
+                            </div>
+                            <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-line" x-text="msg.body"></p>
+                        </div>
+                    </template>
+
+                    <form x-show="ticketData && !ticketData.archived" @submit.prevent="sendReporterReply()" class="pt-2 border-t border-slate-200/80 flex flex-col gap-2">
+                        <label class="text-[11px] font-semibold text-slate-700">Kirim Balasan / Info Tambahan ke Guru BK</label>
+                        <textarea x-model="replyBody" rows="2" maxlength="2000" required placeholder="Tulis pesan balasan untuk Guru BK..." class="w-full p-2.5 bg-white text-slate-800 rounded-xl text-xs border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                        <div class="flex items-center justify-between gap-2">
+                            <span x-show="replyError" x-text="replyError" class="text-[11px] text-red-600"></span>
+                            <span x-show="replySuccess" x-text="replySuccess" class="text-[11px] text-emerald-700 font-medium"></span>
+                            <button type="submit" :disabled="replying || !replyBody.trim()" class="ml-auto px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-semibold transition-colors cursor-pointer">
+                                <span x-show="!replying">Kirim Balasan</span>
+                                <span x-show="replying">Mengirim...</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -520,67 +508,32 @@
                 // Form fields
                 category: '',
                 location: '',
+                involvedParties: '',
                 urgency: 'Sedang',
+                dangerConfirmed: false,
                 reporterRole: 'Siswa (Korban Langsung)',
                 incidentTime: 'Hari ini saat istirahat',
                 story: '',
+                website: '',
                 isAnonymous: true,
                 reporterName: '',
                 reporterClass: '',
                 reporterContact: '',
 
-                // Attachment state
-                attachmentFile: null,
-                attachmentPreview: null,
-                attachmentName: '',
-                attachmentSize: '',
-                attachmentIsImage: false,
-
                 // Tracking tab
                 searchCode: '',
                 ticketData: null,
-
-                handleAttachment(event) {
-                    const file = event.target.files[0];
-                    if (!file) return;
-
-                    if (file.size > 5 * 1024 * 1024) {
-                        alert('Ukuran berkas maksimal 5MB.');
-                        event.target.value = '';
-                        return;
-                    }
-
-                    this.attachmentFile = file;
-                    this.attachmentName = file.name;
-                    this.attachmentSize = (file.size / 1024 < 1024) 
-                        ? (file.size / 1024).toFixed(1) + ' KB' 
-                        : (file.size / (1024 * 1024)).toFixed(1) + ' MB';
-                    this.attachmentIsImage = file.type.startsWith('image/');
-
-                    if (this.attachmentIsImage) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.attachmentPreview = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    } else {
-                        this.attachmentPreview = 'file';
-                    }
-                },
-
-                removeAttachment() {
-                    this.attachmentFile = null;
-                    this.attachmentPreview = null;
-                    this.attachmentName = '';
-                    this.attachmentSize = '';
-                    this.attachmentIsImage = false;
-                    if (this.$refs.attachmentInput) {
-                        this.$refs.attachmentInput.value = '';
-                    }
-                },
+                replyBody: '',
+                replying: false,
+                replyError: '',
+                replySuccess: '',
 
                 async submitReport() {
                     if (this.submitting) return;
+                    if (this.urgency === 'Darurat' && !this.dangerConfirmed) {
+                        this.errorMessage = 'Centang kotak konfirmasi darurat terlebih dahulu sebelum mengirim laporan Darurat.';
+                        return;
+                    }
                     this.submitting = true;
                     this.errorMessage = '';
 
@@ -588,20 +541,26 @@
                         const formData = new FormData();
                         formData.append('category', this.category);
                         formData.append('location', this.location);
+                        if (this.involvedParties.trim()) {
+                            formData.append('involved_parties', this.involvedParties);
+                        }
                         formData.append('urgency', this.urgency);
                         formData.append('reporter_role', this.reporterRole);
                         formData.append('incident_time', this.incidentTime);
                         formData.append('story', this.story);
+                        formData.append('website', this.website);
+                        formData.append('is_training', @json(!empty($trainingMode)) ? '1' : '0');
                         formData.append('is_anonymous', this.isAnonymous ? '1' : '0');
+
+                        const turnstileEl = document.querySelector('[name="cf-turnstile-response"]');
+                        if (turnstileEl && turnstileEl.value) {
+                            formData.append('cf-turnstile-response', turnstileEl.value);
+                        }
 
                         if (!this.isAnonymous) {
                             formData.append('reporter_name', this.reporterName);
                             formData.append('reporter_class', this.reporterClass);
                             formData.append('reporter_contact', this.reporterContact);
-                        }
-
-                        if (this.attachmentFile) {
-                            formData.append('attachment', this.attachmentFile);
                         }
 
                         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -634,9 +593,9 @@
 
                 copyTicketCode() {
                     navigator.clipboard.writeText(this.ticketCode).then(() => {
-                        alert('Nomor tiket ' + this.ticketCode + ' berhasil disalin!');
+                        alert('Kode laporan ' + this.ticketCode + ' berhasil disalin!');
                     }).catch(() => {
-                        prompt('Salin nomor tiket Anda:', this.ticketCode);
+                        prompt('Salin kode laporan Anda:', this.ticketCode);
                     });
                 },
 
@@ -650,13 +609,15 @@
                     this.submitted = false;
                     this.category = '';
                     this.location = '';
+                    this.involvedParties = '';
                     this.urgency = 'Sedang';
+                    this.dangerConfirmed = false;
                     this.story = '';
+                    this.website = '';
                     this.isAnonymous = true;
                     this.reporterName = '';
                     this.reporterClass = '';
                     this.reporterContact = '';
-                    this.removeAttachment();
                 },
 
                 async searchTicket() {
@@ -685,6 +646,47 @@
                         this.trackError = 'Gagal melacak tiket. Periksa koneksi jaringan Anda.';
                     } finally {
                         this.tracking = false;
+                    }
+                },
+
+                async sendReporterReply() {
+                    if (!this.searchCode || !this.replyBody.trim() || this.replying) return;
+                    this.replying = true;
+                    this.replyError = '';
+                    this.replySuccess = '';
+
+                    try {
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                        const response = await fetch('{{ route('public.report.reply') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                            },
+                            body: JSON.stringify({
+                                ticket_code: this.searchCode,
+                                body: this.replyBody,
+                            }),
+                        });
+
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            this.replyBody = '';
+                            this.replySuccess = data.message || 'Balasan terkirim ke Guru BK.';
+                            if (data.messages && this.ticketData) {
+                                this.ticketData.messages = data.messages;
+                            } else {
+                                await this.searchTicket();
+                            }
+                        } else {
+                            this.replyError = data.message || 'Gagal mengirim balasan.';
+                        }
+                    } catch (error) {
+                        console.error('Reply error:', error);
+                        this.replyError = 'Gagal mengirim balasan. Periksa koneksi jaringan Anda.';
+                    } finally {
+                        this.replying = false;
                     }
                 }
             };

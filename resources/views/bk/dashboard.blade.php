@@ -1,5 +1,23 @@
-<x-layouts.bk title="Dashboard BK" page="dashboard" mode="dashboard">
+<x-layouts.bk title="Dashboard BK" page="dashboard" mode="dashboard" :report-count="$unreadCount ?? 0">
 <main x-data="bkTable('dashboard')" @bk-search.window="query = $event.detail.query; statusTab = 0; selected = []; currentPage = 1" class="bk-reports-page p-8 w-full source-space-y-6">
+<div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border {{ !empty($isTrainingView) ? 'border-amber-300 bg-amber-50/80' : 'border-slate-200 bg-white' }} px-4 py-3 shadow-xs">
+<div class="flex items-center gap-2.5 text-xs">
+<span class="material-symbols-outlined text-[18px] {{ !empty($isTrainingView) ? 'text-amber-700' : 'text-blue-600' }}">{{ !empty($isTrainingView) ? 'science' : 'verified_user' }}</span>
+@if(!empty($isTrainingView))
+<span class="font-bold text-amber-900">Mode Latihan (Simulasi):</span>
+<span class="text-amber-800">Menampilkan laporan simulasi saja. Tidak tercampur ke data asli maupun mengirim email darurat.</span>
+@else
+<span class="font-semibold text-slate-800">Antrean Laporan Resmi Sekolah</span>
+@if(!empty($trainingSettingActive))
+<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold text-[11px]">Form Publik sedang Mode Latihan</span>
+@endif
+@endif
+</div>
+<div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg text-xs">
+<a href="{{ route('bk.dashboard') }}" class="px-3 py-1.5 rounded-md font-semibold transition-colors {{ empty($isTrainingView) ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">Data Asli</a>
+<a href="{{ route('bk.dashboard', ['mode' => 'latihan']) }}" class="px-3 py-1.5 rounded-md font-semibold transition-colors {{ !empty($isTrainingView) ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">Mode Latihan</a>
+</div>
+</div>
 <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
 <div class="bk-hover-card bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between cursor-pointer transition-all hover:border-blue-300" @click="statusTab = 0; priorityFilter = ''; currentPage = 1; selected = []">
 <div>
@@ -77,18 +95,24 @@
 <div class="px-6 py-3.5 bg-slate-50/70 border-b border-slate-200/80 flex flex-wrap items-center gap-2.5">
 <div class="relative flex-1 min-w-[240px]">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-<input x-model="query" @input="currentPage = 1; selected = []" aria-label="Cari data tabel" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200/60 rounded-lg text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all" placeholder="Cari kode tiket (cth: SR-2024-8042) atau kata kunci..." type="text">
+<input x-model="query" @input="currentPage = 1; selected = []" aria-label="Cari data tabel" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200/60 rounded-lg text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all" placeholder="Cari ID kasus (cth: RPT-0001) atau kata kunci..." type="text">
 </div>
 <div class="relative inline-flex items-center rounded-lg border border-slate-200/60 bg-white transition-all group">
 <span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">category</span>
 <select x-model="categoryFilter" @change="currentPage = 1; selected = []" class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; outline: none; box-shadow: none;">
 <option value="">Jenis: Semua</option>
+@if(isset($categories) && $categories->isNotEmpty())
+@foreach($categories as $cat)
+<option value="{{ strtolower($cat->label) }}">{{ $cat->label }}</option>
+@endforeach
+@else
 <option value="fisik">Fisik</option>
 <option value="verbal">Ejekan &amp; Verbal</option>
 <option value="dikucilkan">Dikucilkan</option>
 <option value="cyber">Cyberbullying</option>
 <option value="pelecehan">Pelecehan</option>
 <option value="lainnya">Lainnya</option>
+@endif
 </select>
 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
 </div>
@@ -177,7 +201,9 @@
         default => 'person'
     };
     $isUnread = in_array($report->status, ['belum_dibaca', 'unread']);
-    $isStale = !in_array($report->status, ['selesai', 'resolved', 'iseng']) && $report->updated_at <= now()->subDays(3);
+    $isStale = !in_array($report->status, ['selesai', 'resolved', 'iseng'])
+        && $report->status_updated_date
+        && $report->status_updated_date->lte(now()->subDays(3));
     $statusType = $isUnread ? 'unread' : (in_array($report->status, ['selesai', 'resolved']) ? 'resolved' : 'in_progress');
 @endphp
 <tr class="hover:bg-slate-50 transition-colors {{ $isUnread && $report->urgency_normalized === 'urgent' ? 'bg-rose-50/20 hover:bg-rose-50/40' : ($isUnread && $report->urgency_normalized === 'medium' ? 'bg-amber-50/15 hover:bg-amber-50/30' : '') }}"
@@ -186,10 +212,11 @@
     data-status="{{ $statusType }}"
     data-urgency="{{ $report->urgency_normalized }}"
     data-category="{{ $report->category_normalized }}"
+    data-category-label="{{ strtolower($report->category) }}"
     data-role="{{ $report->role_normalized }}"
     data-contact="{{ $report->wants_contact ? 'ya' : 'tidak' }}"
     data-stale="{{ $isStale ? '1' : '0' }}"
-    data-date="{{ $report->created_at ? $report->created_at->format('Y-m-d') : '' }}"
+    data-date="{{ $report->submitted_date ? $report->submitted_date->format('Y-m-d') : '' }}"
     x-show="rowVisible({{ $index }})">
 <td class="py-3 px-4 text-center">
 <input x-model="selected" value="{{ $report->id }}" aria-label="Pilih laporan" class="row-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" type="checkbox">
@@ -203,7 +230,7 @@
 @else
 <span class="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100" title="Selesai"></span>
 @endif
-<span>#{{ $report->ticket_code }}</span>
+<span>#{{ $report->case_label }}</span>
 </div>
 </td>
 <td class="py-3 px-3 whitespace-nowrap">
@@ -213,7 +240,10 @@
 </span>
 </td>
 <td class="py-3 px-3 font-medium text-slate-800 whitespace-nowrap">
-{{ $report->category }}
+<div>{{ $report->category }}</div>
+@if($report->ml_status === 'selesai')
+<span class="mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $report->ml_label === 1 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600' }}">{{ $report->ml_badge_label }}</span>
+@endif
 </td>
 <td class="py-3 px-3 text-slate-600 whitespace-nowrap">
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">

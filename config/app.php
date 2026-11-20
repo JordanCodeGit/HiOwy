@@ -99,6 +99,9 @@ return [
 
     'key' => env('APP_KEY'),
 
+    // Pepper HMAC-SHA256 untuk hashing kode laporan publik (backup bersama APP_KEY di luar server).
+    'ticket_pepper' => env('TICKET_PEPPER', env('APP_KEY')),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

@@ -9,10 +9,10 @@
             </button>
         </div>
         <label class="flex flex-col gap-2 text-xs font-semibold text-slate-700">Wali Kelas
-            <select x-model="walasClass" class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500" required>
+            <select x-model="forwardToUserId" class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500" required>
                 @if(!empty($waliKelasList) && count($waliKelasList) > 0)
                     @foreach($waliKelasList as $walas)
-                        <option value="{{ $walas['class'] }}">{{ $walas['label'] }}</option>
+                        <option value="{{ $walas['id'] }}">{{ $walas['label'] }}</option>
                     @endforeach
                 @else
                     <option value="">Belum ada wali kelas terdaftar (Undang staf terlebih dahulu)</option>

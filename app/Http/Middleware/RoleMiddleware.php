@@ -12,17 +12,18 @@ class RoleMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  ...$roles
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (! Auth::check()) {
-            return $next($request);
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Silakan masuk terlebih dahulu.'], 401)
+                : redirect()->guest(route('login'));
         }
 
         $user = Auth::user();
-        $userRole = $user->role ?? 'bk';
+        $normalizedUserRole = $user->normalizedRole();
 
         $roleAliases = [
             'walikelas' => 'walas',
@@ -32,18 +33,17 @@ class RoleMiddleware
             'kesiswaan' => 'kesiswaan',
         ];
 
-        $normalizedUserRole = $roleAliases[$userRole] ?? $userRole;
+        $normalizedAllowedRoles = array_map(
+            fn (string $role) => $roleAliases[strtolower($role)] ?? strtolower($role),
+            $roles
+        );
 
-        $normalizedAllowedRoles = array_map(function ($r) use ($roleAliases) {
-            return $roleAliases[$r] ?? $r;
-        }, $roles);
+        if ($normalizedUserRole === '' || ! in_array($normalizedUserRole, $normalizedAllowedRoles, true)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Anda tidak memiliki izin mengakses halaman ini.'], 403);
+            }
 
-        if (! in_array($normalizedUserRole, $normalizedAllowedRoles, true)) {
-            return match ($normalizedUserRole) {
-                'walas' => redirect()->route('walas.dashboard'),
-                'kesiswaan' => redirect()->route('kesiswaan.dashboard'),
-                default => redirect()->route('bk.dashboard'),
-            };
+            abort(403, 'Anda tidak memiliki hak akses ke halaman ini.');
         }
 
         return $next($request);

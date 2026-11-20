@@ -101,7 +101,7 @@
                                 </label>
                                 <div class="relative flex items-center">
                                     <span class="material-symbols-outlined absolute left-3.5 text-outline text-title-md pointer-events-none">alternate_email</span>
-                                    <input class="w-full pl-11 pr-4 py-3 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-xl outline-hidden shadow-xs focus:shadow-md transition-all placeholder:text-outline-variant border border-outline-variant/30 focus:border-secondary" id="counselor-email" placeholder="konselor.sarah@nusantara.sch.id" required="" type="email" name="email" x-model="email" autocomplete="username">
+                                    <input class="w-full pl-11 pr-4 py-3 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-xl outline-hidden shadow-xs focus:shadow-md transition-all placeholder:text-outline-variant border border-outline-variant/30 focus:border-secondary" id="counselor-email" placeholder="bk@smptelkompwt.sch.id" required="" type="email" name="email" x-model="email" autocomplete="username">
                                 </div>
                             </div>
 
@@ -133,27 +133,10 @@
                                 <span>Lanjutkan ke Verifikasi 2FA</span>
                                 <span class="material-symbols-outlined text-title-md">arrow_forward</span>
                             </button>
-
-                            <!-- Alternative SSO Option -->
-                            <div class="relative flex items-center justify-center my-1">
-                                <div class="w-full bg-outline-variant h-px opacity-30"></div>
-                                <span class="absolute px-3 bg-surface-container-lowest font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Atau</span>
-                            </div>
-
-                            <!-- Google SSO Button -->
-                            <a href="{{ route('auth.google') }}" class="w-full py-3 px-5 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-title-md text-title-md transition-all flex items-center justify-center gap-3 cursor-pointer border border-outline-variant/30">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                                    <path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.15z" fill="#4285F4"></path>
-                                    <path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z" fill="#34A853"></path>
-                                    <path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.98 0 12c0 2.02.45 3.84 1.25 5.42l4.03-3.15z" fill="#FBBC05"></path>
-                                    <path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" fill="#EA4335"></path>
-                                </svg>
-                                <span>Lanjutkan dengan Google</span>
-                            </a>
                         </form>
 
-                        <p class="text-center font-body-sm text-body-sm text-on-surface-variant">
-                            Belum punya akun? <a href="{{ route('register') }}" class="font-semibold text-secondary hover:underline">Daftar akun</a>
+                        <p class="text-center font-body-xs text-body-sm text-on-surface-variant">
+                            Akun staf sekolah hanya dibuat melalui undangan resmi Koordinator BK / Admin Sekolah.
                         </p>
 
                         <!-- Help Support Button -->

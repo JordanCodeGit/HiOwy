@@ -1,25 +1,31 @@
-@props(['portal' => 'bk', 'notifications' => []])
+@props(['portal' => 'bk', 'notifications' => [], 'reportCount' => 0])
 @php
-    $profileName = Auth::user()->name ?? ($portal === 'walas' ? 'Ibu Ratna Dewi, S.Pd.' : 'Sarah Jenkins, M.Pd.');
-    $profileEmail = Auth::user()->email ?? ($portal === 'walas' ? 'ratna.dewi@sman1teladan.sch.id' : 'sarah.jenkins@lincoln.sch.id');
-    $userAvatar = Auth::user()?->avatar;
+    $user = Auth::user();
+    $profileName = $user?->name ?? 'Staf Sekolah';
+    $profileEmail = $user?->email ?? '-';
+    $userAvatar = $user?->avatar;
     $avatarExists = $userAvatar && file_exists(public_path($userAvatar));
     $profileImage = $avatarExists ? $userAvatar : ($portal === 'walas' ? 'images/walas/ratna.jpg' : 'images/bk/counselor.jpg');
-    $walasStaff = Auth::check() && in_array(Auth::user()->role, ['walas', 'wali_kelas', 'walikelas'], true)
-        ? rescue(fn() => \Illuminate\Support\Facades\DB::table('staff_members')->where('email', Auth::user()->email)->first(), null, false)
+    $walasStaff = $user && $user->normalizedRole() === 'walas'
+        ? rescue(fn() => \Illuminate\Support\Facades\DB::table('staff_members')->where('email', strtolower($user->email))->first(), null, false)
         : null;
     $walasTitle = $walasStaff && !empty($walasStaff->class_name) ? 'Wali Kelas ' . $walasStaff->class_name : 'Wali Kelas';
+    $schoolName = \App\Models\SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+    $notifCount = $portal === 'bk'
+        ? rescue(fn() => \App\Models\StudentReport::active()->production()->where('status', 'belum_dibaca')->count(), 0, false)
+        : (int) $reportCount;
 
-    $profileRole = Auth::user()?->role ? match(Auth::user()->role) {
+    $profileRole = $user ? match($user->normalizedRole()) {
         'kesiswaan' => 'Kesiswaan',
-        'walas', 'wali_kelas', 'walikelas' => $walasTitle,
-        default => 'Guru BK / Konselor Inti',
-    } : (['bk' => 'Guru BK / Konselor Inti', 'kesiswaan' => 'Kesiswaan', 'walas' => 'Wali Kelas 8B'][$portal]);
+        'walas' => $walasTitle,
+        'bk' => 'Guru BK / Konselor Inti',
+        default => 'Staf Sekolah',
+    } : 'Staf Sekolah';
 @endphp
 <header class="staff-topbar sticky top-0 z-20 min-h-16 py-2 bg-white/95 backdrop-blur border-b border-slate-200/80 px-4 lg:px-8 flex items-center justify-between">
 <div class="flex items-center gap-3">
 @if($portal !== 'walas')
-<div class="staff-mobile-school"><strong>SMA Lincoln</strong><span>{{ $profileRole }}</span></div>
+<div class="staff-mobile-school"><strong>{{ $schoolName }}</strong><span>{{ $profileRole }}</span></div>
 @endif
 <div class="staff-academic-year inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 text-slate-700 text-xs font-semibold border border-slate-200">
 <span class="material-symbols-outlined text-[16px] text-slate-500">school</span>
@@ -35,14 +41,16 @@
 <div class="relative" id="notificationWrapper">
 <button @click="notificationsOpen = !notificationsOpen; profileOpen = false" :aria-expanded="notificationsOpen" aria-controls="notificationDropdown" aria-label="Notifikasi" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-slate-700 bg-slate-100 hover:bg-slate-200/70 transition-colors cursor-pointer" id="notifBellBtn" type="button">
 <span class="material-symbols-outlined text-[20px]">notifications</span>
+@if($notifCount > 0)
 <span  class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse" x-show="!notificationsRead">
 </span>
+@endif
 </button>
 <div @click.outside="notificationsOpen = false" x-cloak x-show="notificationsOpen" x-transition.opacity class="absolute right-0 mt-2.5 w-[380px] bg-white rounded-2xl shadow-2xl border border-slate-200/80 z-50 overflow-hidden transition-all duration-200 origin-top-right " id="notificationDropdown">
 <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
 <div class="flex items-center gap-2">
 <h3 class="text-sm font-bold text-slate-900">Notifikasi</h3>
-<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-200" x-text="notificationsRead ? '0 Baru' : '3 Baru'">3 Baru</span>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-200" x-text="notificationsRead ? '0 Baru' : '{{ $notifCount }} Baru'">{{ $notifCount }} Baru</span>
 </div>
 <button @click="markNotificationsRead()" class="text-[11px] font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors" id="markAllReadBtn" type="button">
 <span x-text="notificationsRead ? 'Semua Dibaca' : 'Tandai Semua Dibaca'">
@@ -50,7 +58,7 @@
 </button>
 </div>
 <div class="px-4 pt-3 pb-2 flex items-center gap-1.5 border-b border-slate-100 bg-white">
-<button  class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 text-slate-900" type="button" @click="notificationFilter = 'all'" :aria-pressed="notificationFilter === 'all'">Semua (3)</button>
+<button  class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 text-slate-900" type="button" @click="notificationFilter = 'all'" :aria-pressed="notificationFilter === 'all'">Semua</button>
 <button   class="px-2.5 py-1 rounded-md text-[11px] font-semibold text-rose-700 hover:bg-rose-50 transition-colors flex items-center gap-1" type="button" @click="notificationFilter = 'urgent'" :aria-pressed="notificationFilter === 'urgent'">
 <span class="w-1.5 h-1.5 rounded-full bg-rose-600">
 </span> Darurat
@@ -58,63 +66,21 @@
 <button type="button" @click="notificationFilter = 'update'" :aria-pressed="notificationFilter === 'update'" class="px-2.5 py-1 rounded-md text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors">Update</button>
 </div>
 <div class="divide-y divide-slate-100 max-h-[360px] overflow-y-auto">
-<div class="p-3.5 hover:bg-rose-50/30 transition-colors bg-rose-50/15 cursor-pointer flex items-start gap-3" x-show="notificationFilter === 'all' || notificationFilter === 'urgent'">
-<div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5 border border-rose-200">
-<span class="material-symbols-outlined text-[18px] fill-1">e911_emergency</span>
-</div>
-<div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-1">
-<span class="text-[10px] font-bold uppercase tracking-wider text-rose-600">Laporan Darurat Masuk!</span>
-<span class="text-[10px] text-slate-400 whitespace-nowrap">5 menit lalu</span>
-</div>
-<p class="text-xs font-semibold text-slate-900 mt-0.5 line-clamp-2 leading-snug">
-            #SR-2024-8042 - Bullying Fisik di Lorong Kelas 8
-          </p>
-<div class="mt-2 flex items-center gap-2">
-<a  class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-bold bg-rose-600 text-white hover:bg-rose-700 transition-colors shadow-xs"  href="{{ route('bk.report') }}">
-<span>Buka Kasus</span>
-<span class="material-symbols-outlined text-[13px]">arrow_forward</span>
-</a>
-<span  class="w-2 h-2 rounded-full bg-rose-500" title="Belum dibaca" x-show="!notificationsRead">
-</span>
+<div class="p-4 text-center flex flex-col items-center gap-1.5">
+<span class="material-symbols-outlined text-slate-300 text-2xl">notifications_none</span>
+<p class="text-xs font-medium text-slate-600">
+{{ $notifCount > 0 ? "{$notifCount} laporan baru menunggu ditelaah pada antrean aktif." : 'Belum ada notifikasi baru.' }}
+</p>
 </div>
 </div>
-</div>
-<div class="p-3.5 hover:bg-slate-50 transition-colors cursor-pointer flex items-start gap-3" x-show="notificationFilter === 'all' || notificationFilter === 'update'">
-<div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 mt-0.5 border border-amber-200">
-<span class="material-symbols-outlined text-[18px] fill-1">edit_note</span>
-</div>
-<div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-1">
-<span class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Pembaruan Kasus</span>
-<span class="text-[10px] text-slate-400 whitespace-nowrap">1 jam lalu</span>
-</div>
-<p class="text-xs text-slate-800 mt-0.5 leading-snug">
-<span class="font-semibold text-slate-900">#SR-2024-8036</span> - Catatan Wali Kelas ditambahkan: jadwal mediasi konseling disepakati.
-          </p>
-</div>
-</div>
-<div class="p-3.5 hover:bg-slate-50 transition-colors cursor-pointer flex items-start gap-3" x-show="notificationFilter === 'all' || notificationFilter === 'update'">
-<div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 border border-blue-100">
-<span class="material-symbols-outlined text-[18px]">verified_user</span>
-</div>
-<div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-1">
-<span class="text-[10px] font-bold uppercase tracking-wider text-blue-700">Keamanan Akun</span>
-<span class="text-[10px] text-slate-400 whitespace-nowrap">3 jam lalu</span>
-</div>
-<p class="text-xs text-slate-700 mt-0.5 leading-snug">
-            Verifikasi 2FA berhasil dari sesi baru (Chrome macOS - Kantor BK).
-          </p>
-</div>
-</div>
-</div>
+@if(\Illuminate\Support\Facades\Route::has($portal.'.access-log'))
 <div class="p-3 border-t border-slate-100 bg-slate-50/70 text-center">
 <a class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors" href="{{ route($portal.'.access-log') }}">
-<span>Lihat Semua Notifikasi di Log Akses</span>
+<span>Lihat Log Akses</span>
 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
 </a>
 </div>
+@endif
 </div>
 </div>
 @elseif($portal === 'walas')

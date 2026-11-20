@@ -53,7 +53,7 @@ class PasswordResetController extends Controller
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $user->email],
             [
-                'token'      => Hash::make($token),
+                'token' => Hash::make($token),
                 'created_at' => now(),
             ]
         );
@@ -66,14 +66,14 @@ class PasswordResetController extends Controller
         try {
             Mail::to($user->email)->send(new ResetPasswordMail($user, $resetUrl));
         } catch (\Throwable $e) {
-            Log::warning('Email reset password gagal terkirim: ' . $e->getMessage());
+            Log::warning('Email reset password gagal terkirim: '.$e->getMessage());
         }
 
         Log::info("Password reset link generated for {$user->email}: {$resetUrl}");
 
         return back()->with([
-            'status'    => 'Tautan pemulihan kata sandi telah dikirim ke ' . $user->email . '.',
-            'email'     => $user->email,
+            'status' => 'Tautan pemulihan kata sandi telah dikirim ke '.$user->email.'.',
+            'email' => $user->email,
             'reset_url' => $resetUrl,
         ]);
     }
@@ -126,20 +126,20 @@ class PasswordResetController extends Controller
     public function resetPassword(Request $request): RedirectResponse
     {
         $request->validate([
-            'token'    => ['required', 'string'],
-            'email'    => ['required', 'email'],
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
             'password' => [
                 'required',
                 'confirmed',
-                Password::min(8)->mixedCase()->numbers()->symbols(),
+                Password::min(10)->mixedCase()->numbers()->symbols(),
             ],
         ], [
-            'password.required'  => 'Kata sandi baru wajib diisi.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
             'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
-            'password.min'       => 'Kata sandi minimal 8 karakter.',
-            'password.mixed'     => 'Kata sandi harus kombinasi huruf besar dan kecil.',
-            'password.numbers'   => 'Kata sandi harus mengandung minimal 1 angka.',
-            'password.symbols'   => 'Kata sandi harus mengandung minimal 1 simbol khusus.',
+            'password.min' => 'Kata sandi minimal 10 karakter.',
+            'password.mixed' => 'Kata sandi harus kombinasi huruf besar dan kecil.',
+            'password.numbers' => 'Kata sandi harus mengandung minimal 1 angka.',
+            'password.symbols' => 'Kata sandi harus mengandung minimal 1 simbol khusus.',
         ]);
 
         $record = DB::table('password_reset_tokens')->where('email', $request->email)->first();
@@ -165,7 +165,7 @@ class PasswordResetController extends Controller
 
         return redirect()->route('login')->with([
             'status' => 'Kata sandi berhasil diperbarui! Silakan masuk menggunakan kata sandi baru Anda.',
-            'email'  => $user->email,
+            'email' => $user->email,
         ]);
     }
 }

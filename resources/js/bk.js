@@ -132,7 +132,6 @@ export function registerBk(Alpine, navigateTo) {
         categories: initialData.categories ? [...initialData.categories] : structuredClone(manageRows.categories),
         locations: initialData.locations ? [...initialData.locations] : structuredClone(manageRows.locations),
         staffMembers: initialData.staffMembers ? [...initialData.staffMembers] : [],
-        qrTotalScans: initialData.qrTotalScans ?? 0,
         reportUrl: initialData.reportUrl || (window.location.origin + '/s/lapor'),
         qrScanUrl: initialData.qrScanUrl || (window.location.origin + '/s/qr'),
         qrSvgHtml: '',
@@ -155,6 +154,8 @@ export function registerBk(Alpine, navigateTo) {
         staffStatus: 'pending',
         qrQuery: '',
         staffQuery: '',
+        trainingMode: Boolean(initialData.trainingMode),
+        nlpEnabled: Boolean(initialData.nlpEnabled),
         saving: false,
 
         get csrfToken() {
@@ -169,12 +170,6 @@ export function registerBk(Alpine, navigateTo) {
                 if (['jenis', 'lokasi', 'qr', 'staf'].includes(h)) this.tab = h;
             });
             this.renderQrCode();
-            window.addEventListener('focus', () => {
-                if (this.tab === 'qr') this.fetchQrStats();
-            });
-            setInterval(() => {
-                if (this.tab === 'qr' && !document.hidden) this.fetchQrStats();
-            }, 6000);
         },
 
         setTab(tab) {
@@ -582,32 +577,48 @@ export function registerBk(Alpine, navigateTo) {
             }
         },
 
+        async toggleSetting(key, value) {
+            const prev = this[key === 'training_mode' ? 'trainingMode' : 'nlpEnabled'];
+            if (key === 'training_mode') this.trainingMode = Boolean(value);
+            if (key === 'nlp_enabled') this.nlpEnabled = Boolean(value);
+            try {
+                const res = await fetch('/bk/manage/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ [key]: Boolean(value) }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.trainingMode = Boolean(data.training_mode);
+                    this.nlpEnabled = Boolean(data.nlp_enabled);
+                    this.showNotice('Tersimpan', data.message);
+                } else {
+                    if (key === 'training_mode') this.trainingMode = prev;
+                    if (key === 'nlp_enabled') this.nlpEnabled = prev;
+                    this.showNotice('Gagal', data.message || 'Gagal memperbarui pengaturan.');
+                }
+            } catch (err) {
+                console.error(err);
+                if (key === 'training_mode') this.trainingMode = prev;
+                if (key === 'nlp_enabled') this.nlpEnabled = prev;
+                this.showNotice('Error', 'Gagal menghubungi server.');
+            }
+        },
+
         // --- QR Code & Downloads ---
         renderQrCode() {
             try {
                 const qr = new QRCode(0, 'M');
-                qr.addData(this.qrScanUrl);
+                qr.addData(this.reportUrl || this.qrScanUrl);
                 qr.make();
                 this.qrSvgHtml = qr.createSvg(220, 4);
             } catch (e) {
                 console.error('Failed to generate QR', e);
             }
-        },
-        async fetchQrStats() {
-            try {
-                const res = await fetch('/bk/manage/qr/stats');
-                const data = await res.json();
-                if (data.success && typeof data.total_scans === 'number') {
-                    this.qrTotalScans = data.total_scans;
-                }
-            } catch (e) {
-                // silent
-            }
-        },
-        testScanQr() {
-            window.open(this.qrScanUrl, '_blank');
-            setTimeout(() => this.fetchQrStats(), 1000);
-            this.showNotice('Memindai QR', 'Simulasi pemindaian QR sedang berjalan di tab baru.');
         },
         copyReportUrl() {
             navigator.clipboard.writeText(this.reportUrl).then(() => {
@@ -680,6 +691,7 @@ export function registerBk(Alpine, navigateTo) {
                 status: row.dataset.status || 'unread',
                 urgency: row.dataset.urgency || '',
                 category: row.dataset.category || '',
+                categoryLabel: (row.dataset.categoryLabel || '').toLowerCase(),
                 role: row.dataset.role || '',
                 contact: row.dataset.contact || '',
                 stale: row.dataset.stale === '1',
@@ -701,7 +713,7 @@ export function registerBk(Alpine, navigateTo) {
                     if (this.priorityFilter === 'overdue' && !row.stale) return false;
 
                     // Dropdown filters
-                    if (this.categoryFilter && row.category !== this.categoryFilter) return false;
+                    if (this.categoryFilter && row.category !== this.categoryFilter && row.categoryLabel !== this.categoryFilter.toLowerCase()) return false;
                     if (this.roleFilter && row.role !== this.roleFilter) return false;
                     if (this.urgencyFilter && row.urgency !== this.urgencyFilter) return false;
                     if (this.contactFilter && row.contact !== this.contactFilter) return false;
@@ -815,11 +827,30 @@ export function registerBk(Alpine, navigateTo) {
             return true;
         },
         matchesDate(text, value, label = '') {
-            const day = Number(text.match(/\b\d{1,2}\b/)?.[0]);
-            if (value === 'today' || label === 'hari ini') return day === 24;
-            if (value === '7' || label.includes('7 hari')) return day >= 18;
-            if (value === '30' || label.includes('30 hari') || label.includes('semester')) return true;
-            if (value === 'custom') return (!this.dateFrom || `2024-10-${String(day).padStart(2, '0')}` >= this.dateFrom) && (!this.dateTo || `2024-10-${String(day).padStart(2, '0')}` <= this.dateTo);
+            const months = { jan: '01', feb: '02', mar: '03', apr: '04', mei: '05', jun: '06', jul: '07', ags: '08', agu: '08', sep: '09', okt: '10', nov: '11', des: '12' };
+            const now = new Date();
+            const todayIso = now.toISOString().slice(0, 10);
+            let rowIso = '';
+
+            if (text.includes('hari ini')) {
+                rowIso = todayIso;
+            } else if (text.includes('kemarin')) {
+                rowIso = new Date(now.getTime() - 86400000).toISOString().slice(0, 10);
+            } else {
+                const match = text.match(/(\d{1,2})\s+([a-z]{3,})\s+(\d{4})/i);
+                if (match) {
+                    const mKey = match[2].slice(0, 3).toLowerCase();
+                    rowIso = `${match[3]}-${months[mKey] || '01'}-${String(match[1]).padStart(2, '0')}`;
+                }
+            }
+
+            if (!rowIso) return true;
+            const diffDays = Math.floor((new Date(todayIso) - new Date(rowIso)) / 86400000);
+
+            if (value === 'today' || label === 'hari ini') return rowIso === todayIso;
+            if (value === '7' || value === '7d' || label.includes('7 hari')) return diffDays <= 7;
+            if (value === '30' || value === '30d' || label.includes('30 hari') || label.includes('semester')) return diffDays <= 180;
+            if (value === 'custom') return (!this.dateFrom || rowIso >= this.dateFrom) && (!this.dateTo || rowIso <= this.dateTo);
             return true;
         },
         matchesRange(text) {
@@ -1013,12 +1044,14 @@ export function registerBk(Alpine, navigateTo) {
         ...modalState(),
         reportId: config.reportId || null,
         urgency: config.urgency || 'Darurat',
-        caseStatus: config.caseStatus || 'read',
+        caseStatus: config.caseStatus || 'dibaca',
+        categoryChoice: config.categoryChoice || '',
         caseHandler: config.caseHandler || '',
         summary: '',
-        walasClass: config.walasClass || '7B',
+        forwardToUserId: config.firstWalasId || '',
         counselorReply: '',
         internalNote: '',
+        archiveReason: 'selesai',
         loading: false,
 
         openForward() {
@@ -1130,8 +1163,46 @@ export function registerBk(Alpine, navigateTo) {
             }
         },
 
+        async updateCategory(id = null) {
+            const reportId = id || this.reportId;
+            if (!this.categoryChoice) {
+                return;
+            }
+            this.loading = true;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/bk/reports/${reportId}/category`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        category: this.categoryChoice,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showNotice('Tersimpan', data.message || 'Kategori kasus berhasil dikoreksi.');
+                    setTimeout(() => window.location.reload(), 900);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal mengoreksi kategori kasus.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan saat mengoreksi kategori.');
+            } finally {
+                this.loading = false;
+            }
+        },
+
         async submitForward(id = null) {
             const reportId = id || this.reportId;
+            if (!this.forwardToUserId) {
+                this.showNotice('Perhatian', 'Pilih Wali Kelas penerima terlebih dahulu.');
+                return;
+            }
             if (!this.summary.trim()) {
                 this.showNotice('Perhatian', 'Tuliskan ringkasan terlebih dahulu.');
                 return;
@@ -1148,7 +1219,7 @@ export function registerBk(Alpine, navigateTo) {
                     },
                     body: JSON.stringify({
                         summary: this.summary,
-                        walas_class: this.walasClass,
+                        to_user_id: Number(this.forwardToUserId),
                     }),
                 });
                 const data = await res.json();
@@ -1208,6 +1279,9 @@ export function registerBk(Alpine, navigateTo) {
                         'X-CSRF-TOKEN': token,
                         'Accept': 'application/json',
                     },
+                    body: JSON.stringify({
+                        archive_reason: this.archiveReason || 'selesai',
+                    }),
                 });
                 const data = await res.json();
                 if (data.success) {
@@ -1249,14 +1323,15 @@ export function registerBk(Alpine, navigateTo) {
         rowVisible(index) {
             const row = this.rows[index];
             if (!row) return false;
+            const cutoff = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10);
             if (!this.archive && this.priorityFilter === 'danger' && row.danger !== 'true') return false;
-            if (!this.archive && this.priorityFilter === 'overdue' && row.date >= '2024-10-21') return false;
+            if (!this.archive && this.priorityFilter === 'overdue' && row.date >= cutoff) return false;
             if (!this.archive && (this.status === 'handling' ? !['dibaca', 'ditindaklanjuti'].includes(row.status) : row.status !== this.status)) return false;
             const query = normalize(this.query).replace(/^#/, '').replace(/sr-\d{4}-/g, 'sr-');
             if (!row.text.includes(query)) return false;
             if (!Object.entries(this.filters).every(([key, value]) => !value || row[key] === value)) return false;
             if (this.period === 'custom') return (!this.dateFrom || row.date >= this.dateFrom) && (!this.dateTo || row.date <= this.dateTo);
-            return !this.period || (row.date >= this.period && row.date <= '2024-10-24');
+            return !this.period || (row.date >= this.period);
         },
         get visibleRows() { return this.rows.filter((row, index) => this.rowVisible(index)); },
         get visibleCount() { return this.visibleRows.length; },
@@ -1271,7 +1346,7 @@ export function registerBk(Alpine, navigateTo) {
         qrModalOpen: false,
         qrSvgHtml: '',
         reportUrl: config.reportUrl || (window.location.origin + '/s/lapor'),
-        qrScanUrl: config.qrScanUrl || (window.location.origin + '/s/qr'),
+        qrScanUrl: config.qrScanUrl || (window.location.origin + '/s/lapor'),
         className: config.className || '7B',
 
         init() {

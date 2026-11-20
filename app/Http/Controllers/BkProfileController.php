@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\SchoolSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,62 +17,59 @@ class BkProfileController extends Controller
      */
     public function show(): View
     {
-        $user = Auth::user() ?? User::where('role', 'bk')->first() ?? User::first();
+        $user = Auth::user();
 
-        // Ambil inisial nama untuk avatar
-        $words = preg_split('/\s+/', trim($user->name ?? 'Sarah Jenkins'));
+        $words = preg_split('/\s+/', trim($user->name ?? 'Guru BK'));
         if (count($words) >= 2) {
-            $initials = strtoupper(substr($words[0], 0, 1) . substr(end($words), 0, 1));
+            $initials = strtoupper(substr($words[0], 0, 1).substr(end($words), 0, 1));
         } else {
-            $initials = strtoupper(substr($words[0] ?? 'SJ', 0, 2));
+            $initials = strtoupper(substr($words[0] ?? 'BK', 0, 2));
         }
 
-        $roleLabel = match ($user->role ?? 'bk') {
+        $roleLabel = match ($user?->normalizedRole()) {
             'kesiswaan' => 'Kesiswaan',
-            'wali_kelas', 'walas', 'walikelas' => 'Wali Kelas',
+            'walas' => 'Wali Kelas',
             default => 'Guru BK / Konselor Inti',
         };
 
+        $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+
         return view('bk.profile', [
-            'user'      => $user,
-            'initials'  => $initials,
+            'user' => $user,
+            'initials' => $initials,
             'roleLabel' => $roleLabel,
+            'schoolName' => $schoolName,
         ]);
     }
 
     /**
-     * Perbarui data profil (Nama Tampilan, Sekolah & Foto Profil).
+     * Perbarui data profil (Nama Tampilan & Foto Profil).
      */
     public function updateProfile(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'school_name' => ['nullable', 'string', 'max:255'],
-            'avatar'      => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
+            'name' => ['required', 'string', 'max:255'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
         ], [
             'name.required' => 'Nama tampilan lengkap wajib diisi.',
-            'name.max'      => 'Nama tampilan maksimal 255 karakter.',
-            'avatar.image'  => 'Berkas harus berupa gambar.',
-            'avatar.mimes'  => 'Format foto harus berupa JPG, PNG, atau WEBP.',
-            'avatar.max'    => 'Ukuran foto maksimal 4MB.',
+            'name.max' => 'Nama tampilan maksimal 255 karakter.',
+            'avatar.image' => 'Berkas harus berupa gambar.',
+            'avatar.mimes' => 'Format foto harus berupa JPG, PNG, atau WEBP.',
+            'avatar.max' => 'Ukuran foto maksimal 4MB.',
         ]);
 
-        $user = Auth::user() ?? User::where('role', 'bk')->first() ?? User::first();
-
+        $user = Auth::user();
         $user->name = $request->input('name');
-        if ($request->filled('school_name')) {
-            $user->school_name = $request->input('school_name');
-        }
 
         if ($request->hasFile('avatar')) {
             $file = $request->file('avatar');
-            $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $filename = 'avatar_'.$user->id.'_'.time().'.'.$file->getClientOriginalExtension();
             $destination = public_path('uploads/avatars');
             if (! file_exists($destination)) {
                 mkdir($destination, 0755, true);
             }
             $file->move($destination, $filename);
-            $user->avatar = 'uploads/avatars/' . $filename;
+            $user->avatar = 'uploads/avatars/'.$filename;
         }
 
         $user->save();
@@ -87,11 +84,11 @@ class BkProfileController extends Controller
     {
         $request->validate([
             'tahun_ajaran' => ['required', 'string', 'max:50'],
-            'semester'     => ['required', 'string', 'in:ganjil,genap'],
+            'semester' => ['required', 'string', 'in:ganjil,genap'],
         ]);
 
         session([
-            'academic_year'     => $request->input('tahun_ajaran'),
+            'academic_year' => $request->input('tahun_ajaran'),
             'academic_semester' => $request->input('semester'),
         ]);
 
@@ -105,22 +102,22 @@ class BkProfileController extends Controller
     {
         $request->validate([
             'current_password' => ['required', 'string'],
-            'password'         => [
+            'password' => [
                 'required',
                 'confirmed',
-                Password::min(8)->mixedCase()->numbers()->symbols(),
+                Password::min(10)->mixedCase()->numbers()->symbols(),
             ],
         ], [
             'current_password.required' => 'Kata sandi saat ini wajib diisi.',
-            'password.required'         => 'Kata sandi baru wajib diisi.',
-            'password.confirmed'        => 'Konfirmasi kata sandi baru tidak cocok.',
-            'password.min'              => 'Kata sandi baru minimal 8 karakter.',
-            'password.mixed'            => 'Kata sandi harus mengandung huruf besar dan huruf kecil.',
-            'password.numbers'          => 'Kata sandi harus mengandung minimal 1 angka.',
-            'password.symbols'          => 'Kata sandi harus mengandung minimal 1 simbol khusus.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+            'password.min' => 'Kata sandi baru minimal 10 karakter.',
+            'password.mixed' => 'Kata sandi harus mengandung huruf besar dan huruf kecil.',
+            'password.numbers' => 'Kata sandi harus mengandung minimal 1 angka.',
+            'password.symbols' => 'Kata sandi harus mengandung minimal 1 simbol khusus.',
         ]);
 
-        $user = Auth::user() ?? User::where('role', 'bk')->first() ?? User::first();
+        $user = Auth::user();
 
         if (! Hash::check($request->input('current_password'), $user->password)) {
             return back()->withErrors([
@@ -131,53 +128,9 @@ class BkProfileController extends Controller
         $user->password = Hash::make($request->input('password'));
         $user->save();
 
-        // Logout perangkat lain jika sesi autentikasi sedang berjalan
-        if (Auth::check()) {
-            Auth::logoutOtherDevices($request->input('password'));
-        }
+        Auth::logoutOtherDevices($request->input('password'));
 
         return back()->with('success_password', 'Kata sandi berhasil diperbarui. Sesi di perangkat lain telah diputus demi keamanan.');
-    }
-
-    /**
-     * Lengkapi data profil konselor pertama kali (nama, asal sekolah & foto profil).
-     */
-    public function completeProfile(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'school_name' => ['required', 'string', 'max:255'],
-            'avatar'      => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
-        ], [
-            'name.required'        => 'Nama lengkap & gelar wajib diisi.',
-            'name.max'             => 'Nama maksimal 255 karakter.',
-            'school_name.required' => 'Asal sekolah wajib diisi.',
-            'school_name.max'      => 'Asal sekolah maksimal 255 karakter.',
-            'avatar.image'         => 'Berkas harus berupa gambar.',
-            'avatar.mimes'         => 'Format foto harus berupa JPG, PNG, atau WEBP.',
-            'avatar.max'           => 'Ukuran foto maksimal 4MB.',
-        ]);
-
-        $user = Auth::user();
-        if ($user) {
-            $user->name = $request->input('name');
-            $user->school_name = $request->input('school_name');
-
-            if ($request->hasFile('avatar')) {
-                $file = $request->file('avatar');
-                $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-                $destination = public_path('uploads/avatars');
-                if (! file_exists($destination)) {
-                    mkdir($destination, 0755, true);
-                }
-                $file->move($destination, $filename);
-                $user->avatar = 'uploads/avatars/' . $filename;
-            }
-
-            $user->save();
-        }
-
-        return redirect()->route('bk.dashboard')->with('status', 'Profil konselor berhasil disimpan! Selamat datang di HiOwy.');
     }
 
     /**

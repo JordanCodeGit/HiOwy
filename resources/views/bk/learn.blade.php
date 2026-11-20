@@ -262,7 +262,7 @@
                         'audience_label' => $audienceLabel,
                         'content'        => $material->content,
                         'is_visible'     => (bool) $material->is_visible,
-                        'author_name'    => $material->author_name ?? 'Sarah Jenkins, M.Pd.',
+                        'author_name'    => $material->author_name ?? 'Guru BK',
                         'date'           => $dateFormatted,
                         'views_count'    => $material->views_count ?? 0,
                         'update_url'     => route('bk.learn.update', $material->id),
@@ -305,7 +305,7 @@
                             </span>
                             <span class="flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-base">person</span>
-                                <span>{{ $material->author_name ?? 'Sarah Jenkins, M.Pd.' }}</span>
+                                <span>{{ $material->author_name ?? 'Guru BK' }}</span>
                             </span>
                             <span class="flex items-center gap-1.5">
                                 <span class="material-symbols-outlined text-base">bar_chart</span>

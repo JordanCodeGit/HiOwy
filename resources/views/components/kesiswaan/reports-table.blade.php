@@ -20,7 +20,7 @@
         <label><span class="sr-only">Urgensi</span><select x-model="filters.urgency" @change="selected = []" class="rounded-lg border-slate-200 bg-white py-2 text-sm"><option value="">Urgensi: Semua</option><option>Darurat</option><option>Medium</option><option>Easy</option></select></label>
         <label><span class="sr-only">Ingin dihubungi</span><select x-model="filters.contact" @change="selected = []" class="rounded-lg border-slate-200 bg-white py-2 text-sm"><option value="">Ingin dihubungi: Semua</option><option value="ya">Ya</option><option value="tidak">Tidak</option></select></label>
         @endif
-        <label><span class="sr-only">Periode</span><select x-model="period" @change="selected = []" class="rounded-lg border-slate-200 bg-white py-2 text-sm"><option value="">Waktu: Semua</option><option value="2024-10-24">24 Okt 2024</option><option value="2024-10-18">18–24 Okt 2024</option><option value="custom">Rentang tanggal</option></select></label>
+        <label><span class="sr-only">Periode</span><select x-model="period" @change="selected = []" class="rounded-lg border-slate-200 bg-white py-2 text-sm"><option value="">Waktu: Semua</option><option value="{{ now('Asia/Jakarta')->toDateString() }}">Hari Ini</option><option value="{{ now('Asia/Jakarta')->subDays(7)->toDateString() }}">7 Hari Terakhir</option><option value="custom">Rentang tanggal</option></select></label>
         <div x-cloak x-show="period === 'custom'" class="flex flex-wrap gap-2"><label class="text-xs">Dari <input type="date" x-model="dateFrom" @change="selected = []" class="rounded-lg border-slate-200 text-sm"></label><label class="text-xs">Sampai <input type="date" x-model="dateTo" @change="selected = []" class="rounded-lg border-slate-200 text-sm"></label></div>
     </div>
     <div class="bk-reports-scroll overflow-x-auto">
@@ -52,5 +52,22 @@
     <div class="staff-desktop-only border-t border-slate-100 px-6 py-4 text-xs text-slate-500">Menampilkan <span x-text="visibleCount">{{ $reports->count() }}</span> dari {{ $reports->count() }} laporan yang dapat Anda akses.</div>
 </section>
 @unless($archive)
-<x-kesiswaan.confirmation id="bulk-iseng" title="Tandai laporan sebagai iseng?" action="Penandaan laporan iseng">Anda memilih <span x-text="selected.length"></span> laporan. Penandaan akan memengaruhi status laporan. Konfirmasi untuk melanjutkan.</x-kesiswaan.confirmation>
+<template x-teleport="body">
+    <div x-cloak x-show="modal === 'bulk-iseng'" x-transition.opacity class="bk-modal fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" @click.self="closeModal()" @keydown.escape.window="closeModal()">
+        <section id="bulk-iseng" role="dialog" aria-modal="true" aria-labelledby="bulk-iseng-title" tabindex="-1" @keydown.tab="trapFocus($event)" class="w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+            <h2 id="bulk-iseng-title" class="text-lg font-bold text-slate-900">Tandai laporan sebagai iseng?</h2>
+            <p class="mt-3 text-sm leading-relaxed text-slate-600">Anda memilih <strong x-text="selected.length"></strong> laporan. Laporan yang ditandai iseng akan dipindahkan dari antrean aktif ke arsip.</p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" @click="closeModal()" class="rounded-xl border border-slate-200 px-4 py-2.5 hover:bg-slate-50">Batal</button>
+                <form method="POST" action="{{ route('kesiswaan.reports.bulk-iseng') }}">
+                    @csrf
+                    <template x-for="id in selected" :key="id">
+                        <input type="hidden" name="ids[]" :value="id">
+                    </template>
+                    <button type="submit" class="rounded-xl bg-primary text-on-primary px-4 py-2.5 hover:bg-primary-container">Konfirmasi</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</template>
 @endunless

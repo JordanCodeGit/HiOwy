@@ -16,10 +16,10 @@
         default => 'bg-emerald-500'
     };
     $caseStatusNormalized = match($report->status) {
-        'belum_dibaca', 'unread' => 'unread',
-        'selesai', 'resolved' => 'resolved',
-        'sedang_diproses', 'in_progress' => 'in_progress',
-        default => 'read'
+        'belum_dibaca', 'unread' => 'belum_dibaca',
+        'selesai', 'resolved' => 'selesai',
+        'ditindaklanjuti', 'sedang_diproses', 'in_progress' => 'ditindaklanjuti',
+        default => 'dibaca'
     };
     $roleIcon = match(strtolower($report->reporter_role ?: '')) {
         'guru' => 'school',
@@ -32,8 +32,9 @@
     reportId: {{ $report->id }},
     urgency: '{{ $urgencyLabel }}',
     caseStatus: '{{ $caseStatusNormalized }}',
+    categoryChoice: '{{ addslashes($report->category) }}',
     caseHandler: '{{ addslashes($report->assigned_counselor ?: ($counselors[0] ?? '')) }}',
-    walasClass: '{{ $report->reporter_class ?: '7B' }}'
+    firstWalasId: '{{ $waliKelasList[0]['id'] ?? '' }}'
 })" class="p-8 max-w-[1580px] w-full mx-auto source-space-y-6">
 <div class="flex flex-col gap-6 w-full">
 <nav class="flex items-center justify-between text-xs text-slate-500">
@@ -41,11 +42,11 @@
 <a class="inline-flex items-center gap-1 font-medium text-slate-600 hover:text-slate-900 transition-colors" href="{{ route('bk.dashboard') }}">
 <span class="material-symbols-outlined text-[16px]">arrow_back</span>Semua Laporan</a>
 <span class="text-slate-300">/</span>
-<span class="font-semibold text-slate-900">Detail Kasus #{{ $report->ticket_code }}</span>
+<span class="font-semibold text-slate-900">Detail Kasus #{{ $report->case_label }}</span>
 </div>
 <div class="flex items-center gap-2 text-slate-400">
 <span class="material-symbols-outlined text-[16px]">schedule</span>
-<span>Diterima: {{ $report->created_at ? $report->created_at->translatedFormat('d M Y, H:i') : '24 Okt 2024, 10:15' }} WIB</span>
+<span>Diterima: {{ $report->formatted_time }}</span>
 </div>
 </nav>
 <div class="bk-hover-card flex flex-wrap items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
@@ -55,14 +56,14 @@
 </div>
 <div>
 <div class="flex items-center gap-2.5">
-<h1 class="text-xl font-bold tracking-tight text-slate-900">#{{ $report->ticket_code }}</h1>
+<h1 class="text-xl font-bold tracking-tight text-slate-900">#{{ $report->case_label }}</h1>
 <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full {{ $urgencyBadgeStyle }} border text-xs font-bold ring-1">
 <span class="w-1.5 h-1.5 rounded-full {{ $urgencyDotColor }}">
 </span>{{ $urgencyLabel }}</span>
-@if($report->status === 'selesai' || $report->status === 'resolved')
+@if($caseStatusNormalized === 'selesai')
 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
 <span class="material-symbols-outlined text-[14px]">task_alt</span>Selesai</span>
-@elseif($report->status === 'sedang_diproses' || $report->status === 'in_progress')
+@elseif($caseStatusNormalized === 'ditindaklanjuti')
 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">
 <span class="material-symbols-outlined text-[14px]">pending</span>Ditindaklanjuti</span>
 @else
@@ -89,9 +90,9 @@
 <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Alur &amp; Progres Penanganan Kasus</span>
 </div>
 <span class="text-xs text-slate-500 font-medium">Posisi Saat Ini: 
-@if($report->status === 'selesai' || $report->status === 'resolved')
+@if($caseStatusNormalized === 'selesai')
 <strong class="text-emerald-600">Selesai / Teratasi</strong>
-@elseif($report->status === 'sedang_diproses' || $report->status === 'in_progress')
+@elseif($caseStatusNormalized === 'ditindaklanjuti')
 <strong class="text-amber-600">Tindak Lanjut Koordinasi</strong>
 @else
 <strong class="text-blue-600">Dibaca &amp; Diproses BK</strong>
@@ -105,34 +106,34 @@
 </div>
 <div class="min-w-0">
 <p class="text-xs font-bold text-slate-900 truncate">1. Laporan Masuk</p>
-<p class="text-[11px] text-slate-500">{{ $report->created_at ? $report->created_at->format('d M, H:i') : '24 Okt, 10:15' }} WIB</p>
+<p class="text-[11px] text-slate-500">{{ $report->formatted_time }}</p>
 </div>
 </div>
-<div class="flex items-center gap-3 p-3 rounded-xl {{ in_array($caseStatusNormalized, ['read', 'in_progress', 'resolved']) ? 'bg-blue-50/60 border border-blue-200' : 'bg-slate-50/70 border border-slate-200/40 opacity-75' }}">
-<div class="w-8 h-8 rounded-lg {{ in_array($caseStatusNormalized, ['read', 'in_progress', 'resolved']) ? 'bg-blue-600 text-white ring-4 ring-blue-100' : 'bg-slate-200 text-slate-600' }} flex items-center justify-center shrink-0 font-bold text-xs">
+<div class="flex items-center gap-3 p-3 rounded-xl {{ in_array($caseStatusNormalized, ['dibaca', 'ditindaklanjuti', 'selesai']) ? 'bg-blue-50/60 border border-blue-200' : 'bg-slate-50/70 border border-slate-200/40 opacity-75' }}">
+<div class="w-8 h-8 rounded-lg {{ in_array($caseStatusNormalized, ['dibaca', 'ditindaklanjuti', 'selesai']) ? 'bg-blue-600 text-white ring-4 ring-blue-100' : 'bg-slate-200 text-slate-600' }} flex items-center justify-center shrink-0 font-bold text-xs">
 <span class="material-symbols-outlined text-[18px]">visibility</span>
 </div>
 <div class="min-w-0">
-<p class="text-xs font-bold {{ in_array($caseStatusNormalized, ['read', 'in_progress', 'resolved']) ? 'text-blue-700' : 'text-slate-600' }} truncate">2. Dibaca &amp; Aktif</p>
-<p class="text-[11px] text-slate-500">{{ $report->updated_at ? $report->updated_at->format('d M, H:i') : '24 Okt, 10:25' }} WIB</p>
+<p class="text-xs font-bold {{ in_array($caseStatusNormalized, ['dibaca', 'ditindaklanjuti', 'selesai']) ? 'text-blue-700' : 'text-slate-600' }} truncate">2. Dibaca &amp; Aktif</p>
+<p class="text-[11px] text-slate-500">{{ $report->status_updated_date ? $report->status_updated_date->translatedFormat('d M Y') : '-' }}</p>
 </div>
 </div>
-<div class="flex items-center gap-3 p-3 rounded-xl {{ in_array($caseStatusNormalized, ['in_progress', 'resolved']) ? 'bg-amber-50/60 border border-amber-200' : 'bg-slate-50/70 border border-slate-200/40 opacity-75' }}">
-<div class="w-8 h-8 rounded-lg {{ in_array($caseStatusNormalized, ['in_progress', 'resolved']) ? 'bg-amber-600 text-white ring-4 ring-amber-100' : 'bg-slate-200 text-slate-600' }} flex items-center justify-center shrink-0 font-bold text-xs">
+<div class="flex items-center gap-3 p-3 rounded-xl {{ in_array($caseStatusNormalized, ['ditindaklanjuti', 'selesai']) ? 'bg-amber-50/60 border border-amber-200' : 'bg-slate-50/70 border border-slate-200/40 opacity-75' }}">
+<div class="w-8 h-8 rounded-lg {{ in_array($caseStatusNormalized, ['ditindaklanjuti', 'selesai']) ? 'bg-amber-600 text-white ring-4 ring-amber-100' : 'bg-slate-200 text-slate-600' }} flex items-center justify-center shrink-0 font-bold text-xs">
 <span class="material-symbols-outlined text-[18px]">pending</span>
 </div>
 <div class="min-w-0">
-<p class="text-xs font-semibold {{ in_array($caseStatusNormalized, ['in_progress', 'resolved']) ? 'text-amber-800 font-bold' : 'text-slate-700' }} truncate">3. Tindak Lanjut</p>
+<p class="text-xs font-semibold {{ in_array($caseStatusNormalized, ['ditindaklanjuti', 'selesai']) ? 'text-amber-800 font-bold' : 'text-slate-700' }} truncate">3. Tindak Lanjut</p>
 <p class="text-[11px] text-slate-400">Proses koordinasi</p>
 </div>
 </div>
-<div class="flex items-center gap-3 p-3 rounded-xl {{ $caseStatusNormalized === 'resolved' ? 'bg-emerald-50/60 border border-emerald-200' : 'bg-slate-50/70 border border-slate-200/40 opacity-60' }}">
-<div class="w-8 h-8 rounded-lg {{ $caseStatusNormalized === 'resolved' ? 'bg-emerald-600 text-white ring-4 ring-emerald-100' : 'bg-slate-200 text-slate-400' }} flex items-center justify-center shrink-0 font-bold text-xs">
+<div class="flex items-center gap-3 p-3 rounded-xl {{ $caseStatusNormalized === 'selesai' ? 'bg-emerald-50/60 border border-emerald-200' : 'bg-slate-50/70 border border-slate-200/40 opacity-60' }}">
+<div class="w-8 h-8 rounded-lg {{ $caseStatusNormalized === 'selesai' ? 'bg-emerald-600 text-white ring-4 ring-emerald-100' : 'bg-slate-200 text-slate-400' }} flex items-center justify-center shrink-0 font-bold text-xs">
 <span class="material-symbols-outlined text-[18px]">task_alt</span>
 </div>
 <div class="min-w-0">
-<p class="text-xs font-semibold {{ $caseStatusNormalized === 'resolved' ? 'text-emerald-800 font-bold' : 'text-slate-600' }} truncate">4. Selesai / Arsip</p>
-<p class="text-[11px] text-slate-400">{{ $caseStatusNormalized === 'resolved' ? 'Tuntas' : 'Menunggu hasil' }}</p>
+<p class="text-xs font-semibold {{ $caseStatusNormalized === 'selesai' ? 'text-emerald-800 font-bold' : 'text-slate-600' }} truncate">4. Selesai / Arsip</p>
+<p class="text-[11px] text-slate-400">{{ $caseStatusNormalized === 'selesai' ? 'Tuntas' : 'Menunggu hasil' }}</p>
 </div>
 </div>
 </div>
@@ -145,7 +146,7 @@
 <span class="material-symbols-outlined text-blue-600 text-[20px]">description</span>
 <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Informasi Insiden</h2>
 </div>
-<span class="text-xs text-slate-400 font-medium">ID: {{ $report->ticket_code }}</span>
+<span class="text-xs text-slate-400 font-medium">ID: {{ $report->case_label }}</span>
 </div>
 <div class="grid grid-cols-2 gap-3">
 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
@@ -154,15 +155,21 @@
 </div>
 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Waktu Kejadian</span>
-<span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->incident_time ?: ($report->created_at ? $report->created_at->translatedFormat('d M Y (H:i WIB)') : '-') }}</span>
+<span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->incident_time ?: $report->formatted_time }}</span>
 </div>
 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lokasi</span>
 <span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->location ?: 'Area Sekolah' }}</span>
 </div>
 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pihak Terlibat / Peran</span>
-<span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->reporter_role ?: 'Siswa' }} {{ $report->reporter_class ? '('.$report->reporter_class.')' : '' }}</span>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Peran Pelapor</span>
+<span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->reporter_role ?: 'Siswa' }} {{ (!$report->is_anonymous && $report->reporter_class) ? '('.$report->reporter_class.')' : '' }}</span>
+</div>
+</div>
+<div>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Pihak Terlibat / Saksi</span>
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-800">
+{{ $report->involved_parties ?: 'Tidak disebutkan pelapor.' }}
 </div>
 </div>
 <div>
@@ -170,28 +177,6 @@
 <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs leading-relaxed text-slate-800">
 <p>“{{ $report->story }}”</p>
 </div>
-</div>
-<div>
-<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Lampiran Bukti (AES-256)</span>
-@if($report->attachment_path)
-<div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-<div class="flex items-center gap-3 min-w-0">
-<div class="w-9 h-9 rounded-lg bg-white border border-slate-200 text-blue-600 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-[20px]">image</span>
-</div>
-<div class="min-w-0">
-<p class="text-xs font-semibold text-slate-800 truncate">{{ basename($report->attachment_path) }}</p>
-<p class="text-[11px] text-slate-400">Berkas Lampiran • Terenkripsi</p>
-</div>
-</div>
-<a href="{{ asset($report->attachment_path) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg transition-colors shadow-xs">
-<span class="material-symbols-outlined text-[15px]">visibility</span>Buka</a>
-</div>
-@else
-<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-400 italic">
-Tidak ada berkas bukti lampiran yang disertakan pada laporan ini.
-</div>
-@endif
 </div>
 </section>
 <section class="bk-hover-card bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
@@ -242,23 +227,36 @@ Tidak ada berkas bukti lampiran yang disertakan pada laporan ini.
 <div class="flex flex-col items-start gap-1 max-w-[85%]">
 <div class="flex items-center gap-2 text-[11px]">
 <span class="font-bold text-slate-800">Pelapor ({{ $report->reporter_role ?: 'Siswa' }})</span>
-<span class="text-slate-400">{{ $report->created_at ? $report->created_at->format('H:i') : '10:15' }} WIB</span>
+<span class="text-slate-400">{{ $report->formatted_time }}</span>
 </div>
 <div class="p-3 rounded-2xl rounded-tl-sm bg-slate-100 text-xs text-slate-900 leading-relaxed">
 {{ Str::limit($report->story, 260) }}
 </div>
 </div>
-@if($report->counselor_reply)
+@forelse($report->messages as $msg)
+@if($msg->sender === 'bk')
 <div class="flex flex-col items-end gap-1 self-end max-w-[85%]">
 <div class="flex items-center gap-2 text-[11px]">
-<span class="text-slate-400">{{ $report->counselor_replied_at ? $report->counselor_replied_at->format('H:i') : '10:28' }} WIB</span>
-<span class="font-bold text-blue-700">{{ $report->assigned_counselor ?: 'Konselor BK' }}</span>
+<span class="text-slate-400">{{ $msg->sent_date ? \Carbon\Carbon::parse($msg->sent_date)->translatedFormat('d M Y') : '-' }}</span>
+<span class="font-bold text-blue-700">{{ $msg->user?->name ?: ($report->assigned_counselor ?: 'Konselor BK') }}</span>
 </div>
 <div class="p-3 rounded-2xl rounded-tr-sm bg-blue-600 text-xs text-white leading-relaxed">
-{{ $report->counselor_reply }}
+{{ $msg->body }}
+</div>
+</div>
+@else
+<div class="flex flex-col items-start gap-1 max-w-[85%]">
+<div class="flex items-center gap-2 text-[11px]">
+<span class="font-bold text-slate-800">Pelapor</span>
+<span class="text-slate-400">{{ $msg->sent_date ? \Carbon\Carbon::parse($msg->sent_date)->translatedFormat('d M Y') : '-' }}</span>
+</div>
+<div class="p-3 rounded-2xl rounded-tl-sm bg-slate-100 text-xs text-slate-900 leading-relaxed">
+{{ $msg->body }}
 </div>
 </div>
 @endif
+@empty
+@endforelse
 </div>
 <div class="pt-2 flex flex-col gap-2.5">
 <label class="text-xs font-bold text-slate-700" for="counselorReply">Balasan Cepat Konselor</label>
@@ -278,18 +276,35 @@ Tidak ada berkas bukti lampiran yang disertakan pada laporan ini.
 <span class="material-symbols-outlined text-blue-600 text-[20px]">tune</span>
 <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Status &amp; Penugasan</h2>
 </div>
-<span class="w-2 h-2 rounded-full {{ $caseStatusNormalized === 'resolved' ? 'bg-emerald-500' : ($caseStatusNormalized === 'in_progress' ? 'bg-amber-500' : 'bg-blue-600') }}"></span>
+<span class="w-2 h-2 rounded-full {{ $caseStatusNormalized === 'selesai' ? 'bg-emerald-500' : ($caseStatusNormalized === 'ditindaklanjuti' ? 'bg-amber-500' : 'bg-blue-600') }}"></span>
 </div>
 <div class="flex flex-col gap-1.5">
 <label class="text-xs font-semibold text-slate-700" for="caseStatus">Status Kasus</label>
 <div class="relative">
 <select x-model="caseStatus" class="w-full appearance-none p-2.5 pr-8 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:bg-white cursor-pointer" id="caseStatus">
-<option value="unread">Belum Dibaca</option>
-<option value="read">Dibaca (Aktif)</option>
-<option value="in_progress">Ditindaklanjuti Tim BK</option>
-<option value="resolved">Selesai / Teratasi</option>
+<option value="belum_dibaca">Belum Dibaca</option>
+<option value="dibaca">Dibaca (Aktif)</option>
+<option value="ditindaklanjuti">Ditindaklanjuti Tim BK</option>
+<option value="selesai">Selesai / Teratasi</option>
 </select>
 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">arrow_drop_down</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-slate-700" for="caseCategory">Koreksi Jenis Kejadian <span class="font-normal text-slate-400">(Visibilitas Kesiswaan)</span></label>
+<div class="flex items-center gap-2">
+<div class="relative flex-1">
+<select x-model="categoryChoice" class="w-full appearance-none p-2.5 pr-8 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:bg-white cursor-pointer" id="caseCategory">
+@foreach($categories as $cat)
+<option value="{{ $cat->label }}">{{ $cat->label }}</option>
+@endforeach
+@if($report->category && ! $categories->pluck('label')->contains($report->category))
+<option value="{{ $report->category }}">{{ $report->category }}</option>
+@endif
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">arrow_drop_down</span>
+</div>
+<button type="button" @click="updateCategory()" :disabled="loading" class="px-3 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200 transition-colors cursor-pointer shrink-0">Koreksi</button>
 </div>
 </div>
 <div class="flex flex-col gap-1.5">
@@ -322,6 +337,12 @@ Tidak ada berkas bukti lampiran yang disertakan pada laporan ini.
 </div>
 <div class="text-[11px] flex items-center justify-between text-slate-500 px-0.5" id="urgencyStatusNote">
 <span>Level terpilih: <strong x-text="urgency" class="text-rose-700 font-semibold" id="urgencyLabelText">{{ $urgencyLabel }}</strong></span>
+</div>
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 text-xs">
+<span class="font-semibold text-slate-600">Klasifikasi NLP Internal:</span>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $report->ml_label === 1 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-200/70 text-slate-700' }}">
+{{ $report->ml_badge_label }}@if($report->ml_status === 'selesai' && $report->ml_confidence !== null) ({{ round($report->ml_confidence * 100) }}%)@endif
+</span>
 </div>
 <button class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors shadow-xs text-xs mt-1 cursor-pointer" type="button" @click="updateCase()" :disabled="loading">
 <span x-show="!loading">Perbarui Kasus</span>
@@ -356,30 +377,30 @@ Tidak ada berkas bukti lampiran yang disertakan pada laporan ini.
 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
 <div class="flex items-center gap-2">
 <span class="material-symbols-outlined text-[19px] text-blue-600">forward_to_inbox</span>
-<h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">LAPORKAN ke Wali Kelas</h2>
+<h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Teruskan ke Wali Kelas</h2>
 </div>
-@if($report->forwarded_to_walas)
+@if($report->forwards->isNotEmpty())
 <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">Terkirim ke Walas</span>
 @else
 <span class="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded">Belum Diteruskan</span>
 @endif
 </div>
-@if($report->forwarded_to_walas)
+@foreach($report->forwards as $fwd)
 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1.5">
 <div class="flex items-center justify-between text-[11px]">
-<span class="font-semibold text-blue-700">Wali Kelas {{ $report->reporter_class ?: '7B' }}</span>
-<span class="text-slate-400">{{ $report->forwarded_at ? $report->forwarded_at->format('d M, H:i') : '10:30' }} WIB</span>
+<span class="font-semibold text-blue-700">{{ $fwd->toUser?->name ?: 'Wali Kelas' }} @if($fwd->toUser?->homeroom_class)(Kelas {{ $fwd->toUser->homeroom_class }})@endif</span>
+<span class="text-slate-400">{{ $fwd->forwarded_at ? \Carbon\Carbon::parse($fwd->forwarded_at)->timezone('Asia/Jakarta')->translatedFormat('d M Y') : '-' }}</span>
 </div>
-<p class="text-xs italic text-slate-700">Ringkasan aman insiden telah diteruskan ke portal wali kelas untuk observasi pendampingan.</p>
+<p class="text-xs italic text-slate-700">{{ $fwd->summary }}</p>
 <div class="flex items-center gap-1 text-[11px] text-emerald-600">
 <span class="material-symbols-outlined text-[14px]">check_circle</span>
-<span>Telah terdistribusi ke portal Wali Kelas</span>
+<span>{{ $fwd->read_at ? 'Sudah dibaca Wali Kelas' : 'Menunggu konfirmasi baca Wali Kelas' }}</span>
 </div>
 </div>
-@endif
+@endforeach
 <button class="w-full py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer" id="quickRelayBtn" type="button" @click="openForward()">
 <span class="material-symbols-outlined text-[16px] text-blue-600">add_circle</span>
-<span>{{ $report->forwarded_to_walas ? 'Kirim Ringkasan Tambahan' : 'Kirim Ringkasan ke Wali Kelas' }}</span>
+<span>{{ $report->forwards->isNotEmpty() ? 'Kirim Ringkasan Tambahan' : 'Kirim Ringkasan ke Wali Kelas' }}</span>
 </button>
 </section>
 <section class="bk-hover-card bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-4">
@@ -391,41 +412,43 @@ Tidak ada berkas bukti lampiran yang disertakan pada laporan ini.
 <span class="text-xs text-slate-400">Audit Trail</span>
 </div>
 <div class="flex flex-col gap-3 pl-4 relative before:absolute before:left-1 before:top-1.5 before:bottom-1.5 before:w-0.5 before:bg-slate-200">
-@if($report->forwarded_to_walas)
+@if($report->forwards->isNotEmpty())
+@php($latestForward = $report->forwards->last())
 <div class="relative flex flex-col gap-0.5">
 <div class="absolute -left-[19px] top-1 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white"></div>
 <div class="flex items-center justify-between text-xs">
-<span class="font-bold text-slate-800">Eskalasi Terkirim</span>
-<span class="text-[11px] text-slate-400">{{ $report->forwarded_at ? $report->forwarded_at->format('H:i') : '10:30' }} WIB</span>
+<span class="font-bold text-slate-800">Ringkasan Terkirim</span>
+<span class="text-[11px] text-slate-400">{{ $latestForward?->forwarded_at ? \Carbon\Carbon::parse($latestForward->forwarded_at)->timezone('Asia/Jakarta')->translatedFormat('d M Y') : '-' }}</span>
 </div>
-<span class="text-[11px] text-slate-500">Ringkasan aman dikirim ke portal Wali Kelas</span>
+<span class="text-[11px] text-slate-500">Ringkasan aman dikirim ke {{ $latestForward?->toUser?->name ?: 'Wali Kelas' }}</span>
 </div>
 @endif
-@if($report->counselor_reply)
+@if($report->messages->where('sender', 'bk')->isNotEmpty())
+@php($latestBkMsg = $report->messages->where('sender', 'bk')->last())
 <div class="relative flex flex-col gap-0.5">
 <div class="absolute -left-[19px] top-1 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white"></div>
 <div class="flex items-center justify-between text-xs">
 <span class="font-bold text-slate-800">Balasan Konselor</span>
-<span class="text-[11px] text-slate-400">{{ $report->counselor_replied_at ? $report->counselor_replied_at->format('H:i') : '10:28' }} WIB</span>
+<span class="text-[11px] text-slate-400">{{ $latestBkMsg?->sent_date ? \Carbon\Carbon::parse($latestBkMsg->sent_date)->translatedFormat('d M Y') : '-' }}</span>
 </div>
-<span class="text-[11px] text-slate-500">{{ $report->assigned_counselor ?: 'Konselor BK' }} mengirimkan respons resmi</span>
+<span class="text-[11px] text-slate-500">{{ $latestBkMsg?->user?->name ?: ($report->assigned_counselor ?: 'Konselor BK') }} mengirimkan respons resmi</span>
 </div>
 @endif
 <div class="relative flex flex-col gap-0.5">
 <div class="absolute -left-[19px] top-1 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white"></div>
 <div class="flex items-center justify-between text-xs">
 <span class="font-bold text-slate-800">Laporan Ditelaah</span>
-<span class="text-[11px] text-slate-400">{{ $report->updated_at ? $report->updated_at->format('H:i') : '10:25' }} WIB</span>
+<span class="text-[11px] text-slate-400">{{ $report->status_updated_date ? $report->status_updated_date->translatedFormat('d M Y') : '-' }}</span>
 </div>
-<span class="text-[11px] text-slate-500">Konselor membuka tiket laporan</span>
+<span class="text-[11px] text-slate-500">Konselor membuka laporan</span>
 </div>
 <div class="relative flex flex-col gap-0.5">
 <div class="absolute -left-[19px] top-1 w-2 h-2 rounded-full bg-slate-400 ring-2 ring-white"></div>
 <div class="flex items-center justify-between text-xs">
 <span class="font-bold text-slate-800">Laporan Diterima</span>
-<span class="text-[11px] text-slate-400">{{ $report->created_at ? $report->created_at->format('H:i') : '10:15' }} WIB</span>
+<span class="text-[11px] text-slate-400">{{ $report->formatted_time }}</span>
 </div>
-<span class="text-[11px] text-slate-500">Tiket aduan #{{ $report->ticket_code }} dibuat oleh sistem</span>
+<span class="text-[11px] text-slate-500">Laporan #{{ $report->case_label }} masuk ke sistem</span>
 </div>
 </div>
 </section>
@@ -472,11 +495,18 @@ Ya, Tandai Iseng
 <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
 <span class="material-symbols-outlined text-[24px]">archive</span>
 </div>
-<div class="source-space-y-1">
+<div class="source-space-y-1 flex-1">
 <h3 class="text-base font-bold text-slate-900">Arsipkan Laporan Ini?</h3>
 <p class="text-xs text-slate-600 leading-relaxed">
-Laporan akan dipindahkan dari antrean aktif ke arsip kasus selesai. Riwayat dan audit trail tetap tersimpan.
+Laporan akan dipindahkan dari antrean aktif ke arsip kasus. Riwayat dan audit trail tetap tersimpan.
 </p>
+<div class="pt-2">
+<label class="text-xs font-semibold text-slate-700 block mb-1" for="archiveReasonSelect">Alasan Pengarsipan</label>
+<select id="archiveReasonSelect" x-model="archiveReason" class="w-full p-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none">
+<option value="selesai">Selesai Ditangani</option>
+<option value="iseng">Ditandai Iseng / Palsu</option>
+</select>
+</div>
 </div>
 </div>
 <div class="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-100">

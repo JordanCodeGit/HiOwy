@@ -97,8 +97,8 @@
                     <p class="text-xs text-slate-600 mt-0.5">Segala kerahasiaan identitas dan isi pembicaraan dilindungi kode etik konselor.</p>
                 </div>
             </div>
-            <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shrink-0 transition-colors shadow-xs">
-                Hubungi Konselor
+            <a href="{{ route('public.report') }}" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shrink-0 transition-colors shadow-xs">
+                Kirim Aduan / Konseling
             </a>
         </div>
     </main>

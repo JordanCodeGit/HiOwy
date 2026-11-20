@@ -56,8 +56,8 @@
                             <span class="">Kembali ke Halaman Masuk</span>
                         </a>
                         <div class="flex shrink-0 items-center gap-2 py-2 text-on-surface-variant font-label-sm text-label-sm">
-                            <span class="hidden sm:inline">Butuh panduan?</span>
-                            <button class="text-secondary font-semibold hover:underline" type="button" x-on:click="showUnavailable('Kontak bantuan belum tersedia.')">Pusat Bantuan</button>
+                            <span class="hidden sm:inline">Butuh informasi?</span>
+                            <a class="text-secondary font-semibold hover:underline" href="{{ route('public.learn.default') }}">Ruang Edukasi</a>
                         </div>
                     </div>
                     <!-- Centered Interactive Recovery Form -->
@@ -149,7 +149,7 @@
                                         Email</label>
                                     <div class="relative flex items-center">
                                         <span class="material-symbols-outlined absolute left-4 text-outline pointer-events-none text-xl">alternate_email</span>
-                                        <input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-lowest text-on-surface placeholder:text-outline-variant font-body-md text-body-md rounded-xl shadow-xs focus:outline-hidden focus:bg-surface-container-lowest transition-all duration-200 border border-outline-variant/30 focus:border-secondary" id="emailInput" placeholder="konselor.sarah@nusantara.sch.id" required="" type="email" name="email" value="{{ old('email') }}" autocomplete="email">
+                                        <input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-lowest text-on-surface placeholder:text-outline-variant font-body-md text-body-md rounded-xl shadow-xs focus:outline-hidden focus:bg-surface-container-lowest transition-all duration-200 border border-outline-variant/30 focus:border-secondary" id="emailInput" placeholder="bk@smptelkompwt.sch.id" required="" type="email" name="email" value="{{ old('email') }}" autocomplete="email">
                                     </div>
                                 </div>
                                 <!-- Security Callout Box (Gentle soft blue container) -->

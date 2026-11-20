@@ -14,9 +14,7 @@ use Illuminate\Notifications\Notifiable;
     'email',
     'password',
     'role',
-    'school_name',
     'avatar',
-    'google_id',
     'two_factor_secret',
     'two_factor_recovery_codes',
     'two_factor_confirmed_at',
@@ -44,21 +42,31 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
         ];
     }
 
     /**
      * Recovery codes as array.
+     *
+     * @return array<int, string>
      */
     public function recoveryCodes(): array
     {
-        if (empty($this->two_factor_recovery_codes)) {
-            return [];
+        $raw = $this->two_factor_recovery_codes;
+
+        if (is_array($raw)) {
+            return $raw;
         }
 
-        $decoded = json_decode($this->two_factor_recovery_codes, true);
+        if (is_string($raw) && $raw !== '') {
+            $decoded = json_decode($raw, true);
 
-        return is_array($decoded) ? $decoded : [];
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
     }
 
     /**
@@ -75,9 +83,24 @@ class User extends Authenticatable
         }
 
         unset($codes[$index]);
-        $this->two_factor_recovery_codes = json_encode(array_values($codes));
+        $this->two_factor_recovery_codes = array_values($codes);
         $this->save();
 
         return true;
+    }
+
+    /**
+     * Normalize user role alias into canonical role string.
+     */
+    public function normalizedRole(): string
+    {
+        $role = strtolower((string) ($this->role ?? ''));
+
+        return match ($role) {
+            'walikelas', 'wali_kelas', 'walas' => 'walas',
+            'kesiswaan' => 'kesiswaan',
+            'bk' => 'bk',
+            default => $role,
+        };
     }
 }

@@ -3,9 +3,10 @@
     categories: @js($categories),
     locations: @js($locations),
     staffMembers: @js($staffMembers),
-    qrTotalScans: @js($qrTotalScans),
     reportUrl: @js($reportUrl),
-    qrScanUrl: @js($qrScanUrl)
+    qrScanUrl: @js($qrScanUrl),
+    trainingMode: @js($trainingMode ?? false),
+    nlpEnabled: @js($nlpEnabled ?? false)
 })" @keydown.escape.window="closeModal()" class="w-full bg-surface flex-1 px-8 py-6">
 <div class="flex flex-col w-full">
 <div class="flex flex-col gap-space-md mb-8">
@@ -13,15 +14,31 @@
 <div class="flex flex-col">
 <h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Jenis, Lokasi, Staff, QR</h1>
 <p class="font-body-md text-body-md text-on-surface-variant mt-1">
-          Konfigurasi jenis aduan, titik lokasi kejadian sekolah, dan tautan kode QR pelaporan resmi.
+          Konfigurasi jenis aduan, titik lokasi kejadian sekolah, tautan QR, mode latihan, dan klasifikasi NLP.
         </p>
 </div>
-<div class="flex items-center gap-3 bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-xs self-start lg:self-center">
+<div class="flex flex-wrap items-center gap-3 self-start lg:self-center">
+<div class="flex items-center gap-3 bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-xs">
 <span class="material-symbols-outlined text-secondary text-[22px]">account_balance</span>
 <div class="flex flex-col">
 <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Unit SEKOLAH</span>
 <span class="font-title-md text-title-md text-on-surface font-semibold">{{ $schoolName }}</span>
 </div>
+</div>
+<label class="flex items-center gap-2.5 bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-xs cursor-pointer border border-outline-variant/30">
+<input type="checkbox" :checked="trainingMode" @change="toggleSetting('training_mode', $event.target.checked)" class="rounded text-amber-600 focus:ring-amber-500">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-on-surface">Mode Latihan</span>
+<span class="text-[10px] text-on-surface-variant" x-text="trainingMode ? 'Aktif (Simulasi)' : 'Nonaktif'"></span>
+</div>
+</label>
+<label class="flex items-center gap-2.5 bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-xs cursor-pointer border border-outline-variant/30">
+<input type="checkbox" :checked="nlpEnabled" @change="toggleSetting('nlp_enabled', $event.target.checked)" class="rounded text-secondary focus:ring-secondary">
+<div class="flex flex-col">
+<span class="text-xs font-bold text-on-surface">Modul NLP AI</span>
+<span class="text-[10px] text-on-surface-variant" x-text="nlpEnabled ? 'Aktif' : 'Nonaktif (Default)'"></span>
+</div>
+</label>
 </div>
 </div>
 <div role="tablist" aria-label="Kelola sekolah" class="flex items-center gap-2 p-1.5 bg-surface-container-low rounded-xl w-fit max-w-full overflow-x-auto mt-2">
@@ -276,38 +293,6 @@
 </div>
 </div>
 </div>
-
-{{-- METRIK: TOTAL AKSES PEMINDAIAN QR SEKOLAH (AKTIF DENGAN SIMULASI & AUTO-REFRESH) --}}
-<div class="p-4 bg-surface-container-lowest rounded-xl border border-surface-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs mt-1">
-<div class="flex items-center gap-3.5">
-<div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary shrink-0">
-<span class="material-symbols-outlined text-[26px]">qr_code_scanner</span>
-</div>
-<div class="flex flex-col">
-<div class="flex items-center gap-2">
-<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Total Akses Pemindaian QR</span>
-<button type="button" @click="fetchQrStats()" title="Segarkan jumlah pemindaian" class="text-outline hover:text-secondary p-0.5 rounded cursor-pointer transition-colors">
-<span class="material-symbols-outlined text-[16px]">refresh</span>
-</button>
-</div>
-<div class="flex items-baseline gap-1.5 mt-0.5">
-<span class="font-headline-md text-headline-md font-bold text-on-surface" x-text="qrTotalScans.toLocaleString('id-ID')">{{ number_format($qrTotalScans) }}</span>
-<span class="font-body-md text-body-md text-on-surface-variant font-medium">kali dipindai siswa</span>
-</div>
-</div>
-</div>
-<div class="flex items-center gap-2.5">
-<button type="button" @click="testScanQr()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold border border-outline-variant/30 transition-all cursor-pointer shadow-2xs" title="Buka tautan pindai untuk simulasi penambahan pemindaian">
-<span class="material-symbols-outlined text-[16px] text-secondary">open_in_new</span>
-<span>Uji Pindai (Test +1)</span>
-</button>
-<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
-<span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-<span>Kanal Aktif &amp; Siap Dipindai</span>
-</span>
-</div>
-</div>
-
 </div>
 <div class="pt-4 border-t border-surface-container/60 flex flex-col sm:flex-row items-center gap-3">
 <button class="w-full sm:w-auto flex-1 px-5 py-3.5 bg-primary hover:bg-inverse-surface text-on-primary rounded-xl font-title-md text-title-md font-semibold transition-all shadow-xs flex items-center justify-center gap-2.5 cursor-pointer" type="button" @click="openPosterA4()">

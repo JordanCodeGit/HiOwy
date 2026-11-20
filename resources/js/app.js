@@ -144,9 +144,39 @@ Alpine.data('authNotice', () => ({
 Alpine.data('otpEntry', () => ({
     digits: ['', '', '', '', '', ''],
     recoveryOpen: false,
+    verifyState: 'idle',
 
     inputs() {
         return Array.from(this.$root.querySelectorAll('[data-otp]'));
+    },
+
+    async checkOtpServer() {
+        const code = this.digits.join('');
+        if (code.length < 6) {
+            this.verifyState = 'idle';
+            return;
+        }
+        this.verifyState = 'checking';
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.content
+                || this.$root.querySelector('input[name="_token"]')?.value
+                || '';
+            const res = await fetch('/two-factor/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                body: JSON.stringify({ code }),
+            });
+            const data = await res.json();
+            if (this.digits.join('') === code) {
+                this.verifyState = data.valid ? 'valid' : 'invalid';
+            }
+        } catch {
+            this.verifyState = 'idle';
+        }
     },
 
     inputDigit(event, index) {
@@ -165,6 +195,8 @@ Alpine.data('otpEntry', () => ({
             next.focus();
             next.select();
         }
+
+        this.checkOtpServer();
     },
 
     moveFocus(event, index) {
@@ -206,6 +238,8 @@ Alpine.data('otpEntry', () => ({
         const next = inputs[Math.min(start + characters.length, 5)];
         next.focus();
         next.select();
+
+        this.checkOtpServer();
     },
 
     toggleRecovery() {

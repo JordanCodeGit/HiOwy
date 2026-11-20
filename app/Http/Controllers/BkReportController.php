@@ -2,59 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccessLog;
+use App\Models\Forward;
+use App\Models\IncidentCategory;
+use App\Models\ReportMessage;
+use App\Models\SchoolSetting;
 use App\Models\StaffMember;
 use App\Models\StudentReport;
-use App\Support\WaliKelasPreview;
+use App\Models\User;
+use App\Support\AuditLogger;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class BkReportController extends Controller
 {
     /**
-     * Dashboard Utama Laporan BK (/bk)
+     * Dashboard Utama Laporan BK (/bk).
      */
     public function dashboard(Request $request): View
     {
-        // Ambil semua laporan yang tidak berstatus iseng untuk dashboard utama
-        $reports = StudentReport::where('status', '!=', 'iseng')
-            ->where('is_archived', false)
-            ->orderByRaw("CASE 
-                WHEN status IN ('belum_dibaca', 'unread') THEN 1 
-                WHEN status IN ('sedang_diproses', 'in_progress', 'read') THEN 2 
-                ELSE 3 END")
+        Gate::authorize('viewAnyBk', StudentReport::class);
+
+        $isTrainingView = $request->query('mode') === 'latihan';
+        $trainingSettingActive = SchoolSetting::get('training_mode', '0') === '1';
+
+        $reports = StudentReport::active()
+            ->where('is_training', $isTrainingView)
+            ->with('forwards')
+            ->orderByRaw("CASE
+                WHEN status = 'belum_dibaca' AND LOWER(COALESCE(urgency, '')) IN ('darurat', 'urgent') THEN 1
+                WHEN status = 'belum_dibaca' AND ml_label = 1 THEN 2
+                WHEN status = 'belum_dibaca' THEN 3
+                WHEN status IN ('dibaca', 'ditindaklanjuti') THEN 4
+                ELSE 5 END")
             ->orderByDesc('id')
             ->get();
 
-        // Hitung metrik statistik
-        $unreadCount = StudentReport::whereIn('status', ['belum_dibaca', 'unread'])->where('is_archived', false)->count();
-        $urgentUnreadCount = StudentReport::whereIn('status', ['belum_dibaca', 'unread'])
+        $unreadCount = StudentReport::active()->where('is_training', $isTrainingView)->where('status', 'belum_dibaca')->count();
+
+        $urgentUnreadCount = StudentReport::active()
+            ->where('is_training', $isTrainingView)
+            ->where('status', 'belum_dibaca')
             ->whereIn('urgency', ['Darurat', 'Urgent', 'Tinggi'])
-            ->where('is_archived', false)
-            ->count();
-        
-        // Tanpa update > 3 hari
-        $threeDaysAgo = Carbon::now()->subDays(3);
-        $staleCount = StudentReport::whereNotIn('status', ['selesai', 'resolved', 'iseng'])
-            ->where('is_archived', false)
-            ->where('updated_at', '<=', $threeDaysAgo)
             ->count();
 
-        // Hitung per tab
+        $threeDaysAgo = Carbon::now('Asia/Jakarta')->subDays(3)->toDateString();
+        $staleCount = StudentReport::active()
+            ->where('is_training', $isTrainingView)
+            ->where('status', '!=', 'selesai')
+            ->where('status_updated_date', '<=', $threeDaysAgo)
+            ->count();
+
         $tabBelumDibaca = $unreadCount;
-        $tabSedangDitangani = StudentReport::whereIn('status', ['sedang_diproses', 'in_progress', 'read'])
-            ->where('is_archived', false)
-            ->count();
-        $tabSelesai = StudentReport::whereIn('status', ['selesai', 'resolved'])
-            ->where('is_archived', false)
-            ->count();
+        $tabSedangDitangani = StudentReport::active()->where('is_training', $isTrainingView)->whereIn('status', ['dibaca', 'ditindaklanjuti'])->count();
+        $tabSelesai = StudentReport::active()->where('is_training', $isTrainingView)->where('status', 'selesai')->count();
+        $categories = IncidentCategory::where('active', true)->orderBy('order_index')->get();
 
         return view('bk.dashboard', compact(
             'reports',
@@ -63,103 +72,110 @@ class BkReportController extends Controller
             'staleCount',
             'tabBelumDibaca',
             'tabSedangDitangani',
-            'tabSelesai'
+            'tabSelesai',
+            'isTrainingView',
+            'trainingSettingActive',
+            'categories'
         ));
     }
 
     /**
-     * Tampilkan detail laporan spesifik (/bk/reports/{id})
+     * Tampilkan detail laporan spesifik (/bk/reports/{id}).
      */
-    public function show(Request $request, $id): View
+    public function show(int $id): View
     {
-        $report = is_numeric($id) 
-            ? StudentReport::find($id) 
-            : StudentReport::where('ticket_code', $id)->first();
+        $report = StudentReport::with(['messages.user', 'forwards.toUser'])->findOrFail($id);
+        Gate::authorize('viewBk', $report);
 
-        if (!$report) {
-            $report = StudentReport::first();
+        // Status belum_dibaca -> dibaca otomatis saat Guru BK membuka laporan.
+        if ($report->status === 'belum_dibaca') {
+            $report->update([
+                'status' => 'dibaca',
+                'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+            ]);
         }
 
-        if (!$report) {
-            abort(404, 'Laporan tidak ditemukan');
+        AuditLogger::log(Auth::user(), 'view_report', $report);
+
+        $counselors = User::where('role', 'bk')->pluck('name')->filter()->values()->all();
+        if (Auth::check() && Auth::user()->name && ! in_array(Auth::user()->name, $counselors, true)) {
+            array_unshift($counselors, Auth::user()->name);
+        }
+        if (empty($counselors)) {
+            $counselors = ['Guru BK'];
         }
 
-        // Jika status masih belum_dibaca, tandai otomatis menjadi dibaca (read)
-        if (in_array($report->status, ['belum_dibaca', 'unread'])) {
-            $report->update(['status' => 'read']);
-        }
-
-        // Ambil daftar konselor untuk dropdown
-        $counselors = [
-            'Sarah Jenkins, M.Pd. (Konselor Inti)',
-            'Budi Santoso, S.Psi. (Konselor Kelas 7 & 8)',
-            'Ratna Kusuma, M.Psi. (Psikolog)',
-        ];
-        if (Auth::check() && Auth::user()->name) {
-            $userName = Auth::user()->name;
-            if (!in_array($userName, $counselors)) {
-                array_unshift($counselors, $userName . ' (Konselor Aktif)');
-            }
-        }
-
-        // Ambil daftar wali kelas untuk penerusan
+        $categories = IncidentCategory::where('active', true)->orderBy('order_index')->get();
         $waliKelasList = $this->getWaliKelasList();
 
-        return view('bk.report', compact('report', 'counselors', 'waliKelasList'));
+        return view('bk.report', compact('report', 'counselors', 'categories', 'waliKelasList'));
     }
 
     /**
-     * Fallback route untuk /bk/reports/preview
+     * Fallback route untuk /bk/reports/preview.
      */
-    public function preview(Request $request): View|RedirectResponse
+    public function preview(): View|RedirectResponse
     {
-        $first = StudentReport::orderByDesc('id')->first();
-        if (!$first) {
+        Gate::authorize('viewAnyBk', StudentReport::class);
+
+        $first = StudentReport::active()->production()->orderByDesc('id')->first()
+            ?? StudentReport::production()->orderByDesc('id')->first();
+        if (! $first) {
             return redirect()->route('bk.dashboard')->with('status', 'Belum ada data laporan.');
         }
-            
-        return $this->show($request, $first->id);
+
+        return $this->show($first->id);
     }
 
     /**
-     * Update status, urgensi, konselor penanggung jawab
+     * Update status, urgensi, konselor penanggung jawab.
      */
-    public function updateStatus(Request $request, $id): JsonResponse|RedirectResponse
+    public function updateStatus(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $report = StudentReport::findOrFail($id);
+        Gate::authorize('viewBk', $report);
 
         $validated = $request->validate([
-            'status'             => ['nullable', 'string', 'in:unread,belum_dibaca,read,sedang_diproses,in_progress,selesai,resolved,iseng'],
-            'urgency'            => ['nullable', 'string', 'in:Darurat,Urgent,Sedang,Medium,Rendah,Easy'],
+            'status' => ['nullable', 'string', 'in:unread,belum_dibaca,read,dibaca,ditindaklanjuti,sedang_diproses,in_progress,selesai,resolved'],
+            'urgency' => ['nullable', 'string', 'in:Darurat,Urgent,Sedang,Medium,Rendah,Easy'],
             'assigned_counselor' => ['nullable', 'string', 'max:120'],
         ]);
 
         if (isset($validated['status'])) {
             $statusMap = [
-                'unread'      => 'belum_dibaca',
-                'read'        => 'sedang_diproses',
-                'in_progress' => 'sedang_diproses',
-                'resolved'    => 'selesai',
+                'unread' => 'belum_dibaca',
+                'read' => 'dibaca',
+                'in_progress' => 'ditindaklanjuti',
+                'sedang_diproses' => 'ditindaklanjuti',
+                'resolved' => 'selesai',
             ];
             $validated['status'] = $statusMap[$validated['status']] ?? $validated['status'];
+            $validated['status_updated_date'] = now('Asia/Jakarta')->toDateString();
         }
 
         if (isset($validated['urgency'])) {
             $urgencyMap = [
                 'Urgent' => 'Darurat',
                 'Medium' => 'Sedang',
-                'Easy'   => 'Rendah',
+                'Easy' => 'Rendah',
             ];
             $validated['urgency'] = $urgencyMap[$validated['urgency']] ?? $validated['urgency'];
         }
 
         $report->update($validated);
 
+        AuditLogger::log(
+            Auth::user(),
+            'update_status',
+            $report,
+            "Status: {$report->status}, Urgensi: {$report->urgency}"
+        );
+
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Status dan penugasan laporan berhasil diperbarui.',
-                'report'  => $report,
+                'report' => $report,
             ]);
         }
 
@@ -167,28 +183,82 @@ class BkReportController extends Controller
     }
 
     /**
-     * Balasan Konselor untuk Siswa
+     * Koreksi jenis kejadian laporan oleh Guru BK (memengaruhi visibilitas Kesiswaan).
      */
-    public function storeCounselorReply(Request $request, $id): JsonResponse|RedirectResponse
+    public function updateCategory(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $report = StudentReport::findOrFail($id);
+        Gate::authorize('correctCategory', $report);
+
+        $validated = $request->validate([
+            'category' => ['required', 'string', 'max:120', Rule::exists('incident_categories', 'label')],
+        ]);
+
+        $oldCategory = $report->category;
+        $report->update([
+            'category' => $validated['category'],
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+
+        AuditLogger::log(
+            Auth::user(),
+            'correct_category',
+            $report,
+            "{$oldCategory} -> {$report->category}"
+        );
+
+        $message = "Jenis kejadian berhasil dikoreksi menjadi '{$report->category}'.";
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'category' => $report->category,
+            ]);
+        }
+
+        return back()->with('status', $message);
+    }
+
+    /**
+     * Balasan Konselor untuk Siswa (menyimpan ke tabel report_messages terenkripsi).
+     */
+    public function storeCounselorReply(Request $request, int $id): JsonResponse|RedirectResponse
+    {
+        $report = StudentReport::findOrFail($id);
+        Gate::authorize('reply', $report);
 
         $validated = $request->validate([
             'counselor_reply' => ['required', 'string', 'max:2000'],
         ]);
 
-        $report->update([
-            'counselor_reply'      => $validated['counselor_reply'],
-            'counselor_replied_at' => now(),
-            'status'               => in_array($report->status, ['belum_dibaca', 'unread']) ? 'sedang_diproses' : $report->status,
+        $today = now('Asia/Jakarta')->toDateString();
+
+        $msg = ReportMessage::create([
+            'student_report_id' => $report->id,
+            'sender' => 'bk',
+            'user_id' => Auth::id(),
+            'body' => trim($validated['counselor_reply']),
+            'sent_date' => $today,
         ]);
+
+        $nextStatus = in_array($report->status, ['belum_dibaca', 'dibaca'], true)
+            ? 'ditindaklanjuti'
+            : $report->status;
+
+        $report->update([
+            'status' => $nextStatus,
+            'status_updated_date' => $today,
+        ]);
+
+        AuditLogger::log(Auth::user(), 'reply_report', $report);
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Balasan resmi konselor berhasil dikirimkan.',
-                'reply'   => $report->counselor_reply,
-                'time'    => now()->format('H:i') . ' WIB',
+                'reply' => $msg->body,
+                'date' => $msg->sent_date->translatedFormat('d M Y'),
             ]);
         }
 
@@ -196,29 +266,33 @@ class BkReportController extends Controller
     }
 
     /**
-     * Simpan Catatan Rahasia Antar Konselor
+     * Simpan Catatan Rahasia Antar Konselor.
      */
-    public function storeInternalNote(Request $request, $id): JsonResponse|RedirectResponse
+    public function storeInternalNote(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $report = StudentReport::findOrFail($id);
+        Gate::authorize('viewBk', $report);
 
         $validated = $request->validate([
             'note' => ['required', 'string', 'max:2000'],
         ]);
 
         $author = Auth::user()->name ?? 'Konselor BK';
-        $time = now()->format('d M, H:i') . ' WIB';
-        $newNoteEntry = "[{$time}] {$author}: " . $validated['note'];
+        $date = now('Asia/Jakarta')->translatedFormat('d M Y');
+        $newNoteEntry = "[{$date}] {$author}: ".$validated['note'];
 
-        $existing = $report->internal_notes ? $report->internal_notes . "\n\n" : '';
+        $existing = $report->internal_notes ? $report->internal_notes."\n\n" : '';
         $report->update([
-            'internal_notes' => $existing . $newNoteEntry,
+            'internal_notes' => $existing.$newNoteEntry,
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
         ]);
+
+        AuditLogger::log(Auth::user(), 'add_note', $report);
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
-                'success'        => true,
-                'message'        => 'Catatan rahasia berhasil disimpan.',
+                'success' => true,
+                'message' => 'Catatan rahasia berhasil disimpan.',
                 'internal_notes' => $report->internal_notes,
             ]);
         }
@@ -227,113 +301,132 @@ class BkReportController extends Controller
     }
 
     /**
-     * Teruskan Ringkasan Aman ke Wali Kelas
+     * Teruskan Ringkasan Aman ke Wali Kelas melalui tabel forwards (terenkripsi).
      */
-    public function forwardToWalas(Request $request, $id): JsonResponse|RedirectResponse
+    public function forwardToWalas(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $report = StudentReport::findOrFail($id);
+        Gate::authorize('forward', $report);
 
         $validated = $request->validate([
-            'summary'     => ['required', 'string', 'max:2000'],
-            'walas_class' => ['nullable', 'string', 'max:32'],
+            'summary' => ['required', 'string', 'max:2000'],
+            'to_user_id' => ['required', 'integer', 'exists:users,id'],
         ]);
 
-        $targetClass = $validated['walas_class'] ?: ($report->reporter_class ?: '7B');
+        $toUser = User::findOrFail((int) $validated['to_user_id']);
+        if ($toUser->normalizedRole() !== 'walas') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Penerima terusan harus merupakan akun Wali Kelas aktif.',
+            ], 422);
+        }
 
-        // Tambahkan ke sistem WaliKelasPreview
-        $walasService = app(WaliKelasPreview::class);
-        $allSummaries = $walasService->all();
-        
-        $newId = count($allSummaries) > 0 ? (max(array_column($allSummaries, 'id')) + 1) : 1;
-        $author = Auth::user()->name ?? 'Konselor BK Inti';
-
-        $newSummary = [
-            'id'        => $newId,
-            'school'    => 'smakita',
-            'class'     => $targetClass,
-            'counselor' => $author,
-            'role'      => 'Konselor BK',
-            'time'      => 'Hari ini, ' . now()->format('H:i') . ' WIB',
-            'status'    => 'unread',
-            'content'   => $validated['summary'],
-            'excerpt'   => Str::limit($validated['summary'], 140),
-            'read_at'   => null,
-            'detail'    => $validated['summary'],
-        ];
-
-        array_unshift($allSummaries, $newSummary);
-        @file_put_contents(storage_path('framework/walas_summaries.json'), json_encode($allSummaries, JSON_PRETTY_PRINT));
+        Forward::create([
+            'student_report_id' => $report->id,
+            'from_user_id' => Auth::id(),
+            'to_user_id' => $toUser->id,
+            'summary' => trim($validated['summary']),
+            'forwarded_at' => now(),
+        ]);
 
         $report->update([
-            'forwarded_to_walas' => true,
-            'forwarded_at'       => now(),
-            'notes'              => ($report->notes ? $report->notes . "\n" : "") . "Diteruskan ke Wali Kelas {$targetClass}: " . Str::limit($validated['summary'], 80),
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
         ]);
+
+        AuditLogger::log(Auth::user(), 'forward_report', $report, "Diteruskan ke {$toUser->name}");
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => "Ringkasan aman berhasil diteruskan ke Wali Kelas {$targetClass}.",
+                'message' => "Ringkasan aman berhasil diteruskan kepada {$toUser->name}.",
             ]);
         }
 
-        return back()->with('status', "Ringkasan aman berhasil diteruskan ke Wali Kelas {$targetClass}.");
+        return back()->with('status', "Ringkasan aman berhasil diteruskan kepada {$toUser->name}.");
     }
 
     /**
-     * Tandai Laporan Iseng (Single)
+     * Tandai Laporan Iseng (Single) -> arsip dengan archive_reason = iseng.
      */
-    public function markIseng(Request $request, $id): JsonResponse|RedirectResponse
+    public function markIseng(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $report = StudentReport::findOrFail($id);
+        Gate::authorize('viewBk', $report);
+
         $report->update([
-            'status' => 'iseng',
+            'archived_at' => now(),
+            'archive_reason' => 'iseng',
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
         ]);
+
+        AuditLogger::log(Auth::user(), 'mark_iseng', $report);
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Laporan telah ditandai sebagai laporan iseng dan dipindahkan ke arsip.',
+                'message' => 'Laporan telah ditandai iseng dan dipindahkan ke arsip.',
             ]);
         }
 
-        return redirect()->route('bk.dashboard')->with('status', 'Laporan telah ditandai sebagai laporan iseng.');
+        return redirect()->route('bk.dashboard')->with('status', 'Laporan telah ditandai iseng.');
     }
 
     /**
-     * Bulk Action: Tandai Iseng untuk beberapa laporan
+     * Bulk Action: Tandai Iseng untuk beberapa laporan.
      */
     public function bulkMarkIseng(Request $request): JsonResponse|RedirectResponse
     {
+        Gate::authorize('viewAnyBk', StudentReport::class);
+
         $validated = $request->validate([
-            'ids'   => ['required', 'array'],
-            'ids.*' => ['required'],
+            'ids' => ['required', 'array'],
+            'ids.*' => ['required', 'integer'],
         ]);
 
-        $ids = $validated['ids'];
-        $count = StudentReport::whereIn('id', $ids)->update(['status' => 'iseng']);
+        $targets = StudentReport::whereIn('id', $validated['ids'])->get();
+        $count = StudentReport::whereIn('id', $validated['ids'])->update([
+            'archived_at' => now(),
+            'archive_reason' => 'iseng',
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+
+        foreach ($targets as $targetReport) {
+            AuditLogger::log(Auth::user(), 'mark_iseng', $targetReport, 'Bulk action');
+        }
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => "{$count} laporan berhasil ditandai sebagai iseng.",
-                'count'   => $count,
+                'message' => "{$count} laporan berhasil ditandai iseng dan diarsipkan.",
+                'count' => $count,
             ]);
         }
 
-        return back()->with('status', "{$count} laporan berhasil ditandai sebagai iseng.");
+        return back()->with('status', "{$count} laporan berhasil ditandai iseng.");
     }
 
     /**
-     * Arsipkan Laporan
+     * Arsipkan Laporan dengan alasan (selesai / iseng).
      */
-    public function archive(Request $request, $id): JsonResponse|RedirectResponse
+    public function archive(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $report = StudentReport::findOrFail($id);
-        $report->update([
-            'is_archived' => true,
-            'status'      => 'selesai',
+        Gate::authorize('viewBk', $report);
+
+        $validated = $request->validate([
+            'archive_reason' => ['nullable', 'string', 'in:selesai,iseng'],
         ]);
+
+        $reason = $validated['archive_reason'] ?? 'selesai';
+
+        $report->update([
+            'status' => $reason === 'selesai' ? 'selesai' : $report->status,
+            'archived_at' => now(),
+            'archive_reason' => $reason,
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+
+        AuditLogger::log(Auth::user(), 'archive_report', $report, "Alasan: {$reason}");
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
@@ -346,27 +439,109 @@ class BkReportController extends Controller
     }
 
     /**
-     * Helper untuk mengambil daftar wali kelas
+     * Halaman Arsip Laporan BK (/bk/archive) membaca data nyata DB.
+     */
+    public function archiveIndex(): View
+    {
+        Gate::authorize('viewAnyBk', StudentReport::class);
+
+        $archivedReports = StudentReport::archived()->production()->orderByDesc('id')->get();
+        $totalArchived = $archivedReports->count();
+        $resolvedCount = $archivedReports->where('archive_reason', 'selesai')->count();
+        $isengCount = $archivedReports->where('archive_reason', 'iseng')->count();
+        $unreadCount = StudentReport::active()->production()->where('status', 'belum_dibaca')->count();
+
+        return view('bk.archive', compact(
+            'archivedReports',
+            'totalArchived',
+            'resolvedCount',
+            'isengCount',
+            'unreadCount'
+        ));
+    }
+
+    /**
+     * Halaman Statistik BK (/bk/statistics) membaca data agregat nyata DB.
+     */
+    public function statistics(): View
+    {
+        Gate::authorize('viewAnyBk', StudentReport::class);
+
+        $all = StudentReport::production()->get();
+        $total = $all->count();
+        $active = $all->whereNull('archived_at')->count();
+        $completed = $all->filter(fn (StudentReport $r) => $r->status === 'selesai' || $r->archive_reason === 'selesai')->count();
+        $rate = $total > 0 ? (int) round(($completed / $total) * 100) : 0;
+        $unreadCount = $all->whereNull('archived_at')->where('status', 'belum_dibaca')->count();
+
+        $byCategory = $all->groupBy('category')->map->count()->sortDesc();
+        $byStatus = [
+            'belum_dibaca' => $all->where('status', 'belum_dibaca')->count(),
+            'dibaca' => $all->where('status', 'dibaca')->count(),
+            'ditindaklanjuti' => $all->where('status', 'ditindaklanjuti')->count(),
+            'selesai' => $all->where('status', 'selesai')->count(),
+            'iseng' => $all->where('archive_reason', 'iseng')->count(),
+        ];
+
+        return view('bk.statistics', compact(
+            'total',
+            'active',
+            'completed',
+            'rate',
+            'unreadCount',
+            'byCategory',
+            'byStatus'
+        ));
+    }
+
+    /**
+     * Halaman Log Akses & Audit Keamanan BK (/bk/access-log).
+     */
+    public function accessLog(): View
+    {
+        Gate::authorize('viewAnyBk', StudentReport::class);
+
+        $logs = AccessLog::with(['user', 'report'])->orderByDesc('id')->limit(200)->get();
+        $totalLogs = AccessLog::count();
+        $sensitiveViewsCount = AccessLog::whereIn('action', ['view_report', 'reply_report', 'add_note', 'forward_report'])->count();
+        $failedAuthCount = AccessLog::whereIn('action', ['login_failed', 'login_locked', '2fa_failed'])->count();
+        $unreadCount = StudentReport::active()->production()->where('status', 'belum_dibaca')->count();
+
+        return view('bk.access-log', compact(
+            'logs',
+            'totalLogs',
+            'sensitiveViewsCount',
+            'failedAuthCount',
+            'unreadCount'
+        ));
+    }
+
+    /**
+     * Helper untuk mengambil daftar user Wali Kelas aktif untuk penerusan.
+     *
+     * @return array<int, array<string, mixed>>
      */
     private function getWaliKelasList(): array
     {
-        try {
-            if (Schema::hasTable('staff_members')) {
-                $staff = StaffMember::whereIn('role', ['walas', 'walikelas'])->get();
-                if ($staff->count() > 0) {
-                    return $staff->map(function ($s) {
-                        return [
-                            'name'  => $s->name,
-                            'class' => $s->class_name ?: '7B',
-                            'label' => "{$s->name} (Wali {$s->class_name})",
-                        ];
-                    })->toArray();
-                }
-            }
-        } catch (\Throwable $e) {
-            // ignore
+        $walasUsers = User::whereIn('role', ['walas', 'wali_kelas', 'walikelas'])->get();
+        if ($walasUsers->isEmpty()) {
+            return [];
         }
 
-        return [];
+        $staffByEmail = Schema::hasTable('staff_members')
+            ? StaffMember::all()->keyBy(fn (StaffMember $s) => strtolower($s->email))
+            : collect([]);
+
+        return $walasUsers->map(function (User $u) use ($staffByEmail): array {
+            $staff = $staffByEmail->get(strtolower($u->email));
+            $class = $staff?->class_name ?: '-';
+
+            return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'class' => $class,
+                'label' => $class !== '-' ? "{$u->name} (Wali Kelas {$class})" : "{$u->name} (Wali Kelas)",
+            ];
+        })->values()->all();
     }
 }

@@ -50,8 +50,8 @@ class BkLearnController extends Controller
             $sort = $request->input('sort', 'newest');
             match ($sort) {
                 'oldest' => $query->oldest(),
-                'views'  => $query->orderByDesc('views_count'),
-                default  => $query->latest(),
+                'views' => $query->orderByDesc('views_count'),
+                default => $query->latest(),
             };
 
             $materials = $query->get();
@@ -67,11 +67,11 @@ class BkLearnController extends Controller
         }
 
         return view('bk.learn', [
-            'materials'      => $materials,
-            'totalViews'     => $totalViews,
+            'materials' => $materials,
+            'totalViews' => $totalViews,
             'publishedCount' => $publishedCount,
-            'totalCount'     => $totalCount,
-            'hasTable'       => $hasTable,
+            'totalCount' => $totalCount,
+            'hasTable' => $hasTable,
         ]);
     }
 
@@ -81,15 +81,15 @@ class BkLearnController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'title'      => ['required', 'string', 'max:255'],
-            'audience'   => ['required', 'string', 'in:siswa,orang_tua,umum'],
-            'content'    => ['required', 'string'],
+            'title' => ['required', 'string', 'max:255'],
+            'audience' => ['required', 'string', 'in:siswa,orang_tua,umum'],
+            'content' => ['required', 'string'],
             'is_visible' => ['nullable'],
         ], [
-            'title.required'    => 'Judul pengumuman wajib diisi.',
-            'title.max'         => 'Judul maksimal 255 karakter.',
+            'title.required' => 'Judul pengumuman wajib diisi.',
+            'title.max' => 'Judul maksimal 255 karakter.',
             'audience.required' => 'Target penerima materi wajib dipilih.',
-            'content.required'  => 'Isi pengumuman wajib diisi.',
+            'content.required' => 'Isi pengumuman wajib diisi.',
         ]);
 
         if (! Schema::hasTable('learning_materials')) {
@@ -101,13 +101,13 @@ class BkLearnController extends Controller
         $author = Auth::user();
 
         LearningMaterial::create([
-            'code'        => $code,
-            'title'       => $validated['title'],
-            'audience'    => $validated['audience'],
-            'content'     => $validated['content'],
-            'is_visible'  => $request->boolean('is_visible', true),
-            'author_name' => $author?->name ?? 'Sarah Jenkins, M.Pd.',
-            'author_id'   => $author?->id,
+            'code' => $code,
+            'title' => $validated['title'],
+            'audience' => $validated['audience'],
+            'content' => $validated['content'],
+            'is_visible' => $request->boolean('is_visible', true),
+            'author_name' => $author?->name ?? 'Guru BK',
+            'author_id' => $author?->id,
             'views_count' => 0,
         ]);
 
@@ -120,26 +120,26 @@ class BkLearnController extends Controller
     public function update(Request $request, int $id): RedirectResponse
     {
         $validated = $request->validate([
-            'title'      => ['required', 'string', 'max:255'],
-            'audience'   => ['required', 'string', 'in:siswa,orang_tua,umum'],
-            'content'    => ['required', 'string'],
+            'title' => ['required', 'string', 'max:255'],
+            'audience' => ['required', 'string', 'in:siswa,orang_tua,umum'],
+            'content' => ['required', 'string'],
             'is_visible' => ['nullable'],
         ], [
-            'title.required'    => 'Judul pengumuman wajib diisi.',
-            'title.max'         => 'Judul maksimal 255 karakter.',
+            'title.required' => 'Judul pengumuman wajib diisi.',
+            'title.max' => 'Judul maksimal 255 karakter.',
             'audience.required' => 'Target penerima materi wajib dipilih.',
-            'content.required'  => 'Isi pengumuman wajib diisi.',
+            'content.required' => 'Isi pengumuman wajib diisi.',
         ]);
 
         $material = LearningMaterial::findOrFail($id);
         $material->update([
-            'title'      => $validated['title'],
-            'audience'   => $validated['audience'],
-            'content'    => $validated['content'],
+            'title' => $validated['title'],
+            'audience' => $validated['audience'],
+            'content' => $validated['content'],
             'is_visible' => $request->boolean('is_visible'),
         ]);
 
-        return back()->with('success_message', 'Materi edukasi (' . $material->code . ') berhasil diperbarui.');
+        return back()->with('success_message', 'Materi edukasi ('.$material->code.') berhasil diperbarui.');
     }
 
     /**
@@ -153,13 +153,13 @@ class BkLearnController extends Controller
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
-                'success'    => true,
+                'success' => true,
                 'is_visible' => $material->is_visible,
-                'message'    => 'Status tayang materi ' . $material->code . ' berhasil diubah.',
+                'message' => 'Status tayang materi '.$material->code.' berhasil diubah.',
             ]);
         }
 
-        return back()->with('success_message', 'Status tayang materi ' . $material->code . ' berhasil diubah menjadi ' . ($material->is_visible ? 'Aktif' : 'Disembunyikan') . '.');
+        return back()->with('success_message', 'Status tayang materi '.$material->code.' berhasil diubah menjadi '.($material->is_visible ? 'Aktif' : 'Disembunyikan').'.');
     }
 
     /**
@@ -171,7 +171,7 @@ class BkLearnController extends Controller
         $code = $material->code;
         $material->delete();
 
-        return back()->with('success_message', 'Materi edukasi ' . $code . ' berhasil dihapus dari sistem.');
+        return back()->with('success_message', 'Materi edukasi '.$code.' berhasil dihapus dari sistem.');
     }
 
     /**
@@ -190,7 +190,7 @@ class BkLearnController extends Controller
 
         return view('public.learn', [
             'schoolCode' => $code,
-            'materials'  => $materials,
+            'materials' => $materials,
         ]);
     }
 
@@ -223,7 +223,7 @@ class BkLearnController extends Controller
         $counter = max($maxNumber + 1, 1);
 
         do {
-            $code = $prefix . str_pad((string) $counter, 3, '0', STR_PAD_LEFT);
+            $code = $prefix.str_pad((string) $counter, 3, '0', STR_PAD_LEFT);
             $counter++;
         } while (in_array($code, $existingCodes, true) || LearningMaterial::where('code', $code)->exists());
 

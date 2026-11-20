@@ -210,7 +210,7 @@
 
                 <button type="button" @click="window.open(qrScanUrl, '_blank')" class="text-xs text-slate-500 hover:text-blue-600 flex items-center gap-1 transition-colors cursor-pointer">
                     <span class="material-symbols-outlined text-[15px]">open_in_new</span>
-                    <span>Uji Coba Pindai QR (+1 Pemindaian)</span>
+                    <span>Buka Formulir Pelapor di Tab Baru</span>
                 </button>
             </div>
         </div>

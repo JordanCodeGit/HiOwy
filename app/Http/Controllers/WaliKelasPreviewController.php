@@ -2,22 +2,72 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Forward;
+use App\Models\SchoolSetting;
 use App\Models\StaffMember;
-use App\Models\User;
-use App\Support\WaliKelasPreview;
+use App\Support\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class WaliKelasPreviewController extends Controller
 {
-    public function __construct(private readonly WaliKelasPreview $preview) {}
+    private function teacherClass(): string
+    {
+        if (Auth::check() && Schema::hasTable('staff_members')) {
+            $staff = DB::table('staff_members')
+                ->where('email', strtolower((string) Auth::user()->email))
+                ->first();
+
+            if ($staff && ! empty($staff->class_name)) {
+                return $staff->class_name;
+            }
+        }
+
+        return '-';
+    }
+
+    /**
+     * Proyeksikan Forward DB menjadi format tampilan Wali Kelas tanpa membocorkan identitas pelapor.
+     *
+     * @return array<string, mixed>
+     */
+    private function toSummaryArray(Forward $forward): array
+    {
+        $isRead = $forward->read_at !== null;
+        $counselorName = $forward->fromUser?->name ?? 'Guru BK';
+
+        return [
+            'id' => $forward->id,
+            'counselor' => $counselorName,
+            'role' => 'Konselor BK',
+            'time' => $forward->forwarded_at ? $forward->forwarded_at->translatedFormat('d M Y, H:i').' WIB' : '-',
+            'status' => $isRead ? 'read' : 'unread',
+            'content' => $forward->summary,
+            'excerpt' => Str::limit($forward->summary, 140),
+            'read_at' => $isRead ? $forward->read_at->translatedFormat('d M Y, H:i').' WIB' : null,
+            'detail' => $forward->summary,
+        ];
+    }
+
+    private function userSummaries(): Collection
+    {
+        return Forward::with('fromUser')
+            ->where('to_user_id', Auth::id())
+            ->whereHas('report', fn ($q) => $q->where('is_training', false))
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (Forward $f) => $this->toSummaryArray($f));
+    }
 
     public function dashboard(): View
     {
@@ -26,29 +76,42 @@ class WaliKelasPreviewController extends Controller
 
     public function summary(int $summary): View
     {
-        $item = $this->preview->findSummary($summary);
-        return $this->page('summary', ['summary' => $item]);
+        $forward = Forward::with(['fromUser', 'report'])->findOrFail($summary);
+        Gate::authorize('view', $forward);
+
+        AuditLogger::log(Auth::user(), 'view_forward', $forward->report);
+
+        return $this->page('summary', ['summary' => $this->toSummaryArray($forward)]);
     }
 
-    /**
-     * Mengubah status baca satu ringkasan (Toggle Read / Unread).
-     */
     public function toggleRead(Request $request, int $summary): JsonResponse|RedirectResponse
     {
-        $updated = $this->preview->toggleRead($summary);
-        $summaries = $this->preview->summaries();
-        $unreadCount = $summaries->where('status', 'unread')->count();
+        $forward = Forward::with(['fromUser', 'report'])->findOrFail($summary);
+        Gate::authorize('markRead', $forward);
 
-        $message = $updated['status'] === 'read'
+        $forward->read_at = $forward->read_at ? null : now();
+        $forward->save();
+
+        AuditLogger::log(
+            Auth::user(),
+            'toggle_forward_read',
+            $forward->report,
+            $forward->read_at ? 'Dibaca' : 'Belum dibaca'
+        );
+
+        $unreadCount = Forward::where('to_user_id', Auth::id())->whereNull('read_at')->count();
+        $isRead = $forward->read_at !== null;
+
+        $message = $isRead
             ? 'Ringkasan berhasil ditandai telah dibaca.'
             : 'Ringkasan dikembalikan ke status belum dibaca.';
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
-                'success'     => true,
-                'message'     => $message,
-                'status'      => $updated['status'],
-                'read_at'     => $updated['read_at'],
+                'success' => true,
+                'message' => $message,
+                'status' => $isRead ? 'read' : 'unread',
+                'read_at' => $forward->read_at?->translatedFormat('d M Y, H:i').($isRead ? ' WIB' : ''),
                 'unreadCount' => $unreadCount,
             ]);
         }
@@ -56,19 +119,18 @@ class WaliKelasPreviewController extends Controller
         return back()->with('status', $message);
     }
 
-    /**
-     * Menandai semua notifikasi / ringkasan sebagai telah dibaca.
-     */
     public function markAllRead(Request $request): JsonResponse|RedirectResponse
     {
-        $this->preview->markAllAsRead();
+        Forward::where('to_user_id', Auth::id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
 
         $message = 'Seluruh ringkasan telah ditandai dibaca.';
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
-                'success'     => true,
-                'message'     => $message,
+                'success' => true,
+                'message' => $message,
                 'unreadCount' => 0,
             ]);
         }
@@ -76,111 +138,95 @@ class WaliKelasPreviewController extends Controller
         return back()->with('status', $message);
     }
 
-    /**
-     * Mencetak poster resmi QR pengaduan untuk ditempel di ruang kelas.
-     */
     public function downloadPoster(): View
     {
-        $schoolName = Auth::user()?->school_name ?? 'SMP Telkom Purwokerto';
-        $className = $this->preview->getTeacherClass();
+        $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+        $className = $this->teacherClass();
+        $reportUrl = url('/s/lapor');
 
         return view('bk.poster-print', [
-            'schoolName' => $schoolName . ' — Kelas ' . $className,
-            'reportUrl'  => url('/s/lapor'),
-            'qrScanUrl'  => url('/s/qr'),
+            'schoolName' => $schoolName.($className !== '-' ? ' — Kelas '.$className : ''),
+            'reportUrl' => $reportUrl,
+            'qrScanUrl' => $reportUrl,
         ]);
     }
 
-    /**
-     * Menampilkan dokumen cetak PDF disposisi konseling kelas.
-     */
     public function downloadPdf(int $summary): View
     {
-        $item = $this->preview->findSummary($summary);
-        $schoolName = Auth::user()?->school_name ?? 'SMP Telkom Purwokerto';
-        $className = $this->preview->getTeacherClass();
+        $forward = Forward::with('fromUser')->findOrFail($summary);
+        Gate::authorize('view', $forward);
+
+        $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+        $className = $this->teacherClass();
 
         return view('walas.summary-print', [
-            'summary'    => $item,
+            'summary' => $this->toSummaryArray($forward),
             'schoolName' => $schoolName,
-            'className'  => $className,
+            'className' => $className,
         ]);
     }
 
-    /**
-     * Halaman profil & keamanan akun Wali Kelas.
-     */
     public function profile(): View
     {
         return $this->page('profile');
     }
 
-    /**
-     * Memperbarui profil dinas (Nama Tampilan).
-     */
     public function updateProfile(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => ['required', 'string', 'max:120'],
         ], [
             'name.required' => 'Nama lengkap dan gelar wajib diisi.',
-            'name.max'      => 'Nama maksimal 120 karakter.',
+            'name.max' => 'Nama maksimal 120 karakter.',
         ]);
 
         $user = Auth::user();
-        if ($user) {
-            $user->name = $request->input('name');
-            $user->save();
+        $user->name = $request->input('name');
+        $user->save();
 
-            try {
-                if (Schema::hasTable('staff_members')) {
-                    StaffMember::where('email', $user->email)->update(['name' => $user->name]);
-                }
-            } catch (\Throwable $e) {}
+        if (Schema::hasTable('staff_members')) {
+            StaffMember::where('email', strtolower($user->email))->update(['name' => $user->name]);
         }
 
         return back()->with('status', 'Nama lengkap dan data profil dinas berhasil disimpan.');
     }
 
-    /**
-     * Memperbarui kata sandi akun Wali Kelas.
-     */
     public function updatePassword(Request $request): RedirectResponse
     {
         $request->validate([
             'current_password' => ['required', 'current_password'],
-            'password'         => ['required', 'confirmed', Password::defaults()],
+            'password' => ['required', 'confirmed', Password::min(10)->mixedCase()->numbers()->symbols()],
         ], [
-            'current_password.required'         => 'Kata sandi saat ini wajib diisi.',
+            'current_password.required' => 'Kata sandi saat ini wajib diisi.',
             'current_password.current_password' => 'Kata sandi saat ini tidak cocok dengan data kami.',
-            'password.required'                 => 'Kata sandi baru wajib diisi.',
-            'password.confirmed'                => 'Konfirmasi kata sandi baru tidak cocok.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+            'password.min' => 'Kata sandi minimal 10 karakter.',
         ]);
 
         $user = Auth::user();
-        if ($user) {
-            $user->password = Hash::make($request->input('password'));
-            $user->save();
-        }
+        $user->password = Hash::make($request->input('password'));
+        $user->save();
 
         return back()->with('status', 'Kata sandi akun Anda berhasil diperbarui dengan aman.');
     }
 
     private function page(string $page, array $data = []): View
     {
-        $summaries = $this->preview->summaries();
-        $className = $this->preview->getTeacherClass();
-        $schoolName = Auth::user()?->school_name ?? 'SMP Telkom Purwokerto';
+        $summaries = $this->userSummaries();
+        $className = $this->teacherClass();
+        $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+        $reportUrl = url('/s/lapor');
 
         return view('walas.'.$page, $data + [
-            'summaries'     => $summaries,
-            'unreadCount'   => $summaries->where('status', 'unread')->count(),
-            'readCount'     => $summaries->where('status', 'read')->count(),
+            'summaries' => $summaries,
+            'unreadCount' => $summaries->where('status', 'unread')->count(),
+            'readCount' => $summaries->where('status', 'read')->count(),
             'notifications' => $summaries->where('status', 'unread')->values(),
-            'className'     => $className,
-            'schoolName'    => $schoolName,
-            'reportUrl'     => url('/s/lapor'),
-            'qrScanUrl'     => url('/s/qr'),
+            'className' => $className,
+            'schoolName' => $schoolName,
+            'reportUrl' => $reportUrl,
+            'qrScanUrl' => $reportUrl,
         ]);
     }
 }

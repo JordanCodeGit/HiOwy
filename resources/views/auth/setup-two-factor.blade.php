@@ -41,7 +41,7 @@
 
                         <!-- Header Banner & Instructions -->
                         <div class="source-space-y-2">
-                            <div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">Tahap Konfigurasi</span><span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-2.5 py-1 rounded-full"><span class="material-symbols-outlined text-sm">timer</span> Sesi: 1 Jam</span></div>
+                            <div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">Tahap Konfigurasi</span><span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant bg-surface-container-high px-2.5 py-1 rounded-full"><span class="material-symbols-outlined text-sm">timer</span> Sesi: 30 Menit</span></div>
                             <h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Aktifkan Verifikasi 2 Langkah</h2>
                             <p class="font-body-md text-body-md text-on-surface-variant">Ikuti langkah mudah ini untuk amankan akunmu.</p></div>
 
@@ -81,9 +81,15 @@
                                 <div class="flex items-center gap-2.5"><span class="w-6 h-6 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-label-sm text-label-sm font-bold">2</span>
                                     <h3 class="font-title-lg text-title-lg text-on-surface font-bold">Cek Kode Pertama</h3>
                                 </div>
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm transition-colors" x-bind:class="digits.join('').length === 6 ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-surface-container text-on-surface-variant'">
-                                    <span class="material-symbols-outlined text-sm font-bold" x-text="digits.join('').length === 6 ? 'check_circle' : 'pending'">check_circle</span>
-                                    <span x-text="digits.join('').length === 6 ? 'Terverifikasi' : 'Belum terhubung'">Belum terhubung</span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-label-sm text-label-sm transition-colors"
+                                      x-bind:class="{
+                                          'bg-tertiary-fixed text-on-tertiary-fixed': verifyState === 'valid',
+                                          'bg-red-100 text-red-700': verifyState === 'invalid',
+                                          'bg-surface-container text-on-surface-variant': verifyState !== 'valid' && verifyState !== 'invalid'
+                                      }">
+                                    <span class="material-symbols-outlined text-sm font-bold"
+                                          x-text="verifyState === 'valid' ? 'check_circle' : (verifyState === 'invalid' ? 'error' : 'pending')">pending</span>
+                                    <span x-text="verifyState === 'valid' ? 'Terverifikasi' : (verifyState === 'invalid' ? 'Kode Salah' : (verifyState === 'checking' ? 'Memeriksa...' : 'Belum terhubung'))">Belum terhubung</span>
                                 </span>
                             </div>
                             <p class="font-body-md text-body-md text-on-surface-variant">Ketik 6 digit kode yang muncul di aplikasimu:</p>
@@ -96,9 +102,13 @@
                                 <input class="w-12 h-14 text-center font-display-lg text-headline-lg font-bold bg-surface-container-low text-on-surface rounded-xl shadow-[inset_0_2px_4px_0_rgb(0_0_0/0.05)] focus:outline-hidden" maxlength="1" type="text" inputmode="numeric" autocomplete="off" placeholder="•" data-otp="" aria-label="Digit kode 5" x-on:input="inputDigit($event, 4)" x-on:keydown="moveFocus($event, 4)" x-on:paste.prevent="pasteDigits($event, 4)">
                                 <input class="w-12 h-14 text-center font-display-lg text-headline-lg font-bold bg-surface-container-low text-on-surface rounded-xl shadow-[inset_0_2px_4px_0_rgb(0_0_0/0.05)] focus:outline-hidden" maxlength="1" type="text" inputmode="numeric" autocomplete="off" placeholder="•" data-otp="" aria-label="Digit kode 6" x-on:input="inputDigit($event, 5)" x-on:keydown="moveFocus($event, 5)" x-on:paste.prevent="pasteDigits($event, 5)">
                             </div>
-                            <div class="flex items-center gap-2 p-2 rounded-lg bg-surface-container-low text-on-secondary-container">
-                                <span class="material-symbols-outlined text-secondary text-base">check</span>
-                                <span class="font-label-sm text-label-sm" x-text="digits.join('').length === 6 ? 'Kode pas &amp; terhubung' : 'Ketik 6 digit kode dari aplikasi'">Ketik 6 digit kode dari aplikasi</span>
+                            <div class="flex items-center gap-2 p-2 rounded-lg transition-colors"
+                                 x-bind:class="verifyState === 'invalid' ? 'bg-red-50 text-red-700' : 'bg-surface-container-low text-on-secondary-container'">
+                                <span class="material-symbols-outlined text-base"
+                                      x-bind:class="verifyState === 'invalid' ? 'text-red-600' : 'text-secondary'"
+                                      x-text="verifyState === 'valid' ? 'check_circle' : (verifyState === 'invalid' ? 'error' : 'info')">info</span>
+                                <span class="font-label-sm text-label-sm"
+                                      x-text="verifyState === 'valid' ? 'Kode pas &amp; terverifikasi' : (verifyState === 'invalid' ? 'Kode salah atau kedaluwarsa. Periksa aplikasi autentikator Anda.' : 'Ketik 6 digit kode dari aplikasi')">Ketik 6 digit kode dari aplikasi</span>
                             </div>
                         </section>
 
@@ -114,7 +124,7 @@
                                     <span>Bantuan IT</span>
                                 </button>
                             </div>
-                            <p class="font-body-sm text-body-sm text-on-surface-variant text-center pt-1">Sesi otomatis selesai jika 1 jam tidak aktif.</p>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant text-center pt-1">Sesi otomatis selesai jika 30 menit tidak aktif.</p>
                         </div>
                     </form>
                     <!-- Footer Help Line -->

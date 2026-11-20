@@ -2,60 +2,40 @@
 
 namespace Database\Seeders;
 
+use App\Models\SchoolSetting;
 use App\Models\User;
 use App\Support\TotpService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $totp = new TotpService();
-        $sampleSecret = 'JBSWY3DPEHPK3PXP';
-        $recoveryCodes = json_encode([
-            'SR24-8041',
-            'SR24-8042',
-            'SR24-8043',
-            'SR24-8044',
-            'BK99-1122',
-            'BK99-3344',
-            'BK99-5566',
-            'BK99-7788',
-        ]);
+        if (Schema::hasTable('school_settings')) {
+            SchoolSetting::set('school_name', env('SCHOOL_NAME', 'SMP Telkom Purwokerto'));
+        }
 
-        $users = [
-            [
-                'name' => 'Sarah Jenkins, S.Psi.',
-                'email' => 'konselor.sarah@nusantara.sch.id',
-                'password' => Hash::make('password'),
-                'role' => 'bk',
-                'two_factor_secret' => $sampleSecret,
-                'two_factor_recovery_codes' => $recoveryCodes,
-                'two_factor_confirmed_at' => null, // Set null to trigger first-time Gmail activation flow!
-            ],
-            [
-                'name' => 'Bambang Pratama, S.Pd.',
-                'email' => 'kesiswaan@nusantara.sch.id',
-                'password' => Hash::make('password'),
-                'role' => 'kesiswaan',
-                'two_factor_secret' => $sampleSecret,
-                'two_factor_recovery_codes' => $recoveryCodes,
-                'two_factor_confirmed_at' => now(), // Already confirmed
-            ],
-            [
-                'name' => 'Ratna Dewi, S.Pd.',
-                'email' => 'walas.ratna@nusantara.sch.id',
-                'password' => Hash::make('password'),
-                'role' => 'wali_kelas',
-                'two_factor_secret' => $sampleSecret,
-                'two_factor_recovery_codes' => $recoveryCodes,
-                'two_factor_confirmed_at' => null, // First-time flow
-            ],
-        ];
+        // Seed only the first Guru BK admin account if no BK user exists yet.
+        $adminEmail = strtolower((string) env('ADMIN_BK_EMAIL', 'bk@smptelkompwt.sch.id'));
+        $adminName = (string) env('ADMIN_BK_NAME', 'Koordinator BK SMP Telkom Purwokerto');
+        $adminPassword = (string) env('ADMIN_BK_PASSWORD', 'Password-1234');
 
-        foreach ($users as $data) {
-            User::updateOrCreate(['email' => $data['email']], $data);
+        $totp = new TotpService;
+
+        if (! User::where('role', 'bk')->exists()) {
+            User::updateOrCreate(
+                ['email' => $adminEmail],
+                [
+                    'name' => $adminName,
+                    'password' => Hash::make($adminPassword),
+                    'role' => 'bk',
+                    'two_factor_secret' => $totp->generateSecret(),
+                    'two_factor_recovery_codes' => $totp->generateRecoveryCodes(),
+                    'two_factor_confirmed_at' => null,
+                ]
+            );
         }
     }
 }

@@ -1,5 +1,11 @@
 <x-layouts.bk title="Laporan Kesiswaan" page="dashboard" mode="dashboard" portal="kesiswaan" :report-count="$summary['unread']">
 <main x-data="kesiswaanTable(false)" data-report-list @bk-search.window="query = $event.detail.query; status = 'belum_dibaca'; selected = []" class="bk-reports-page p-4 lg:p-8 w-full space-y-6">
+@if(session('status'))
+<div class="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-emerald-600">check_circle</span>
+<span>{{ session('status') }}</span>
+</div>
+@endif
 <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
 <div class="bk-hover-card bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
 <div>
@@ -41,7 +47,7 @@
 <span class="text-3xl font-bold text-slate-900 tracking-tight">{{ $summary['overdue'] }}</span>
 <span class="text-xs text-amber-700 font-medium">perlu tindak lanjut</span>
 </div>
-<p class="text-[11px] text-slate-400 mt-1">Acuan pratinjau: 24 Oktober 2024</p>
+<p class="text-[11px] text-slate-400 mt-1">Laporan aktif lebih dari 3 hari tanpa pembaruan</p>
 </div>
 <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
 <span class="material-symbols-outlined text-[24px]">history_toggle_off</span>

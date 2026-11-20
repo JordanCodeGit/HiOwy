@@ -443,21 +443,11 @@ function formAndNetworkStates(main) {
             error.remove(); input.removeAttribute('aria-invalid');
         }
     });
-    const unload = event => { if (changed.size) { event.preventDefault(); event.returnValue = ''; } };
-    window.addEventListener('beforeunload', unload);
-    document.addEventListener('submit', () => {
-        changed.clear();
-        window.removeEventListener('beforeunload', unload);
-    });
     document.addEventListener('click', event => {
         const link = event.target.closest('a[href]');
         if (!link || link.target === '_blank' || link.hasAttribute('download') || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
         const target = new URL(link.href, location.href);
         if (target.pathname === location.pathname && target.hash) return;
-        if (changed.size && !window.confirm('Ada perubahan yang belum disimpan. Tetap tinggalkan halaman?')) {
-            event.preventDefault(); event.stopImmediatePropagation(); return;
-        }
-        window.removeEventListener('beforeunload', unload);
         if (target.origin === location.origin) document.body.classList.add('staff-navigating');
         if (['report', 'summary'].includes(document.body.dataset.staffPage) && document.referrer && new URL(document.referrer).href === target.href && history.length > 1) {
             event.preventDefault(); event.stopImmediatePropagation(); history.back();

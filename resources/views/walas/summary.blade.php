@@ -71,7 +71,7 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md pt-space-xs">
 <div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-low">
 <div class="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-title-md text-title-md shrink-0 shadow-xs">
-{{ $summary['counselor'] === 'Sarah Jenkins, M.Pd.' ? 'SJ' : 'NH' }}
+{{ collect(explode(' ', trim($summary['counselor'] ?: 'BK')))->filter()->map(fn($w) => strtoupper(substr($w, 0, 1)))->take(2)->implode('') }}
 </div>
 <div class="flex flex-col min-w-0">
 <span class="font-label-sm text-label-sm text-on-surface-variant">Pengirim Ringkasan</span>
@@ -99,7 +99,7 @@
 <div class="flex flex-col min-w-0">
 <span class="font-label-sm text-label-sm text-on-surface-variant">Waktu Diteruskan</span>
 <span class="font-title-md text-title-md text-on-surface">{{ $summary['time'] }}</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">Waktu pada data contoh</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tercatat otomatis oleh sistem</span>
 </div>
 </div>
 </div>
@@ -127,7 +127,7 @@
 <div class="relative bg-surface-container-lowest rounded-xl p-space-lg shadow-xs">
 <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-secondary rounded-l-xl"></div>
 <div class="pl-space-xs flex flex-col gap-space-xs">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">{{ $summary['id'] === 4 ? 'Tindak Lanjut Kehadiran & Partisipasi' : 'Fokus Observasi & Arahan Kelas' }}</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold">Fokus Observasi &amp; Arahan Kelas</span>
 <p class="font-body-lg text-body-lg text-on-surface leading-relaxed">{{ $summary['detail'] }}</p>
 </div>
 </div>
@@ -183,7 +183,7 @@
 
 </div>
 <div class="text-on-surface-variant/80">
-        ID Audit Sesi: <code class="font-mono text-label-sm">{{ $summary['id'] === 4 ? 'E2E-WK8B-20241019-V2 (contoh)' : 'Belum tersedia' }}</code>
+        ID Audit Ringkasan: <code class="font-mono text-label-sm">#FWD-{{ str_pad((string) $summary['id'], 4, '0', STR_PAD_LEFT) }}</code>
 </div>
 </div>
 </div>

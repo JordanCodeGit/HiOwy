@@ -28,6 +28,12 @@
         </div>
     </div>
     <div class="shrink-0 border-t border-slate-100 p-4">
-        <a href="{{ route('login') }}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition-all hover:bg-rose-50 hover:text-rose-600"><span class="material-symbols-outlined text-[19px]" aria-hidden="true">logout</span>Keluar Pratinjau</a>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition-all hover:bg-rose-50 hover:text-rose-600 cursor-pointer">
+                <span class="material-symbols-outlined text-[19px]" aria-hidden="true">logout</span>
+                <span>Keluar</span>
+            </button>
+        </form>
     </div>
 </aside>
