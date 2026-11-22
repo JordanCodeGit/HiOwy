@@ -149,7 +149,7 @@ class Batch2M4Test extends TestCase
         $archivePage->assertSee($r1->case_label);
         $archivePage->assertSee($r2->case_label);
 
-        $this->actingAs($bk)->get('/bk/statistics')->assertOk()->assertSee('Total 2 Kasus');
+        $this->actingAs($bk)->get('/bk/statistics')->assertOk()->assertSee('kurang dari 5');
     }
 
     public function test_kesiswaan_visibility_policy_and_bk_category_correction(): void
