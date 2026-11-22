@@ -93,6 +93,17 @@ class AuthController extends Controller
                 ]);
         }
 
+        if (Schema::hasTable('staff_members')) {
+            $staffRecord = StaffMember::where('email', $email)->first();
+            if ($staffRecord && $staffRecord->status === 'nonaktif') {
+                return back()
+                    ->withInput($request->only('email', 'remember'))
+                    ->withErrors([
+                        'email' => 'Akun staf Anda sedang dinonaktifkan oleh Admin Sekolah. Hubungi Koordinator BK.',
+                    ]);
+            }
+        }
+
         RateLimiter::clear($throttleKey);
 
         // Ensure user has a TOTP secret configured

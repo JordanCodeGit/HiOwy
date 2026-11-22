@@ -118,6 +118,7 @@
                                         <span class="material-symbols-outlined text-title-md" id="eye-icon" x-text="visible ? 'visibility_off' : 'visibility'">visibility</span>
                                     </button>
                                 </div>
+                                <span class="text-[11px] text-on-surface-variant">Kebijakan keamanan akun staf: kata sandi minimal 10 karakter (huruf besar, kecil, angka, dan simbol).</span>
                             </div>
 
                             <!-- Remember me -->

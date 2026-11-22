@@ -103,7 +103,7 @@
                                 </label>
                                 <div class="relative flex items-center">
                                     <span class="material-symbols-outlined absolute left-4 text-outline pointer-events-none text-xl">lock</span>
-                                    <input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-lowest text-on-surface placeholder:text-outline-variant font-body-md text-body-md rounded-xl shadow-xs border border-outline-variant/30 focus:outline-hidden focus:border-secondary focus:bg-surface-container-lowest transition-all" id="new-password" placeholder="Minimal 8 karakter aman" required="" type="password" name="password" autocomplete="new-password" x-bind:type="showPass ? 'text' : 'password'">
+                                    <input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-lowest text-on-surface placeholder:text-outline-variant font-body-md text-body-md rounded-xl shadow-xs border border-outline-variant/30 focus:outline-hidden focus:border-secondary focus:bg-surface-container-lowest transition-all" id="new-password" placeholder="Minimal 10 karakter aman" minlength="10" required="" type="password" name="password" autocomplete="new-password" x-bind:type="showPass ? 'text' : 'password'">
                                     <button class="absolute right-3.5 p-1 text-outline hover:text-on-surface transition-colors cursor-pointer" type="button" x-on:click="showPass = !showPass" title="Tampilkan / Sembunyikan sandi">
                                         <span class="material-symbols-outlined text-xl" x-text="showPass ? 'visibility_off' : 'visibility'">visibility</span>
                                     </button>
@@ -117,7 +117,7 @@
                                 </label>
                                 <div class="relative flex items-center">
                                     <span class="material-symbols-outlined absolute left-4 text-outline pointer-events-none text-xl">lock_clock</span>
-                                    <input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-lowest text-on-surface placeholder:text-outline-variant font-body-md text-body-md rounded-xl shadow-xs border border-outline-variant/30 focus:outline-hidden focus:border-secondary focus:bg-surface-container-lowest transition-all" id="confirm-password" placeholder="Ketik ulang kata sandi baru" required="" type="password" name="password_confirmation" autocomplete="new-password" x-bind:type="showConfirm ? 'text' : 'password'">
+                                    <input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-lowest text-on-surface placeholder:text-outline-variant font-body-md text-body-md rounded-xl shadow-xs border border-outline-variant/30 focus:outline-hidden focus:border-secondary focus:bg-surface-container-lowest transition-all" id="confirm-password" placeholder="Ketik ulang kata sandi baru" minlength="10" required="" type="password" name="password_confirmation" autocomplete="new-password" x-bind:type="showConfirm ? 'text' : 'password'">
                                     <button class="absolute right-3.5 p-1 text-outline hover:text-on-surface transition-colors cursor-pointer" type="button" x-on:click="showConfirm = !showConfirm" title="Tampilkan / Sembunyikan konfirmasi sandi">
                                         <span class="material-symbols-outlined text-xl" x-text="showConfirm ? 'visibility_off' : 'visibility'">visibility</span>
                                     </button>
@@ -128,7 +128,7 @@
                             <div class="p-3.5 rounded-xl bg-surface-container-low text-on-surface-variant font-body-xs text-xs source-space-y-1">
                                 <p class="font-semibold text-on-surface">Ketentuan Kata Sandi:</p>
                                 <ul class="list-disc list-inside space-y-0.5 text-on-surface-variant">
-                                    <li>Minimal 8 karakter</li>
+                                    <li>Minimal 10 karakter</li>
                                     <li>Mengandung kombinasi huruf besar (A-Z) dan kecil (a-z)</li>
                                     <li>Mengandung minimal 1 angka (0-9) dan 1 simbol (!@#$%)</li>
                                 </ul>
