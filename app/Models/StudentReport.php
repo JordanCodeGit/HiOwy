@@ -18,14 +18,17 @@ class StudentReport extends Model
         'urgency',
         'reporter_role',
         'incident_time',
+        'incident_date',
         'story',
         'is_anonymous',
         'reporter_name',
         'reporter_class',
         'reporter_contact',
         'status',
+        'bk_read_at',
         'assigned_counselor',
         'internal_notes',
+        'kesiswaan_notes',
         'submitted_date',
         'submitted_daypart',
         'status_updated_date',
@@ -53,10 +56,13 @@ class StudentReport extends Model
         'reporter_class' => 'encrypted',
         'reporter_contact' => 'encrypted',
         'internal_notes' => 'encrypted',
+        'kesiswaan_notes' => 'encrypted',
         'is_anonymous' => 'boolean',
         'is_training' => 'boolean',
         'ml_label' => 'integer',
         'ml_confidence' => 'float',
+        'incident_date' => 'date',
+        'bk_read_at' => 'datetime',
         'submitted_date' => 'date',
         'status_updated_date' => 'date',
         'archived_at' => 'datetime',
@@ -146,10 +152,10 @@ class StudentReport extends Model
     public function getUrgencyNormalizedAttribute(): string
     {
         $u = strtolower((string) ($this->urgency ?: ''));
-        if (str_contains($u, 'darurat') || str_contains($u, 'urgent') || str_contains($u, 'tinggi')) {
+        if (str_contains($u, 'darurat') || str_contains($u, 'urgent')) {
             return 'urgent';
         }
-        if (str_contains($u, 'sedang') || str_contains($u, 'medium')) {
+        if (str_contains($u, 'sedang') || str_contains($u, 'medium') || str_contains($u, 'tinggi') || str_contains($u, 'penting')) {
             return 'medium';
         }
 
@@ -178,11 +184,21 @@ class StudentReport extends Model
         return 'lainnya';
     }
 
+    public function getFormattedIncidentDateAttribute(): string
+    {
+        return $this->incident_date
+            ? $this->incident_date->translatedFormat('d M Y')
+            : 'Tidak ingat pasti';
+    }
+
     public function getRoleNormalizedAttribute(): string
     {
         $r = strtolower((string) ($this->reporter_role ?: ''));
         if (str_contains($r, 'ortu') || str_contains($r, 'orang tua') || str_contains($r, 'wali')) {
             return 'ortu';
+        }
+        if (str_contains($r, 'saksi') && ! str_contains($r, 'teman')) {
+            return 'saksi';
         }
         if (str_contains($r, 'teman') || str_contains($r, 'saksi')) {
             return 'teman';

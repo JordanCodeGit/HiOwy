@@ -15,11 +15,14 @@ class ReportMessage extends Model
         'user_id',
         'body',
         'sent_date',
+        'bk_sent_time',
+        'read_at',
     ];
 
     protected $casts = [
         'body' => 'encrypted',
         'sent_date' => 'date',
+        'read_at' => 'datetime',
     ];
 
     public function report(): BelongsTo

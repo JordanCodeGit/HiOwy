@@ -11,6 +11,7 @@ class IncidentCategory extends Model
 
     protected $fillable = [
         'label',
+        'permendikbud_type',
         'active',
         'permanent',
         'visible_to_kesiswaan',
