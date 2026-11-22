@@ -67,6 +67,14 @@ Laporan terselesaikan dan ditandai iseng. Riwayat catatan dan audit trail tetap 
 </select>
 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-base pointer-events-none">expand_more</span>
 </div>
+<button type="button" @click="resetFilters()" class="px-3.5 py-2.5 rounded-xl border border-outline-variant/40 text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer inline-flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base">restart_alt</span>
+<span>Reset Filter</span>
+</button>
+<button x-cloak x-show="selected.length > 0" type="button" @click="submitBulkUnarchive()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs">
+<span class="material-symbols-outlined text-base">unarchive</span>
+<span>Keluarkan dari Arsip (<span x-text="selected.length"></span>)</span>
+</button>
 </div>
 </div>
 
@@ -89,7 +97,7 @@ Laporan terselesaikan dan ditandai iseng. Riwayat catatan dan audit trail tetap 
 </thead>
 <tbody class="font-body-md text-body-md text-on-surface" id="archiveTableBody">
 @foreach($archivedReports as $report)
-<tr class="hover:bg-surface-container-low/40 transition-colors group" data-preview-row="{{ $loop->index }}" x-show="rowVisible({{ $loop->index }})">
+<tr class="hover:bg-surface-container-low/40 transition-colors group" data-preview-row="{{ $loop->index }}" data-id="{{ $report->id }}" x-show="rowVisible({{ $loop->index }})">
 <td class="py-4 pl-6 pr-3">
 <input x-model="selected" value="{{ $report->id }}" aria-label="Pilih laporan #{{ $report->case_label }}" class="row-checkbox w-4 h-4 rounded text-secondary bg-surface-container-lowest focus:ring-secondary/20 transition cursor-pointer" type="checkbox">
 </td>
@@ -127,10 +135,16 @@ Selesai Ditangani
 {{ $report->archived_at ? \Carbon\Carbon::parse($report->archived_at)->timezone('Asia/Jakarta')->translatedFormat('d M Y') : '-' }}
 </td>
 <td class="py-4 pl-4 pr-6 text-right">
+<div class="inline-flex items-center gap-2 justify-end">
+<button type="button" @click="unarchiveSingle({{ $report->id }})" class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white rounded-lg font-label-sm text-label-sm font-semibold transition-all cursor-pointer" title="Keluarkan laporan dari arsip">
+<span class="material-symbols-outlined text-sm">unarchive</span>
+<span>Pulihkan</span>
+</button>
 <a class="inline-flex items-center gap-1 px-3 py-1.5 bg-surface-container-low hover:bg-primary hover:text-on-primary rounded-lg font-label-sm text-label-sm text-on-surface transition-all" href="{{ route('bk.reports.show', $report->id) }}">
 Buka Laporan
 <span class="material-symbols-outlined text-sm">arrow_forward</span>
 </a>
+</div>
 </td>
 </tr>
 @endforeach

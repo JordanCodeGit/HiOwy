@@ -141,6 +141,7 @@ export function registerBk(Alpine, navigateTo) {
         editing: false,
         editingId: null,
         categoryLabel: '',
+        categoryPermendikbud: 'Perundungan / Bullying (Permendikbudristek 46/2023)',
         categoryActive: true,
         categoryPermanent: false,
         categoryVisibleKesiswaan: true,
@@ -164,10 +165,10 @@ export function registerBk(Alpine, navigateTo) {
 
         init() {
             const hash = window.location.hash.slice(1);
-            if (['jenis', 'lokasi', 'qr', 'staf'].includes(hash)) this.tab = hash;
+            if (['jenis', 'lokasi', 'qr', 'staf', 'sekolah'].includes(hash)) this.tab = hash;
             window.addEventListener('hashchange', () => {
                 const h = window.location.hash.slice(1);
-                if (['jenis', 'lokasi', 'qr', 'staf'].includes(h)) this.tab = h;
+                if (['jenis', 'lokasi', 'qr', 'staf', 'sekolah'].includes(h)) this.tab = h;
             });
             this.renderQrCode();
         },
@@ -238,6 +239,7 @@ export function registerBk(Alpine, navigateTo) {
             this.editing = !!item;
             this.editingId = item ? item.id : null;
             this.categoryLabel = item?.label || '';
+            this.categoryPermendikbud = item?.permendikbud_type || 'Perundungan / Bullying (Permendikbudristek 46/2023)';
             this.categoryActive = item?.active ?? true;
             this.categoryPermanent = item?.permanent ?? false;
             this.categoryVisibleKesiswaan = item?.visible_to_kesiswaan ?? true;
@@ -261,6 +263,7 @@ export function registerBk(Alpine, navigateTo) {
                     },
                     body: JSON.stringify({
                         label: this.categoryLabel.trim(),
+                        permendikbud_type: this.categoryPermendikbud,
                         active: this.categoryActive,
                         visible_to_kesiswaan: this.categoryVisibleKesiswaan,
                     }),
@@ -271,6 +274,7 @@ export function registerBk(Alpine, navigateTo) {
                         const idx = this.categories.findIndex(c => c.id === this.editingId);
                         if (idx !== -1) {
                             this.categories[idx].label = this.categoryLabel.trim();
+                            this.categories[idx].permendikbud_type = this.categoryPermendikbud;
                             this.categories[idx].active = this.categoryActive;
                             this.categories[idx].visible_to_kesiswaan = this.categoryVisibleKesiswaan;
                         }
@@ -576,6 +580,32 @@ export function registerBk(Alpine, navigateTo) {
                 this.saving = false;
             }
         },
+        async resetStaffAccess(item) {
+            if (this.saving) return;
+            if (!confirm(`Reset kata sandi & 2FA untuk "${item.name}" lalu kirim tautan aktivasi baru ke ${item.email}?`)) return;
+            this.saving = true;
+            try {
+                const res = await fetch(`/bk/manage/staff/${item.id}/reset-access`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': this.csrfToken,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    item.status = 'pending';
+                    this.showNotice('Akses Direset', data.message);
+                } else {
+                    this.showNotice('Gagal Mereset', data.message || 'Gagal mereset akun staf.');
+                }
+            } catch (err) {
+                console.error(err);
+                this.showNotice('Terjadi Kesalahan', 'Gagal menghubungi server.');
+            } finally {
+                this.saving = false;
+            }
+        },
 
         async toggleSetting(key, value) {
             const prev = this[key === 'training_mode' ? 'trainingMode' : 'nlpEnabled'];
@@ -793,6 +823,26 @@ export function registerBk(Alpine, navigateTo) {
                 this.selected = [];
             }
         },
+        resetFilters() {
+            this.query = '';
+            this.priorityFilter = '';
+            this.categoryFilter = '';
+            this.roleFilter = '';
+            this.urgencyFilter = '';
+            this.contactFilter = '';
+            this.timeFilter = '';
+            this.dateFrom = '';
+            this.dateTo = '';
+            this.dateFilterOpen = false;
+            this.filters = {};
+            this.currentPage = 1;
+            this.selected = [];
+            this.$root.querySelectorAll('select').forEach(select => {
+                if (!select.options[0]?.textContent.includes('/ halaman')) {
+                    select.selectedIndex = 0;
+                }
+            });
+        },
         get allSelected() {
             const visibleIds = this.paginatedRows.map(row => String(row.id));
             return visibleIds.length > 0 && visibleIds.every(id => this.selected.includes(id));
@@ -884,6 +934,56 @@ export function registerBk(Alpine, navigateTo) {
             } catch (e) {
                 console.error(e);
                 this.showNotice('Error', 'Terjadi kesalahan sistem saat menandai laporan.');
+            }
+        },
+        async submitBulkUnarchive() {
+            if (this.selected.length === 0) return;
+            if (!confirm(`Keluarkan ${this.selected.length} laporan terpilih dari arsip ke antrean aktif?`)) return;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch('/bk/reports/bulk-unarchive', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ ids: this.selected.map(Number) }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showNotice('Berhasil', data.message || 'Laporan berhasil dikeluarkan dari arsip.');
+                    setTimeout(() => window.location.reload(), 900);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal memulihkan laporan.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan saat memulihkan laporan dari arsip.');
+            }
+        },
+        async unarchiveSingle(id) {
+            if (!confirm('Keluarkan laporan ini dari arsip kembali ke antrean aktif?')) return;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/bk/reports/${id}/unarchive`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showNotice('Berhasil', data.message || 'Laporan berhasil dikeluarkan dari arsip.');
+                    setTimeout(() => window.location.reload(), 900);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal memulihkan laporan.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan saat memulihkan laporan.');
             }
         },
     }));
@@ -1298,6 +1398,35 @@ export function registerBk(Alpine, navigateTo) {
                 this.loading = false;
             }
         },
+
+        async unarchiveCase(id = null) {
+            const reportId = id || this.reportId;
+            if (!confirm('Keluarkan laporan ini dari arsip dan kembalikan ke antrean aktif?')) return;
+            this.loading = true;
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/bk/reports/${reportId}/unarchive`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.showNotice('Berhasil', data.message || 'Laporan berhasil dikeluarkan dari arsip.');
+                    setTimeout(() => window.location.reload(), 900);
+                } else {
+                    this.showNotice('Gagal', data.message || 'Gagal mengeluarkan laporan dari arsip.');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showNotice('Error', 'Terjadi kesalahan saat memulihkan laporan.');
+            } finally {
+                this.loading = false;
+            }
+        },
     }));
 
     Alpine.data('kesiswaanReport', () => ({ ...modalState() }));
@@ -1337,6 +1466,15 @@ export function registerBk(Alpine, navigateTo) {
         get visibleCount() { return this.visibleRows.length; },
         get allSelected() { return this.visibleCount > 0 && this.visibleRows.every(row => this.selected.includes(row.id)); },
         selectVisible(checked) { this.selected = checked ? this.visibleRows.map(row => row.id) : []; },
+        resetFilters() {
+            this.query = '';
+            this.priorityFilter = '';
+            this.filters = { type: '', role: '', urgency: '', contact: '', reason: '' };
+            this.period = '';
+            this.dateFrom = '';
+            this.dateTo = '';
+            this.selected = [];
+        },
     }));
 
     Alpine.data('walasDashboard', (config = {}) => ({

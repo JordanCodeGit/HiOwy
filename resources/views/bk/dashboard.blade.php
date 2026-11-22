@@ -120,10 +120,11 @@
 <span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">badge</span>
 <select x-model="roleFilter" @change="currentPage = 1; selected = []" class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; outline: none; box-shadow: none;">
 <option value="">Peran: Semua</option>
-<option value="siswa">Siswa</option>
-<option value="ortu">Orang Tua</option>
+<option value="siswa">Korban Langsung</option>
+<option value="saksi">Saksi Kejadian</option>
 <option value="teman">Teman Korban</option>
-<option value="guru">Guru</option>
+<option value="ortu">Orang Tua / Wali</option>
+<option value="guru">Warga Sekolah / Guru</option>
 </select>
 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
 </div>
@@ -131,9 +132,9 @@
 <span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">flag</span>
 <select x-model="urgencyFilter" @change="currentPage = 1; selected = []" class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; outline: none; box-shadow: none;">
 <option value="">Urgensi: Semua</option>
-<option value="urgent">Urgent / Darurat</option>
-<option value="medium">Medium</option>
-<option value="easy">Easy</option>
+<option value="urgent">Darurat / Urgent</option>
+<option value="medium">Sedang / Medium</option>
+<option value="easy">Rendah / Konseling</option>
 </select>
 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
 </div>
@@ -156,6 +157,10 @@
 </select>
 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
 </div>
+<button type="button" @click="resetFilters()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-600 transition-colors cursor-pointer" title="Reset semua filter">
+<span class="material-symbols-outlined text-[16px]">restart_alt</span>
+<span>Reset Filter</span>
+</button>
 </div>
 <x-bk.date-filter />
 <div class="bk-reports-scroll overflow-x-auto" tabindex="0" role="region" aria-label="Tabel laporan, geser horizontal bila diperlukan">
@@ -180,19 +185,19 @@
 @forelse($reports as $index => $report)
 @php
     $urgencyClass = match(strtolower($report->urgency ?: '')) {
-        'darurat', 'urgent', 'tinggi' => 'bg-rose-100 text-rose-700 border-rose-200',
-        'sedang', 'medium' => 'bg-amber-100 text-amber-800 border-amber-200',
+        'darurat', 'urgent' => 'bg-rose-100 text-rose-700 border-rose-200',
+        'sedang', 'medium', 'tinggi', 'penting' => 'bg-amber-100 text-amber-800 border-amber-200',
         default => 'bg-emerald-50 text-emerald-700 border-emerald-200'
     };
     $urgencyIcon = match(strtolower($report->urgency ?: '')) {
-        'darurat', 'urgent', 'tinggi' => 'error',
-        'sedang', 'medium' => 'warning',
+        'darurat', 'urgent' => 'error',
+        'sedang', 'medium', 'tinggi', 'penting' => 'warning',
         default => 'check_circle'
     };
     $urgencyText = match(strtolower($report->urgency ?: '')) {
-        'darurat', 'urgent', 'tinggi' => 'Darurat',
-        'sedang', 'medium' => 'Medium',
-        default => 'Easy'
+        'darurat', 'urgent' => 'Darurat',
+        'sedang', 'medium', 'tinggi', 'penting' => 'Sedang',
+        default => 'Rendah'
     };
     $roleIcon = match(strtolower($report->reporter_role ?: '')) {
         'guru' => 'school',

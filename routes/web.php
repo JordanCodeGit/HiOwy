@@ -47,6 +47,7 @@ Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']
 Route::prefix('bk')->name('bk.')->middleware(['auth', '2fa', 'role:bk'])->group(function () {
     Route::get('/', [BkReportController::class, 'dashboard'])->name('dashboard');
     Route::post('/reports/bulk-iseng', [BkReportController::class, 'bulkMarkIseng'])->name('reports.bulk-iseng');
+    Route::post('/reports/bulk-unarchive', [BkReportController::class, 'bulkUnarchive'])->name('reports.bulk-unarchive');
     Route::get('/reports/preview', [BkReportController::class, 'preview'])->name('report');
     Route::get('/reports/{id}', [BkReportController::class, 'show'])->whereNumber('id')->name('reports.show');
     Route::post('/reports/{id}/status', [BkReportController::class, 'updateStatus'])->whereNumber('id')->name('reports.status');
@@ -55,6 +56,7 @@ Route::prefix('bk')->name('bk.')->middleware(['auth', '2fa', 'role:bk'])->group(
     Route::post('/reports/{id}/note', [BkReportController::class, 'storeInternalNote'])->whereNumber('id')->name('reports.note');
     Route::post('/reports/{id}/forward', [BkReportController::class, 'forwardToWalas'])->whereNumber('id')->name('reports.forward');
     Route::post('/reports/{id}/archive', [BkReportController::class, 'archive'])->whereNumber('id')->name('reports.archive');
+    Route::post('/reports/{id}/unarchive', [BkReportController::class, 'unarchive'])->whereNumber('id')->name('reports.unarchive');
     Route::post('/reports/{id}/iseng', [BkReportController::class, 'markIseng'])->whereNumber('id')->name('reports.iseng');
 
     Route::get('/manage', [BkManageController::class, 'index'])->name('manage');
@@ -72,17 +74,22 @@ Route::prefix('bk')->name('bk.')->middleware(['auth', '2fa', 'role:bk'])->group(
 
     Route::post('/manage/staff', [BkManageController::class, 'storeStaff'])->name('manage.staff.store');
     Route::put('/manage/staff/{id}', [BkManageController::class, 'updateStaff'])->name('manage.staff.update');
+    Route::post('/manage/staff/{id}/reset-access', [BkManageController::class, 'resetStaffAccess'])->name('manage.staff.reset');
     Route::delete('/manage/staff/{id}', [BkManageController::class, 'destroyStaff'])->name('manage.staff.destroy');
     Route::post('/manage/staff/{id}/resend', [BkManageController::class, 'resendStaffInvite'])->name('manage.staff.resend');
     Route::post('/manage/settings', [BkManageController::class, 'updateSettings'])->name('manage.settings');
+    Route::post('/manage/retention/run', [BkManageController::class, 'runRetention'])->name('manage.retention.run');
 
     Route::get('/manage/poster', [BkManageController::class, 'downloadPoster'])->name('manage.poster');
     Route::get('/learn', [BkLearnController::class, 'index'])->name('learn');
     Route::post('/learn', [BkLearnController::class, 'store'])->name('learn.store');
+    Route::post('/learn/seed-guide', [BkLearnController::class, 'seedOfficialGuide'])->name('learn.seed-guide');
     Route::put('/learn/{id}', [BkLearnController::class, 'update'])->name('learn.update');
     Route::post('/learn/{id}/toggle', [BkLearnController::class, 'toggleVisibility'])->name('learn.toggle');
     Route::delete('/learn/{id}', [BkLearnController::class, 'destroy'])->name('learn.destroy');
     Route::get('/statistics', [BkReportController::class, 'statistics'])->name('statistics');
+    Route::get('/statistics/export/csv', [BkReportController::class, 'exportStatisticsCsv'])->name('statistics.csv');
+    Route::get('/statistics/export/pdf', [BkReportController::class, 'exportStatisticsPdf'])->name('statistics.pdf');
     Route::get('/archive', [BkReportController::class, 'archiveIndex'])->name('archive');
     Route::get('/access-log', [BkReportController::class, 'accessLog'])->name('access-log');
     Route::get('/profile', [BkProfileController::class, 'show'])->name('profile');
@@ -98,7 +105,9 @@ Route::prefix('kesiswaan')->name('kesiswaan.')->middleware(['auth', '2fa', 'role
     Route::post('/reports/bulk-iseng', 'bulkMarkIseng')->name('reports.bulk-iseng');
     Route::get('/reports/{report}', 'report')->whereNumber('report')->name('report');
     Route::post('/reports/{report}/status', 'updateStatus')->whereNumber('report')->name('reports.status');
+    Route::post('/reports/{report}/note', 'storeNote')->whereNumber('report')->name('reports.note');
     Route::post('/reports/{report}/archive', 'archiveReport')->whereNumber('report')->name('reports.archive');
+    Route::post('/reports/{report}/unarchive', 'unarchiveReport')->whereNumber('report')->name('reports.unarchive');
     Route::post('/reports/{report}/iseng', 'markIseng')->whereNumber('report')->name('reports.iseng');
     Route::get('/archive', 'archive')->name('archive');
     Route::get('/statistics', 'statistics')->name('statistics');
@@ -108,17 +117,21 @@ Route::prefix('kesiswaan')->name('kesiswaan.')->middleware(['auth', '2fa', 'role
     Route::post('/profile/password', 'updatePassword')->name('profile.password');
 });
 
-// Public Reporter & Educational Portal (tanpa login)
-Route::get('/s/qr', [BkManageController::class, 'handleQrScan'])->name('public.qr');
-Route::get('/s/lapor', [BkManageController::class, 'showPublicReport'])->name('public.report');
-Route::post('/s/lapor', [BkManageController::class, 'storePublicReport'])->name('public.report.store');
-Route::match(['get', 'post'], '/s/lapor/track', [BkManageController::class, 'trackReport'])->name('public.report.track');
-Route::post('/s/lapor/track/reply', [BkManageController::class, 'replyReport'])->name('public.report.reply');
-Route::get('/s/pelajari', [BkLearnController::class, 'showPublic'])->name('public.learn.default');
-Route::get('/s/{code}/pelajari', [BkLearnController::class, 'showPublic'])->name('public.learn');
-Route::get('/s/{code}/qr', [BkManageController::class, 'handleQrScan']);
-Route::get('/s/{code}/lapor', [BkManageController::class, 'showPublicReport']);
-Route::post('/s/{code}/lapor', [BkManageController::class, 'storePublicReport']);
+// Public Reporter & Educational Portal (tanpa login + anti-back-cache FR-66/FR-67)
+Route::middleware('public.nocache')->group(function () {
+    Route::get('/s/qr', [BkManageController::class, 'handleQrScan'])->name('public.qr');
+    Route::get('/s/lapor', [BkManageController::class, 'showPublicReport'])->name('public.report');
+    Route::post('/s/lapor', [BkManageController::class, 'storePublicReport'])->name('public.report.store');
+    Route::match(['get', 'post'], '/s/lapor/track', [BkManageController::class, 'trackReport'])->name('public.report.track');
+    Route::post('/s/lapor/track/reply', [BkManageController::class, 'replyReport'])->name('public.report.reply');
+    Route::get('/latihan', [BkManageController::class, 'showTrainingReport'])->name('public.training');
+    Route::post('/latihan', [BkManageController::class, 'storeTrainingReport'])->name('public.training.store');
+    Route::get('/s/pelajari', [BkLearnController::class, 'showPublic'])->name('public.learn.default');
+    Route::get('/s/{code}/pelajari', [BkLearnController::class, 'showPublic'])->name('public.learn');
+    Route::get('/s/{code}/qr', [BkManageController::class, 'handleQrScan']);
+    Route::get('/s/{code}/lapor', [BkManageController::class, 'showPublicReport']);
+    Route::post('/s/{code}/lapor', [BkManageController::class, 'storePublicReport']);
+});
 
 // Wali Kelas Portal (wajib login, 2FA terverifikasi, dan role:walas)
 Route::prefix('wali-kelas')->name('walas.')->middleware(['auth', '2fa', 'role:walas'])->controller(WaliKelasPreviewController::class)->group(function () {

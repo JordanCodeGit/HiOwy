@@ -7,6 +7,7 @@ use App\Models\IncidentCategory;
 use App\Models\SchoolSetting;
 use App\Models\StudentReport;
 use App\Support\AuditLogger;
+use App\Support\StatisticsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -68,18 +69,24 @@ class KesiswaanPreviewController extends Controller
             'reason' => $report->archive_reason === 'iseng' ? 'Laporan Iseng' : ($report->archive_reason === 'selesai' ? 'Selesai Ditangani' : ''),
             'archive_reason' => $report->archive_reason,
             'role' => $report->reporter_role ?: 'Siswa',
-            'urgency' => $report->urgency ?: 'Sedang',
+            'urgency' => match ($report->urgency_normalized) {
+                'urgent' => 'Darurat',
+                'medium' => 'Sedang',
+                default => 'Rendah',
+            },
             'danger_flag' => $report->urgency_normalized === 'urgent',
             'date' => $report->submitted_date ? $report->submitted_date->format('Y-m-d') : now()->toDateString(),
             'status_date' => $report->status_updated_date ? $report->status_updated_date->format('Y-m-d') : now()->toDateString(),
             'received' => $report->formatted_time,
             'incident_time' => $report->incident_time ?: $report->formatted_time,
+            'incident_date' => $report->incident_date ? $report->incident_date->translatedFormat('d M Y') : 'Tidak ingat pasti',
             'location' => $report->location ?: 'Area Sekolah',
             'parties' => 'Dirahasiakan',
             'wants_contact' => $report->wants_contact,
             'assigned' => $report->assigned_counselor ?: 'Belum Ditugaskan',
             'snippet' => Str::limit((string) $report->story, 85),
             'story' => $report->story,
+            'kesiswaan_notes' => $report->kesiswaan_notes,
             'notes' => [],
             'activities' => [
                 ['time' => $report->formatted_time, 'label' => 'Laporan diterima sistem'],
@@ -145,6 +152,42 @@ class KesiswaanPreviewController extends Controller
         return back()->with('status', 'Status laporan berhasil diperbarui.');
     }
 
+    /**
+     * Simpan catatan tindak lanjut Kesiswaan terenkripsi & terpisah dari catatan rahasia BK (FR-41).
+     */
+    public function storeNote(Request $request, int $report): JsonResponse|RedirectResponse
+    {
+        $model = StudentReport::findOrFail($report);
+        Gate::authorize('manageAsKesiswaan', $model);
+
+        $validated = $request->validate([
+            'note' => ['required', 'string', 'max:2000'],
+        ], [
+            'note.required' => 'Tuliskan catatan tindak lanjut terlebih dahulu.',
+        ]);
+
+        $author = Auth::user()->name ?? 'Tim Kesiswaan';
+        $date = now('Asia/Jakarta')->translatedFormat('d M Y');
+        $newEntry = "[{$date}] {$author}: ".trim($validated['note']);
+        $existing = $model->kesiswaan_notes ? $model->kesiswaan_notes."\n\n" : '';
+
+        $model->update([
+            'kesiswaan_notes' => $existing.$newEntry,
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+
+        AuditLogger::log(Auth::user(), 'add_kesiswaan_note', $model);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Catatan tindak lanjut Kesiswaan berhasil disimpan.',
+            ]);
+        }
+
+        return back()->with('status', 'Catatan tindak lanjut Kesiswaan berhasil disimpan.');
+    }
+
     public function archiveReport(Request $request, int $report): JsonResponse|RedirectResponse
     {
         $model = StudentReport::findOrFail($report);
@@ -169,6 +212,36 @@ class KesiswaanPreviewController extends Controller
         }
 
         return redirect()->route('kesiswaan.dashboard')->with('status', 'Laporan berhasil diarsipkan.');
+    }
+
+    /**
+     * Keluarkan laporan dari arsip kembali ke antrean aktif Kesiswaan.
+     */
+    public function unarchiveReport(Request $request, int $report): JsonResponse|RedirectResponse
+    {
+        $model = StudentReport::findOrFail($report);
+        Gate::authorize('manageAsKesiswaan', $model);
+
+        $nextStatus = $model->status === 'ditindaklanjuti' ? 'ditindaklanjuti' : 'dibaca';
+
+        $model->update([
+            'status' => $nextStatus,
+            'archived_at' => null,
+            'archive_reason' => null,
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+
+        AuditLogger::log(Auth::user(), 'unarchive_report', $model, "Dipulihkan Kesiswaan ke status: {$nextStatus}");
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Laporan berhasil dikeluarkan dari arsip.',
+            ]);
+        }
+
+        return redirect()->route('kesiswaan.report', $model->id)
+            ->with('status', 'Laporan berhasil dikeluarkan dari arsip dan kembali ke antrean aktif.');
     }
 
     public function markIseng(Request $request, int $report): JsonResponse|RedirectResponse
@@ -241,29 +314,44 @@ class KesiswaanPreviewController extends Controller
         return $this->page('archive', ['reports' => $archived], $all);
     }
 
-    public function statistics(): View
+    public function statistics(Request $request): View
     {
+        $allowedLabels = $this->allowedCategoryLabels();
+        $rawModels = empty($allowedLabels)
+            ? collect([])
+            : StudentReport::production()->whereIn('category', $allowedLabels)->orderByDesc('id')->get();
+
+        $selectedMonth = trim((string) $request->query('month', '')) ?: null;
+        $stats = StatisticsService::buildFromReports($rawModels, $selectedMonth, false);
+
         $reports = $this->visibleReportsCollection();
         $total = $reports->count();
         $completed = $reports->filter(fn (array $r) => $r['status'] === 'selesai' || $r['archive_reason'] === 'selesai')->count();
 
         $statistics = [
             'total' => $total,
-            'active' => $reports->where('archived', false)->count(),
+            'total_display' => StatisticsService::maskCount($stats['total']),
+            'active' => $stats['active'],
+            'active_display' => StatisticsService::maskCount($stats['active']),
             'completed' => $completed,
-            'rate' => $total > 0 ? (int) round(($completed / $total) * 100) : 0,
+            'completed_display' => StatisticsService::maskCount($stats['completed']),
+            'rate' => $stats['rate'],
             'types' => $reports->countBy('type')->all(),
             'statuses' => [
-                'belum_dibaca' => $reports->where('status', 'belum_dibaca')->count(),
-                'dibaca' => $reports->where('status', 'dibaca')->count(),
-                'ditindaklanjuti' => $reports->where('status', 'ditindaklanjuti')->count(),
-                'selesai' => $reports->where('status', 'selesai')->count(),
-                'iseng' => $reports->where('archive_reason', 'iseng')->count(),
+                'belum_dibaca' => $stats['by_status']['belum_dibaca']['count'] ?? 0,
+                'dibaca' => $stats['by_status']['dibaca']['count'] ?? 0,
+                'ditindaklanjuti' => $stats['by_status']['ditindaklanjuti']['count'] ?? 0,
+                'selesai' => $stats['by_status']['selesai']['count'] ?? 0,
+                'iseng' => $stats['by_status']['iseng']['count'] ?? 0,
             ],
             'months' => $reports->groupBy(fn (array $r) => substr($r['date'], 0, 7))->map->count()->all(),
         ];
 
-        return $this->page('statistics', ['statistics' => $statistics], $reports);
+        return $this->page('statistics', [
+            'statistics' => $statistics,
+            'stats' => $stats,
+            'selectedMonth' => $selectedMonth,
+        ], $reports);
     }
 
     public function accessLog(): View

@@ -1,18 +1,18 @@
 <x-layouts.bk title="Detail Laporan" page="report" mode="dashboard">
 @php
     $urgencyLabel = match(strtolower($report->urgency ?: '')) {
-        'darurat', 'urgent', 'tinggi' => 'Darurat',
-        'sedang', 'medium' => 'Sedang',
+        'darurat', 'urgent' => 'Darurat',
+        'sedang', 'medium', 'tinggi', 'penting' => 'Sedang',
         default => 'Rendah'
     };
     $urgencyBadgeStyle = match(strtolower($report->urgency ?: '')) {
-        'darurat', 'urgent', 'tinggi' => 'bg-rose-50 text-rose-700 ring-rose-200 border-rose-200',
-        'sedang', 'medium' => 'bg-amber-50 text-amber-700 ring-amber-200 border-amber-200',
+        'darurat', 'urgent' => 'bg-rose-50 text-rose-700 ring-rose-200 border-rose-200',
+        'sedang', 'medium', 'tinggi', 'penting' => 'bg-amber-50 text-amber-700 ring-amber-200 border-amber-200',
         default => 'bg-emerald-50 text-emerald-700 ring-emerald-200 border-emerald-200'
     };
     $urgencyDotColor = match(strtolower($report->urgency ?: '')) {
-        'darurat', 'urgent', 'tinggi' => 'bg-rose-500',
-        'sedang', 'medium' => 'bg-amber-500',
+        'darurat', 'urgent' => 'bg-rose-500',
+        'sedang', 'medium', 'tinggi', 'penting' => 'bg-amber-500',
         default => 'bg-emerald-500'
     };
     $caseStatusNormalized = match($report->status) {
@@ -33,7 +33,7 @@
     urgency: '{{ $urgencyLabel }}',
     caseStatus: '{{ $caseStatusNormalized }}',
     categoryChoice: '{{ addslashes($report->category) }}',
-    caseHandler: '{{ addslashes($report->assigned_counselor ?: ($counselors[0] ?? '')) }}',
+    caseHandler: '{{ addslashes($report->assigned_counselor ?: '') }}',
     firstWalasId: '{{ $waliKelasList[0]['id'] ?? '' }}'
 })" class="p-8 max-w-[1580px] w-full mx-auto source-space-y-6">
 <div class="flex flex-col gap-6 w-full">
@@ -72,6 +72,10 @@
 @endif
 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
 <span class="material-symbols-outlined text-[14px]">{{ $roleIcon }}</span>{{ $report->reporter_role ?: 'Siswa' }}</span>
+@if($report->is_archived)
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700 text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px]">archive</span>Diarsipkan</span>
+@endif
 </div>
 <p class="text-xs text-slate-500 mt-1">Kasus {{ $report->category }} • {{ $report->is_anonymous ? 'Dilaporkan anonim melalui portal siswa' : 'Dilaporkan dengan identitas resmi' }}</p>
 </div>
@@ -79,8 +83,13 @@
 <div class="flex items-center gap-2.5">
 <button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-all shadow-xs" id="openRelayModalBtn" type="button" @click="openForward()">
 <span class="material-symbols-outlined text-[17px] text-blue-600">forward_to_inbox</span>Laporkan ke Wali Kelas</button>
+@if($report->is_archived)
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-semibold transition-all shadow-xs cursor-pointer" id="unarchiveCaseBtn" type="button" @click="unarchiveCase()" :disabled="loading">
+<span class="material-symbols-outlined text-[17px]">unarchive</span>Keluarkan dari Arsip</button>
+@else
 <button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-all shadow-xs" id="archiveCaseBtn" type="button" @click="openModal('staff-archive')">
 <span class="material-symbols-outlined text-[17px] text-slate-500">archive</span>Arsipkan</button>
+@endif
 </div>
 </div>
 <div class="bk-hover-card bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
@@ -154,6 +163,10 @@
 <span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->category }}</span>
 </div>
 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tanggal Kejadian</span>
+<span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->formatted_incident_date }}</span>
+</div>
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Waktu Kejadian</span>
 <span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->incident_time ?: $report->formatted_time }}</span>
 </div>
@@ -164,6 +177,10 @@
 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Peran Pelapor</span>
 <span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->reporter_role ?: 'Siswa' }} {{ (!$report->is_anonymous && $report->reporter_class) ? '('.$report->reporter_class.')' : '' }}</span>
+</div>
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jam Dibaca BK</span>
+<span class="text-xs font-bold text-slate-900 mt-0.5 block">{{ $report->bk_read_at ? $report->bk_read_at->copy()->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i').' WIB' : 'Baru dibuka sekarang' }}</span>
 </div>
 </div>
 <div>
@@ -241,7 +258,15 @@
 <span class="font-bold text-blue-700">{{ $msg->user?->name ?: ($report->assigned_counselor ?: 'Konselor BK') }}</span>
 </div>
 <div class="p-3 rounded-2xl rounded-tr-sm bg-blue-600 text-xs text-white leading-relaxed">
-{{ $msg->body }}
+<p>{{ $msg->body }}</p>
+<div class="mt-1 flex items-center justify-end gap-1 text-[10px] text-blue-100">
+@if($msg->bk_sent_time)
+<span>{{ $msg->bk_sent_time }}</span>
+@endif
+<span class="material-symbols-outlined text-[14px] {{ $msg->read_at ? 'text-sky-200' : 'text-blue-200/70' }}" title="{{ $msg->read_at ? 'Sudah dibaca pelapor' : 'Terkirim, belum dibuka pelapor' }}">
+{{ $msg->read_at ? 'done_all' : 'done' }}
+</span>
+</div>
 </div>
 </div>
 @else
@@ -251,7 +276,13 @@
 <span class="text-slate-400">{{ $msg->sent_date ? \Carbon\Carbon::parse($msg->sent_date)->translatedFormat('d M Y') : '-' }}</span>
 </div>
 <div class="p-3 rounded-2xl rounded-tl-sm bg-slate-100 text-xs text-slate-900 leading-relaxed">
-{{ $msg->body }}
+<p>{{ $msg->body }}</p>
+<div class="mt-1 flex items-center justify-end gap-1 text-[10px] text-slate-500">
+<span>{{ $msg->read_at ? 'Dibaca BK ' . $msg->read_at->copy()->timezone('Asia/Jakarta')->format('H:i') . ' WIB' : 'Terkirim' }}</span>
+<span class="material-symbols-outlined text-[14px] {{ $msg->read_at ? 'text-blue-600' : 'text-slate-400' }}">
+{{ $msg->read_at ? 'done_all' : 'done' }}
+</span>
+</div>
 </div>
 </div>
 @endif
@@ -308,15 +339,20 @@
 </div>
 </div>
 <div class="flex flex-col gap-1.5">
-<label class="text-xs font-semibold text-slate-700" for="caseHandler">Konselor Penanggung Jawab</label>
+<div class="flex items-center justify-between gap-2">
+<label class="text-xs font-semibold text-slate-700" for="caseHandler">Penanggung Jawab Kasus</label>
+<button type="button" @click="caseHandler = @js(Auth::user()->name ?? ($counselors[0] ?? 'Guru BK')); updateCase()" :disabled="loading" class="text-[11px] font-semibold text-blue-700 hover:underline cursor-pointer">Tugaskan ke Saya</button>
+</div>
 <div class="relative">
 <select x-model="caseHandler" class="w-full appearance-none p-2.5 pr-8 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:bg-white cursor-pointer" id="caseHandler">
+<option value="">Belum Ditugaskan</option>
 @foreach($counselors as $counselor)
 <option value="{{ $counselor }}">{{ $counselor }}</option>
 @endforeach
 </select>
 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">arrow_drop_down</span>
 </div>
+<span class="text-[11px] text-slate-500">Saat ini: <strong class="text-slate-800">{{ $report->assigned_counselor ?: 'Belum Ditugaskan' }}</strong></span>
 </div>
 <div class="flex flex-col gap-1.5">
 <span class="text-xs font-semibold text-slate-700">Tingkat Urgensi</span>

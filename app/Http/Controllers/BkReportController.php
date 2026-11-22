@@ -11,6 +11,8 @@ use App\Models\StaffMember;
 use App\Models\StudentReport;
 use App\Models\User;
 use App\Support\AuditLogger;
+use App\Support\SchoolConfigService;
+use App\Support\StatisticsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -20,6 +22,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BkReportController extends Controller
 {
@@ -50,7 +53,7 @@ class BkReportController extends Controller
         $urgentUnreadCount = StudentReport::active()
             ->where('is_training', $isTrainingView)
             ->where('status', 'belum_dibaca')
-            ->whereIn('urgency', ['Darurat', 'Urgent', 'Tinggi'])
+            ->whereIn('urgency', ['Darurat', 'Urgent'])
             ->count();
 
         $threeDaysAgo = Carbon::now('Asia/Jakarta')->subDays(3)->toDateString();
@@ -87,13 +90,26 @@ class BkReportController extends Controller
         $report = StudentReport::with(['messages.user', 'forwards.toUser'])->findOrFail($id);
         Gate::authorize('viewBk', $report);
 
-        // Status belum_dibaca -> dibaca otomatis saat Guru BK membuka laporan.
+        // Status belum_dibaca -> dibaca otomatis & catat jam baca BK (TS-003, TS-030)
+        $updates = [];
         if ($report->status === 'belum_dibaca') {
-            $report->update([
-                'status' => 'dibaca',
-                'status_updated_date' => now('Asia/Jakarta')->toDateString(),
-            ]);
+            $updates['status'] = 'dibaca';
+            $updates['status_updated_date'] = now('Asia/Jakarta')->toDateString();
         }
+        if ($report->bk_read_at === null) {
+            $updates['bk_read_at'] = now('Asia/Jakarta');
+        }
+        if ($updates !== []) {
+            $report->update($updates);
+        }
+
+        // Tandai balasan pelapor yang belum dibaca sebagai terbaca oleh Guru BK (centang 2)
+        $report->messages()
+            ->where('sender', 'reporter')
+            ->whereNull('read_at')
+            ->update(['read_at' => now('Asia/Jakarta')]);
+
+        $report->load('messages.user');
 
         AuditLogger::log(Auth::user(), 'view_report', $report);
 
@@ -232,7 +248,8 @@ class BkReportController extends Controller
             'counselor_reply' => ['required', 'string', 'max:2000'],
         ]);
 
-        $today = now('Asia/Jakarta')->toDateString();
+        $nowJkt = now('Asia/Jakarta');
+        $today = $nowJkt->toDateString();
 
         $msg = ReportMessage::create([
             'student_report_id' => $report->id,
@@ -240,7 +257,13 @@ class BkReportController extends Controller
             'user_id' => Auth::id(),
             'body' => trim($validated['counselor_reply']),
             'sent_date' => $today,
+            'bk_sent_time' => $nowJkt->format('H:i').' WIB',
         ]);
+
+        $report->messages()
+            ->where('sender', 'reporter')
+            ->whereNull('read_at')
+            ->update(['read_at' => $nowJkt]);
 
         $nextStatus = in_array($report->status, ['belum_dibaca', 'dibaca'], true)
             ? 'ditindaklanjuti'
@@ -439,6 +462,77 @@ class BkReportController extends Controller
     }
 
     /**
+     * Keluarkan satu laporan dari arsip kembali ke antrean aktif BK.
+     */
+    public function unarchive(Request $request, int $id): JsonResponse|RedirectResponse
+    {
+        $report = StudentReport::findOrFail($id);
+        Gate::authorize('viewBk', $report);
+
+        $nextStatus = $report->status === 'ditindaklanjuti' ? 'ditindaklanjuti' : 'dibaca';
+
+        $report->update([
+            'status' => $nextStatus,
+            'archived_at' => null,
+            'archive_reason' => null,
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+
+        AuditLogger::log(Auth::user(), 'unarchive_report', $report, "Dipulihkan ke status: {$nextStatus}");
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Laporan berhasil dikeluarkan dari arsip dan dikembalikan ke antrean aktif.',
+            ]);
+        }
+
+        return redirect()->route('bk.reports.show', $report->id)
+            ->with('status', 'Laporan berhasil dikeluarkan dari arsip.');
+    }
+
+    /**
+     * Bulk Action: Keluarkan beberapa laporan dari arsip sekaligus.
+     */
+    public function bulkUnarchive(Request $request): JsonResponse|RedirectResponse
+    {
+        Gate::authorize('viewAnyBk', StudentReport::class);
+
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer'],
+        ]);
+
+        $targets = StudentReport::archived()->whereIn('id', $validated['ids'])->get();
+        $today = now('Asia/Jakarta')->toDateString();
+        $count = 0;
+
+        foreach ($targets as $targetReport) {
+            $nextStatus = $targetReport->status === 'ditindaklanjuti' ? 'ditindaklanjuti' : 'dibaca';
+            $targetReport->update([
+                'status' => $nextStatus,
+                'archived_at' => null,
+                'archive_reason' => null,
+                'status_updated_date' => $today,
+            ]);
+            AuditLogger::log(Auth::user(), 'unarchive_report', $targetReport, 'Bulk unarchive');
+            $count++;
+        }
+
+        $message = "{$count} laporan berhasil dikeluarkan dari arsip ke antrean aktif.";
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'count' => $count,
+            ]);
+        }
+
+        return back()->with('status', $message);
+    }
+
+    /**
      * Halaman Arsip Laporan BK (/bk/archive) membaca data nyata DB.
      */
     public function archiveIndex(): View
@@ -461,37 +555,110 @@ class BkReportController extends Controller
     }
 
     /**
-     * Halaman Statistik BK (/bk/statistics) membaca data agregat nyata DB.
+     * Halaman Statistik BK (/bk/statistics) membaca data agregat nyata DB (FR-59, FR-60, FR-61).
      */
-    public function statistics(): View
+    public function statistics(Request $request): View
     {
         Gate::authorize('viewAnyBk', StudentReport::class);
 
-        $all = StudentReport::production()->get();
-        $total = $all->count();
-        $active = $all->whereNull('archived_at')->count();
-        $completed = $all->filter(fn (StudentReport $r) => $r->status === 'selesai' || $r->archive_reason === 'selesai')->count();
-        $rate = $total > 0 ? (int) round(($completed / $total) * 100) : 0;
-        $unreadCount = $all->whereNull('archived_at')->where('status', 'belum_dibaca')->count();
+        $selectedMonth = trim((string) $request->query('month', '')) ?: null;
+        $stats = StatisticsService::buildFromReports(
+            StudentReport::production()->get(),
+            $selectedMonth,
+            true
+        );
 
-        $byCategory = $all->groupBy('category')->map->count()->sortDesc();
-        $byStatus = [
-            'belum_dibaca' => $all->where('status', 'belum_dibaca')->count(),
-            'dibaca' => $all->where('status', 'dibaca')->count(),
-            'ditindaklanjuti' => $all->where('status', 'ditindaklanjuti')->count(),
-            'selesai' => $all->where('status', 'selesai')->count(),
-            'iseng' => $all->where('archive_reason', 'iseng')->count(),
-        ];
+        $unreadCount = StudentReport::active()->production()->where('status', 'belum_dibaca')->count();
 
-        return view('bk.statistics', compact(
-            'total',
-            'active',
-            'completed',
-            'rate',
-            'unreadCount',
-            'byCategory',
-            'byStatus'
-        ));
+        return view('bk.statistics', [
+            'stats' => $stats,
+            'selectedMonth' => $selectedMonth,
+            'total' => $stats['total'],
+            'active' => $stats['active'],
+            'completed' => $stats['completed'],
+            'rate' => $stats['rate'],
+            'unreadCount' => $unreadCount,
+            'byCategory' => collect($stats['by_category'])->map(fn ($v) => $v['count']),
+            'byStatus' => collect($stats['by_status'])->map(fn ($v) => $v['count'])->all(),
+            'schoolConfig' => SchoolConfigService::getConfig(),
+        ]);
+    }
+
+    /**
+     * Ekspor statistik bulanan tanpa isi laporan dalam format CSV (FR-60, FR-61).
+     */
+    public function exportStatisticsCsv(Request $request): StreamedResponse
+    {
+        Gate::authorize('viewAnyBk', StudentReport::class);
+
+        $selectedMonth = trim((string) $request->query('month', '')) ?: null;
+        $stats = StatisticsService::buildFromReports(StudentReport::production()->get(), $selectedMonth, true);
+        $schoolName = SchoolConfigService::getConfig()['school_name'];
+
+        AuditLogger::log(Auth::user(), 'export_statistics_csv', null, $selectedMonth ? "Bulan: {$selectedMonth}" : 'Semua bulan');
+
+        $filename = 'statistik-hiowy-'.($selectedMonth ?: 'semua').'-'.now('Asia/Jakarta')->format('Ymd').'.csv';
+
+        return response()->streamDownload(function () use ($stats, $schoolName, $selectedMonth): void {
+            $out = fopen('php://output', 'w');
+            if ($out === false) {
+                return;
+            }
+            fwrite($out, "\xEF\xBB\xBF");
+
+            fputcsv($out, ['Laporan Statistik Agregat HiOwy', $schoolName]);
+            fputcsv($out, ['Periode Filter', $selectedMonth ? ($stats['available_months'][$selectedMonth] ?? $selectedMonth) : 'Semua Bulan']);
+            fputcsv($out, ['Catatan Privasi', 'Angka kelompok 1-4 disamarkan sebagai "kurang dari 5". Tidak memuat isi cerita maupun identitas pelapor.']);
+            fputcsv($out, []);
+            fputcsv($out, ['Ringkasan', 'Nilai']);
+            fputcsv($out, ['Total Laporan Masuk', $stats['total_display']]);
+            fputcsv($out, ['Laporan Aktif', $stats['active_display']]);
+            fputcsv($out, ['Selesai Ditangani', $stats['completed_display']]);
+            fputcsv($out, ['Tingkat Penyelesaian', $stats['rate'].'%']);
+            fputcsv($out, ['Rata-rata Waktu Sampai Dibaca', $stats['avg_read_label']]);
+
+            $sections = [
+                'Tren Bulanan' => $stats['months'],
+                'Jenis Kejadian' => $stats['by_category'],
+                'Peran Pelapor' => $stats['by_role'],
+                'Lokasi Kejadian' => $stats['by_location'],
+                'Tingkat Urgensi' => $stats['by_urgency'],
+                'Status Tindak Lanjut' => $stats['by_status'],
+            ];
+
+            foreach ($sections as $sectionTitle => $rows) {
+                fputcsv($out, []);
+                fputcsv($out, [$sectionTitle, 'Jumlah (Tersamarkan FR-60)', 'Persentase']);
+                foreach ($rows as $row) {
+                    fputcsv($out, [$row['label'], $row['display'], $row['pct'].'%']);
+                }
+            }
+
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    /**
+     * Halaman cetak PDF Statistik Bulanan tanpa isi cerita/PII (FR-60, FR-61).
+     */
+    public function exportStatisticsPdf(Request $request): View
+    {
+        Gate::authorize('viewAnyBk', StudentReport::class);
+
+        $selectedMonth = trim((string) $request->query('month', '')) ?: null;
+        $stats = StatisticsService::buildFromReports(StudentReport::production()->get(), $selectedMonth, true);
+        $schoolConfig = SchoolConfigService::getConfig();
+
+        AuditLogger::log(Auth::user(), 'export_statistics_pdf', null, $selectedMonth ? "Bulan: {$selectedMonth}" : 'Semua bulan');
+
+        return view('bk.statistics-print', [
+            'stats' => $stats,
+            'selectedMonth' => $selectedMonth,
+            'schoolConfig' => $schoolConfig,
+            'schoolName' => $schoolConfig['school_name'],
+        ]);
     }
 
     /**
