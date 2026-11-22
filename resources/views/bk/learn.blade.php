@@ -18,8 +18,15 @@
         <h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Manajemen Halaman Pelajari</h1>
         <p class="font-body-md text-body-md text-on-surface-variant">Kelola materi edukasi pencegahan dan pengumuman resmi BK untuk portal siswa.</p>
     </div>
-    <div class="flex items-center gap-3">
-        <a href="{{ route('public.learn', ['code' => 'smakita']) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-surface-container-high bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-label-md text-label-md shadow-xs transition-all cursor-pointer">
+    <div class="flex flex-wrap items-center gap-3">
+        <form method="POST" action="{{ route('bk.learn.seed-guide') }}">
+            @csrf
+            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 font-label-md text-label-md shadow-xs transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-lg">auto_stories</span>
+                <span>Muat Panduan Dasar BK</span>
+            </button>
+        </form>
+        <a href="{{ route('public.learn.default') }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-surface-container-high bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-label-md text-label-md shadow-xs transition-all cursor-pointer">
             <span class="material-symbols-outlined text-lg text-secondary">visibility</span>
             <span>Lihat Portal Siswa</span>
         </a>

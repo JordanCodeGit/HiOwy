@@ -351,11 +351,15 @@
         <div class="header">
             <div class="school-info">
                 <div class="school-icon">
-                    <span class="material-symbols-outlined">school</span>
+                    @if(!empty($schoolConfig['school_logo_url']))
+                        <img src="{{ $schoolConfig['school_logo_url'] }}" alt="{{ $schoolName }}" style="width: 40px; height: 40px; object-fit: contain;">
+                    @else
+                        <span class="material-symbols-outlined">school</span>
+                    @endif
                 </div>
                 <div>
                     <h1 class="school-title">{{ $schoolName }}</h1>
-                    <p class="school-subtitle">Layanan Bimbingan & Konseling (BK)</p>
+                    <p class="school-subtitle">Layanan Bimbingan &amp; Konseling (BK) @if(!empty($schoolConfig['emergency_contact'])) • Kontak Darurat: {{ $schoolConfig['emergency_contact'] }} @endif</p>
                 </div>
             </div>
             <div class="portal-badge">

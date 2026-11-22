@@ -63,8 +63,29 @@
 <span>Undang Staf</span>
 <span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary font-label-sm text-label-sm" id="badge-total-staf" x-text="staffMembers.length">{{ $staffCount }}</span>
 </button>
+<button @click="setTab('sekolah')" :aria-selected="tab === 'sekolah'" role="tab" :class="{ 'bk-tab-active': tab === 'sekolah' }" class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-title-md text-title-md font-medium text-on-surface-variant hover:text-on-surface transition-all cursor-pointer" id="tab-btn-sekolah" type="button">
+<span class="material-symbols-outlined text-[19px]">tune</span>
+<span>Sekolah &amp; Kebijakan</span>
+</button>
 </div>
 </div>
+
+@if(session('frontend_notice'))
+<div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-lg text-emerald-600">check_circle</span>
+        <span>{{ session('frontend_notice') }}</span>
+    </div>
+    <button type="button" @click="$el.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900 cursor-pointer"><span class="material-symbols-outlined text-base">close</span></button>
+</div>
+@endif
+
+@if($errors->any())
+<div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2.5">
+    <span class="material-symbols-outlined text-lg text-rose-600">error</span>
+    <span>{{ $errors->first() }}</span>
+</div>
+@endif
 
 {{-- =========================================================================
      TAB 1: JENIS KEJADIAN
@@ -116,7 +137,12 @@
 <td class="py-4 px-6">
 <span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text" x-text="item.label">
 </span>
-<span class="text-xs text-on-surface-variant flex items-center gap-1 mt-0.5" x-text="item.visible_to_kesiswaan ? 'Terlihat Tim Kesiswaan' : 'Khusus Konselor BK'"></span>
+<div class="flex flex-wrap items-center gap-2 mt-1">
+<span class="text-xs text-on-surface-variant flex items-center gap-1" x-text="item.visible_to_kesiswaan ? 'Terlihat Tim Kesiswaan' : 'Khusus Konselor BK'"></span>
+<template x-if="item.permendikbud_type">
+<span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-medium border border-blue-100" x-text="item.permendikbud_type"></span>
+</template>
+</div>
 </td>
 <td class="py-4 px-6">
 <button type="button" @click="toggleCategory(item)" :disabled="item.permanent" class="inline-flex items-center gap-1.5 font-label-md text-label-md font-semibold cursor-pointer transition-colors" :class="item.active ? 'text-emerald-700' : 'text-outline'" :title="item.permanent ? 'Kategori sistem tetap aktif' : 'Klik untuk mengubah status'">
@@ -349,6 +375,12 @@
 </td>
 <td class="py-4 px-6">
 <div class="flex flex-col gap-1 items-start">
+<template x-if="item.role === 'bk'">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-xs font-semibold text-blue-700 border border-blue-100">
+<span class="material-symbols-outlined text-[15px]">psychology</span>
+<span>Guru BK / Konselor</span>
+</span>
+</template>
 <template x-if="item.role === 'kesiswaan'">
 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed/50 text-xs font-semibold text-secondary">
 <span class="material-symbols-outlined text-[15px]">security</span>
@@ -395,6 +427,10 @@
 <span class="material-symbols-outlined text-[16px]">forward_to_inbox</span>
 <span>Kirim Ulang</span>
 </button>
+<button x-show="item.status === 'aktif'" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-amber-50 text-amber-700 text-xs font-semibold transition-colors cursor-pointer" type="button" @click="resetStaffAccess(item)" title="Reset kata sandi dan 2FA staf ini">
+<span class="material-symbols-outlined text-[16px]">lock_reset</span>
+<span>Reset Akses</span>
+</button>
 <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-surface-container text-secondary text-xs font-semibold transition-colors cursor-pointer" type="button" @click="openEditStaff(item)">
 <span class="material-symbols-outlined text-[16px]">tune</span>
 <span>Ubah</span>
@@ -411,6 +447,88 @@
 </table>
 </div>
 </div>
+</div>
+</section>
+
+{{-- =========================================================================
+     TAB 5: KONFIGURASI SEKOLAH & KEBIJAKAN (FR-03, FR-04, FR-12, FR-57, FR-65)
+     ========================================================================= --}}
+<section x-cloak x-show="tab === 'sekolah'" x-transition.opacity class="flex flex-col gap-6" id="panel-sekolah">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<form method="POST" action="{{ route('bk.manage.settings') }}" enctype="multipart/form-data" class="lg:col-span-8 bg-surface-container-lowest rounded-2xl shadow-xs border border-surface-container/60 overflow-hidden flex flex-col">
+@csrf
+<div class="px-6 py-4 bg-surface-container-low/50 border-b border-surface-container/60 flex items-center justify-between">
+<div>
+<h2 class="font-title-md text-title-md font-bold text-on-surface">Identitas Sekolah, Layanan &amp; Privasi (FR-57)</h2>
+<p class="text-xs text-on-surface-variant">Pengaturan ini tampil pada portal pelapor, lacak aduan, dan poster QR sekolah.</p>
+</div>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+<div class="flex flex-col gap-1.5">
+<label for="cfg-school-name" class="text-xs font-semibold text-on-surface">Nama Sekolah</label>
+<input id="cfg-school-name" name="school_name" type="text" required maxlength="120" value="{{ old('school_name', $schoolConfig['school_name']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
+</div>
+<div class="flex flex-col gap-1.5">
+<label for="cfg-emergency" class="text-xs font-semibold text-on-surface">Kontak Darurat BK (Telepon / WhatsApp)</label>
+<input id="cfg-emergency" name="emergency_contact" type="text" maxlength="64" placeholder="Contoh: 081234567890" value="{{ old('emergency_contact', $schoolConfig['emergency_contact']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
+<span class="text-[11px] text-on-surface-variant">Ditautkan ke WhatsApp/Telepon BK pada halaman Lapor, Sukses Kirim, dan Lacak Aduan (FR-03).</span>
+</div>
+<div class="flex flex-col gap-1.5 md:col-span-2">
+<label for="cfg-reading-hours" class="text-xs font-semibold text-on-surface">Keterangan Jam Baca Laporan BK</label>
+<input id="cfg-reading-hours" name="reading_hours" type="text" maxlength="160" value="{{ old('reading_hours', $schoolConfig['reading_hours']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
+</div>
+<div class="flex flex-col gap-1.5">
+<label for="cfg-website" class="text-xs font-semibold text-on-surface">Tautan Website Resmi Sekolah (FR-04)</label>
+<input id="cfg-website" name="school_website_url" type="url" maxlength="255" placeholder="https://smptelkompwt.sch.id" value="{{ old('school_website_url', $schoolConfig['school_website_url']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
+<span class="text-[11px] text-on-surface-variant">Kosongkan bila tidak ingin menampilkan tautan di menu navigasi pelapor.</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<label for="cfg-story-max" class="text-xs font-semibold text-on-surface">Batas Karakter Kronologi (FR-12)</label>
+<input id="cfg-story-max" name="story_max_length" type="number" min="200" max="10000" value="{{ old('story_max_length', $schoolConfig['story_max_length']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
+</div>
+<div class="flex flex-col gap-1.5">
+<label for="cfg-retention-date" class="text-xs font-semibold text-on-surface">Tanggal Akhir Tahun Ajaran / Retensi Arsip (FR-65)</label>
+<input id="cfg-retention-date" name="retention_date" type="date" value="{{ old('retention_date', $schoolConfig['retention_date']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
+<span class="text-[11px] text-on-surface-variant">Pada tanggal ini, laporan arsip/selesai diringkas menjadi statistik dan dibersihkan otomatis; laporan terbuka tetap aman.</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<label for="cfg-logo" class="text-xs font-semibold text-on-surface">Logo Sekolah (PNG/JPG maks 2MB)</label>
+<input id="cfg-logo" name="school_logo" type="file" accept="image/png,image/jpeg,image/webp" class="w-full px-3 py-2 bg-surface-container-low rounded-xl border border-outline-variant/40 text-xs">
+@if(!empty($schoolConfig['school_logo_url']))
+<div class="flex items-center gap-2 mt-1">
+<img src="{{ $schoolConfig['school_logo_url'] }}" alt="Logo sekolah" class="w-8 h-8 rounded object-contain border border-surface-container">
+<span class="text-[11px] text-emerald-700 font-medium">Logo aktif terpasang</span>
+</div>
+@endif
+</div>
+</div>
+<div class="px-6 py-4 bg-surface-container-low/40 border-t border-surface-container flex justify-end">
+<button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-inverse-surface transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">save</span>
+<span>Simpan Konfigurasi Sekolah</span>
+</button>
+</div>
+</form>
+
+<form method="POST" action="{{ route('bk.manage.retention.run') }}" class="lg:col-span-4 bg-surface-container-lowest rounded-2xl shadow-xs border border-surface-container/60 p-6 flex flex-col gap-4">
+@csrf
+<div class="flex items-center gap-2.5 text-secondary">
+<span class="material-symbols-outlined text-[22px]">auto_delete</span>
+<h3 class="font-title-md text-title-md font-bold text-on-surface">Retensi Akhir Tahun Ajaran</h3>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+Meringkas laporan yang sudah diarsipkan atau berstatus selesai menjadi statistik bulanan lalu membersihkan detailnya apabila tanggal retensi telah tercapai. Laporan yang masih terbuka/belum selesai tidak akan terhapus.
+</p>
+<div class="flex flex-col gap-1.5">
+<label for="retention-test-date" class="text-xs font-semibold text-on-surface">Tanggal Uji / Simulasi Retensi (Opsional)</label>
+<input id="retention-test-date" name="test_date" type="date" value="{{ now('Asia/Jakarta')->toDateString() }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-xs">
+<span class="text-[11px] text-outline">Kosongkan untuk memakai tanggal hari ini ({{ now('Asia/Jakarta')->translatedFormat('d M Y') }}).</span>
+</div>
+<button type="submit" onclick="return confirm('Jalankan retensi arsip terhadap laporan yang sudah diarsipkan/selesai? Laporan terbuka tidak akan terhapus.')" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+<span>Jalankan / Simulasikan Retensi</span>
+</button>
+</form>
 </div>
 </section>
 
@@ -444,6 +562,16 @@
 </div>
 <input x-model="categoryLabel" class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="modal-input-label" required maxlength="80" placeholder="Contoh: Pemalakan atau Intimidasi Kelompok" type="text">
 <span class="font-body-sm text-body-sm text-on-surface-variant">Label ini langsung ditampilkan pada daftar opsi saat siswa melapor.</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface" for="modal-input-permendikbud">
+  Pemetaan Bentuk Kekerasan (Permendikbudristek 46/2023)
+</label>
+<select x-model="categoryPermendikbud" id="modal-input-permendikbud" class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-xs font-medium border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-secondary">
+@foreach($permendikbudTypes as $ptype)
+<option value="{{ $ptype }}">{{ $ptype }}</option>
+@endforeach
+</select>
 </div>
 <div class="p-3.5 bg-surface-container-low/70 rounded-xl border border-surface-container flex items-center justify-between gap-4">
 <div class="flex flex-col">
@@ -553,6 +681,16 @@
 <label class="text-xs font-semibold text-on-surface">Peran &amp; Hak Akses <span class="text-error">*</span>
 </label>
 <div class="grid grid-cols-1 gap-2.5">
+<label :class="{ 'bk-choice-active': staffRole === 'bk' }" class="flex items-start gap-3 p-3.5 rounded-xl border hover:bg-surface-container-low/40 cursor-pointer transition-all border-surface-container">
+<input x-model="staffRole" class="mt-1 text-secondary focus:ring-secondary" name="edit-role-choice" type="radio" value="bk">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-on-surface">Guru BK / Konselor</span>
+<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold">Akses Penuh Konseling</span>
+</div>
+<span class="text-xs text-on-surface-variant mt-0.5">Menangani seluruh laporan, membalas pelapor, dan meneruskan ringkasan.</span>
+</div>
+</label>
 <label :class="{ 'bk-choice-active': staffRole === 'kesiswaan' }" class="flex items-start gap-3 p-3.5 rounded-xl border hover:bg-surface-container-low/40 cursor-pointer transition-all border-surface-container" id="edit-role-label-kesiswaan">
 <input x-model="staffRole" class="mt-1 text-secondary focus:ring-secondary" id="edit-radio-kesiswaan" name="edit-role-choice" type="radio" value="kesiswaan">
 <div class="flex flex-col">
@@ -720,6 +858,16 @@
 <label class="text-xs font-semibold text-on-surface">Peran &amp; Hak Akses <span class="text-error">*</span>
 </label>
 <div class="grid grid-cols-1 gap-2.5">
+<label :class="{ 'bk-choice-active': staffRole === 'bk' }" class="flex items-start gap-3 p-3.5 rounded-xl border border-surface-container hover:bg-surface-container-low/40 cursor-pointer transition-all">
+<input x-model="staffRole" class="mt-1 text-secondary focus:ring-secondary" name="invite-role-choice" type="radio" value="bk">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-on-surface">Guru BK / Konselor</span>
+<span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold">Konselor Inti</span>
+</div>
+<span class="text-xs text-on-surface-variant mt-0.5">Menangani seluruh aduan siswa secara tertutup &amp; meneruskan ringkasan.</span>
+</div>
+</label>
 <label :class="{ 'bk-choice-active': staffRole === 'kesiswaan' }" class="flex items-start gap-3 p-3.5 rounded-xl border border-secondary bg-surface-container-low/50 cursor-pointer transition-all" id="invite-role-label-kesiswaan">
 <input x-model="staffRole" class="mt-1 text-secondary focus:ring-secondary" id="invite-radio-kesiswaan" name="invite-role-choice" type="radio" value="kesiswaan">
 <div class="flex flex-col">

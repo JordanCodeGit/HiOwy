@@ -13,14 +13,19 @@ use App\Models\StaffMember;
 use App\Models\StudentReport;
 use App\Models\User;
 use App\Support\AuditLogger;
+use App\Support\RetentionService;
+use App\Support\SchoolConfigService;
 use App\Support\TicketCodeService;
 use App\Support\TurnstileVerifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -28,7 +33,7 @@ use Illuminate\View\View;
 class BkManageController extends Controller
 {
     /**
-     * Tampilkan halaman kelola jenis kejadian, titik lokasi, staf, dan QR sekolah.
+     * Tampilkan halaman kelola jenis kejadian, titik lokasi, staf, konfigurasi sekolah, dan QR sekolah.
      */
     public function index(Request $request): View
     {
@@ -43,10 +48,11 @@ class BkManageController extends Controller
         $locations = IncidentLocation::orderBy('order_index')->orderBy('id')->get();
         $staffMembers = StaffMember::orderByDesc('id')->get();
 
-        $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+        $schoolConfig = SchoolConfigService::getConfig();
+        $schoolName = $schoolConfig['school_name'];
         $reportUrl = url('/s/lapor');
-        $trainingMode = SchoolSetting::get('training_mode', '0') === '1';
-        $nlpEnabled = SchoolSetting::get('nlp_enabled', '0') === '1';
+        $trainingMode = $schoolConfig['training_mode'];
+        $nlpEnabled = $schoolConfig['nlp_enabled'];
 
         return view('bk.manage', [
             'categories' => $categories,
@@ -55,6 +61,8 @@ class BkManageController extends Controller
             'reportUrl' => $reportUrl,
             'qrScanUrl' => $reportUrl,
             'schoolName' => $schoolName,
+            'schoolConfig' => $schoolConfig,
+            'permendikbudTypes' => SchoolConfigService::permendikbudTypes(),
             'trainingMode' => $trainingMode,
             'nlpEnabled' => $nlpEnabled,
             'categoriesCount' => $categories->count(),
@@ -64,13 +72,20 @@ class BkManageController extends Controller
     }
 
     /**
-     * Perbarui saklar Mode Latihan (FR-68) dan Modul NLP ML (FR-42, FR-48).
+     * Perbarui pengaturan sekolah (FR-57), Mode Latihan (FR-68), dan Modul NLP ML (FR-42, FR-48).
      */
     public function updateSettings(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'training_mode' => ['nullable', 'boolean'],
             'nlp_enabled' => ['nullable', 'boolean'],
+            'school_name' => ['nullable', 'string', 'max:120'],
+            'reading_hours' => ['nullable', 'string', 'max:160'],
+            'emergency_contact' => ['nullable', 'string', 'max:64'],
+            'school_website_url' => ['nullable', 'url', 'max:255'],
+            'retention_date' => ['nullable', 'date'],
+            'story_max_length' => ['nullable', 'integer', 'min:200', 'max:10000'],
+            'school_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
         ]);
 
         if (array_key_exists('training_mode', $validated)) {
@@ -95,18 +110,78 @@ class BkManageController extends Controller
             );
         }
 
-        $message = 'Pengaturan sistem berhasil diperbarui.';
+        $schoolFields = ['school_name', 'reading_hours', 'emergency_contact', 'school_website_url', 'retention_date', 'story_max_length'];
+        $updatedSchoolFields = [];
+
+        foreach ($schoolFields as $field) {
+            if ($request->has($field)) {
+                $val = trim((string) ($validated[$field] ?? ''));
+                SchoolSetting::set($field, $val);
+                $updatedSchoolFields[] = $field;
+            }
+        }
+
+        if ($request->hasFile('school_logo')) {
+            $file = $request->file('school_logo');
+            $uploadDir = public_path('uploads');
+            if (! is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $filename = 'school-logo-'.time().'.'.$file->getClientOriginalExtension();
+            $file->move($uploadDir, $filename);
+            SchoolSetting::set('school_logo', 'uploads/'.$filename);
+            $updatedSchoolFields[] = 'school_logo';
+        }
+
+        if ($updatedSchoolFields !== []) {
+            AuditLogger::log(
+                Auth::user(),
+                'update_school_settings',
+                null,
+                'Field: '.implode(', ', $updatedSchoolFields)
+            );
+        }
+
+        $config = SchoolConfigService::getConfig();
+        $message = 'Pengaturan sekolah dan sistem berhasil diperbarui.';
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'training_mode' => SchoolSetting::get('training_mode', '0') === '1',
-                'nlp_enabled' => SchoolSetting::get('nlp_enabled', '0') === '1',
+                'training_mode' => $config['training_mode'],
+                'nlp_enabled' => $config['nlp_enabled'],
+                'config' => $config,
                 'message' => $message,
             ]);
         }
 
-        return back()->with('frontend_notice', $message);
+        return redirect()->route('bk.manage', ['#sekolah'])->with('frontend_notice', $message);
+    }
+
+    /**
+     * Jalankan atau simulasikan retensi arsip akhir tahun ajaran (FR-65).
+     */
+    public function runRetention(Request $request): JsonResponse|RedirectResponse
+    {
+        $validated = $request->validate([
+            'test_date' => ['nullable', 'date'],
+        ]);
+
+        $result = RetentionService::run($validated['test_date'] ?? null, Auth::user());
+
+        $message = $result['executed']
+            ? "Retensi berhasil dijalankan ({$result['retention_date']}). {$result['deleted_count']} laporan arsip/selesai diringkas & dihapus; laporan aktif tetap aman."
+            : ($result['skipped_reason'] ?? 'Retensi belum dijalankan.');
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => $result['executed'],
+                'result' => $result,
+                'message' => $message,
+            ]);
+        }
+
+        return redirect()->route('bk.manage', ['#sekolah'])->with('frontend_notice', $message);
     }
 
     // =========================================================================
@@ -117,6 +192,7 @@ class BkManageController extends Controller
     {
         $validated = $request->validate([
             'label' => ['required', 'string', 'max:80'],
+            'permendikbud_type' => ['nullable', 'string', 'max:120'],
             'active' => ['nullable', 'boolean'],
             'visible_to_kesiswaan' => ['nullable', 'boolean'],
         ]);
@@ -125,6 +201,7 @@ class BkManageController extends Controller
 
         $category = IncidentCategory::create([
             'label' => trim($validated['label']),
+            'permendikbud_type' => trim((string) ($validated['permendikbud_type'] ?? '')) ?: 'Pendampingan Konseling / Lainnya',
             'active' => $request->boolean('active', true),
             'permanent' => false,
             'visible_to_kesiswaan' => $request->boolean('visible_to_kesiswaan', true),
@@ -150,11 +227,15 @@ class BkManageController extends Controller
 
         $validated = $request->validate([
             'label' => ['required', 'string', 'max:80'],
+            'permendikbud_type' => ['nullable', 'string', 'max:120'],
             'active' => ['nullable', 'boolean'],
             'visible_to_kesiswaan' => ['nullable', 'boolean'],
         ]);
 
         $category->label = trim($validated['label']);
+        if ($request->has('permendikbud_type')) {
+            $category->permendikbud_type = trim((string) ($validated['permendikbud_type'] ?? '')) ?: null;
+        }
         if (! $category->permanent) {
             $category->active = $request->boolean('active', true);
         }
@@ -432,12 +513,30 @@ class BkManageController extends Controller
         ]);
 
         $staff = StaffMember::findOrFail($id);
+        $oldEmail = strtolower((string) $staff->email);
         $staff->name = trim($validated['name']);
         $staff->email = strtolower(trim($validated['email']));
         $staff->role = $validated['role'];
         $staff->class_name = $validated['role'] === 'walikelas' ? ($validated['class_name'] ?? '7A') : null;
         $staff->status = $validated['status'];
         $staff->save();
+
+        // Sinkronisasi peran & sesi akun User terkait saat status nonaktif / peran berubah (FR-27)
+        $linkedUser = User::where('email', $oldEmail)->orWhere('email', $staff->email)->first();
+        if ($linkedUser) {
+            $mappedRole = match ($staff->role) {
+                'walikelas' => 'wali_kelas',
+                'kesiswaan' => 'kesiswaan',
+                default => 'bk',
+            };
+            $linkedUser->name = $staff->name;
+            $linkedUser->role = $mappedRole;
+            $linkedUser->save();
+
+            if ($staff->status === 'nonaktif' && Schema::hasTable('sessions')) {
+                DB::table('sessions')->where('user_id', $linkedUser->id)->delete();
+            }
+        }
 
         AuditLogger::log(Auth::user(), 'update_staff', null, "{$staff->email} ({$staff->role}: {$staff->status})");
 
@@ -463,11 +562,82 @@ class BkManageController extends Controller
         return redirect()->route('bk.manage', ['#staf'])->with('frontend_notice', $message);
     }
 
+    /**
+     * Reset kata sandi & 2FA akun staf terundang lalu kirim tautan aktivasi baru (FR-27).
+     */
+    public function resetStaffAccess(int $id): JsonResponse
+    {
+        $staff = StaffMember::findOrFail($id);
+        $email = strtolower(trim((string) $staff->email));
+
+        $linkedUser = User::where('email', $email)->first();
+        if ($linkedUser && $linkedUser->id === Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak dapat mereset akun sendiri yang sedang aktif.',
+            ], 422);
+        }
+
+        if ($linkedUser) {
+            $linkedUser->forceFill([
+                'password' => Hash::make(Str::random(40)),
+                'two_factor_secret' => null,
+                'two_factor_recovery_codes' => null,
+                'two_factor_confirmed_at' => null,
+            ])->save();
+
+            if (Schema::hasTable('sessions')) {
+                DB::table('sessions')->where('user_id', $linkedUser->id)->delete();
+            }
+        }
+
+        $staff->status = 'pending';
+        $staff->invited_at = now();
+        $staff->save();
+
+        $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+        $invitationUrl = URL::temporarySignedRoute(
+            'staff.invitation.show',
+            now()->addDays(7),
+            ['staff' => $staff->id]
+        );
+
+        $emailSent = false;
+        try {
+            Mail::to($staff->email)->send(new StaffInvitationMail($staff, $schoolName, $invitationUrl));
+            $emailSent = true;
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        AuditLogger::log(Auth::user(), 'reset_staff_access', null, $staff->email);
+
+        return response()->json([
+            'success' => true,
+            'staff' => [
+                'id' => $staff->id,
+                'status' => $staff->status,
+            ],
+            'message' => $emailSent
+                ? "Kata sandi & 2FA {$staff->name} telah direset dan tautan aktivasi baru dikirim ke {$staff->email}."
+                : "Kata sandi & 2FA {$staff->name} direset ke status pending (email gagal terkirim).",
+        ]);
+    }
+
     public function destroyStaff(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $staff = StaffMember::findOrFail($id);
         $name = $staff->name;
-        $email = $staff->email;
+        $email = strtolower((string) $staff->email);
+
+        $linkedUser = User::where('email', $email)->first();
+        if ($linkedUser && $linkedUser->id !== Auth::id()) {
+            $linkedUser->forceFill(['role' => null])->save();
+            if (Schema::hasTable('sessions')) {
+                DB::table('sessions')->where('user_id', $linkedUser->id)->delete();
+            }
+        }
+
         $staff->delete();
 
         AuditLogger::log(Auth::user(), 'revoke_staff', null, $email);
@@ -529,7 +699,20 @@ class BkManageController extends Controller
      */
     public function showPublicReport(Request $request): View
     {
-        $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+        return $this->renderPublicReportView($request, false);
+    }
+
+    /**
+     * Tampilkan formulir Mode Latihan (/latihan) dengan alur identik dan badge simulasi (FR-68).
+     */
+    public function showTrainingReport(Request $request): View
+    {
+        return $this->renderPublicReportView($request, true);
+    }
+
+    private function renderPublicReportView(Request $request, bool $forceTraining): View
+    {
+        $config = SchoolConfigService::getConfig();
 
         $categories = IncidentCategory::where('active', true)->orderBy('order_index')->get();
         if ($categories->isEmpty()) {
@@ -543,16 +726,29 @@ class BkManageController extends Controller
             $locations = IncidentLocation::where('active', true)->orderBy('order_index')->get();
         }
 
-        $trainingMode = $request->query('mode') === 'latihan'
-            || SchoolSetting::get('training_mode', '0') === '1';
+        $trainingMode = $forceTraining
+            || $request->query('mode') === 'latihan'
+            || $config['training_mode'];
 
         return view('bk.report-public', [
-            'schoolName' => $schoolName,
+            'schoolName' => $config['school_name'],
+            'schoolConfig' => $config,
             'categories' => $categories,
             'locations' => $locations,
             'trainingMode' => $trainingMode,
+            'storyMaxLength' => $config['story_max_length'],
             'turnstileSiteKey' => (string) config('services.turnstile.site_key', ''),
         ]);
+    }
+
+    /**
+     * Simpan laporan dari rute /latihan secara terisolasi (FR-68).
+     */
+    public function storeTrainingReport(Request $request): JsonResponse|RedirectResponse
+    {
+        $request->merge(['is_training' => '1']);
+
+        return $this->storePublicReport($request);
     }
 
     /**
@@ -588,29 +784,59 @@ class BkManageController extends Controller
             ]);
         }
 
+        $config = SchoolConfigService::getConfig();
+        $storyMax = $config['story_max_length'];
+        $isAnonymous = filter_var($request->input('is_anonymous', true), FILTER_VALIDATE_BOOLEAN);
+
         $request->validate([
             'category' => ['required', 'string', 'max:120'],
             'location' => ['required', 'string', 'max:120'],
+            'custom_location' => ['nullable', 'string', 'max:120'],
             'involved_parties' => ['nullable', 'string', 'max:255'],
-            'story' => ['required', 'string', 'min:5'],
+            'story' => ['required', 'string', 'min:5', 'max:'.$storyMax],
             'urgency' => ['nullable', 'string', 'max:32'],
             'reporter_role' => ['nullable', 'string', 'max:64'],
             'incident_time' => ['nullable', 'string', 'max:120'],
+            'incident_date' => ['nullable', 'date', 'before_or_equal:today'],
+            'incident_date_unknown' => ['nullable'],
             'is_anonymous' => ['nullable'],
             'is_training' => ['nullable'],
-            'reporter_name' => ['nullable', 'string', 'max:120'],
-            'reporter_class' => ['nullable', 'string', 'max:32'],
+            'reporter_name' => [$isAnonymous ? 'nullable' : 'required', 'string', 'max:120'],
+            'reporter_class' => [$isAnonymous ? 'nullable' : 'required', 'string', 'max:32'],
             'reporter_contact' => ['nullable', 'string', 'max:64'],
         ], [
             'category.required' => 'Pilih jenis kejadian yang terjadi.',
             'location.required' => 'Pilih titik lokasi kejadian.',
             'story.required' => 'Ceritakan apa yang terjadi pada kolom cerita.',
             'story.min' => 'Ceritakan kejadian dengan sedikit lebih rinci (minimal 5 karakter).',
+            'story.max' => "Panjang cerita maksimal {$storyMax} karakter.",
+            'reporter_name.required' => 'Jika ingin dihubungi Guru BK, nama wajib diisi.',
+            'reporter_class.required' => 'Jika ingin dihubungi Guru BK, kelas wajib dipilih.',
+            'incident_date.before_or_equal' => 'Tanggal kejadian tidak boleh melebihi hari ini.',
         ]);
+
+        $rawLocation = trim((string) $request->input('location'));
+        $customLocation = trim((string) $request->input('custom_location', ''));
+        if (in_array(strtolower($rawLocation), ['__other__', 'lainnya'], true)) {
+            if ($customLocation === '') {
+                $err = 'Tuliskan nama tempat kejadian jika memilih opsi Lainnya.';
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $err], 422);
+                }
+
+                return back()->withInput()->withErrors(['location' => $err]);
+            }
+            $resolvedLocation = 'Lainnya: '.$customLocation;
+        } else {
+            $resolvedLocation = $rawLocation;
+        }
+
+        $dateUnknown = filter_var($request->input('incident_date_unknown', false), FILTER_VALIDATE_BOOLEAN);
+        $incidentDate = $dateUnknown ? null : ($request->input('incident_date') ?: null);
 
         $today = now('Asia/Jakarta')->toDateString();
         $isTraining = filter_var($request->input('is_training'), FILTER_VALIDATE_BOOLEAN)
-            || SchoolSetting::get('training_mode', '0') === '1';
+            || $config['training_mode'];
 
         // Per-device daily quota (max 5/day, NOT per-IP) via encrypted HttpOnly cookie (FR-53)
         $deviceId = (string) $request->cookie('hiowy_device_id', '');
@@ -631,8 +857,6 @@ class BkManageController extends Controller
                 ->withCookie(cookie('hiowy_device_id', $deviceId, 60 * 24 * 365, '/', null, null, true));
         }
 
-        $isAnonymous = filter_var($request->input('is_anonymous', true), FILTER_VALIDATE_BOOLEAN);
-
         do {
             $plainTicketCode = TicketCodeService::generateCode(10);
             $ticketHash = TicketCodeService::hash($plainTicketCode);
@@ -641,11 +865,12 @@ class BkManageController extends Controller
         $report = StudentReport::create([
             'ticket_hash' => $ticketHash,
             'category' => $request->input('category'),
-            'location' => $request->input('location'),
+            'location' => $resolvedLocation,
             'involved_parties' => $request->input('involved_parties'),
             'urgency' => $request->input('urgency', 'Sedang'),
             'reporter_role' => $request->input('reporter_role', 'Siswa (Korban Langsung)'),
-            'incident_time' => $request->input('incident_time', 'Hari ini'),
+            'incident_time' => $request->input('incident_time', 'Tidak ingat pasti'),
+            'incident_date' => $incidentDate,
             'story' => $request->input('story'),
             'is_anonymous' => $isAnonymous,
             'reporter_name' => $isAnonymous ? null : $request->input('reporter_name'),
@@ -772,18 +997,19 @@ class BkManageController extends Controller
             'selesai' => 'Selesai',
         ];
 
+        // Tandai balasan dari Guru BK sebagai terbaca oleh pelapor (centang 2 di portal BK)
+        $report->messages()
+            ->where('sender', 'bk')
+            ->whereNull('read_at')
+            ->update(['read_at' => now('Asia/Jakarta')]);
+
         $messages = $report->messages()
             ->get()
-            ->map(function (ReportMessage $msg): array {
-                return [
-                    'sender' => $msg->sender,
-                    'sender_label' => $msg->sender === 'bk' ? 'Guru BK' : 'Kamu (Pelapor)',
-                    'body' => $msg->body,
-                    'date' => $msg->sent_date ? $msg->sent_date->translatedFormat('d M Y') : '-',
-                ];
-            })
+            ->map(fn (ReportMessage $msg): array => $this->formatPublicMessageDto($msg))
             ->values()
             ->all();
+
+        $config = SchoolConfigService::getConfig();
 
         return response()->json([
             'success' => true,
@@ -791,6 +1017,14 @@ class BkManageController extends Controller
                 'status' => $publicStatus,
                 'status_label' => $statusLabels[$publicStatus],
                 'archived' => $report->archived_at !== null,
+                'is_training' => (bool) $report->is_training,
+                'bk_read_time' => $report->bk_read_at
+                    ? $report->bk_read_at->copy()->timezone('Asia/Jakarta')->translatedFormat('d M Y, H:i').' WIB'
+                    : null,
+                'reading_hours' => $config['reading_hours'],
+                'emergency_contact' => $config['emergency_contact'],
+                'emergency_wa_url' => $config['emergency_wa_url'],
+                'emergency_tel_url' => $config['emergency_tel_url'],
                 'messages' => $messages,
             ],
         ]);
@@ -852,6 +1086,7 @@ class BkManageController extends Controller
 
         $today = now('Asia/Jakarta')->toDateString();
 
+        // Pesan dari pelapor sengaja TIDAK menyimpan jam-menit H:i demi privasi FR-14 (Opsi A)
         $msg = ReportMessage::create([
             'student_report_id' => $report->id,
             'sender' => 'reporter',
@@ -864,24 +1099,40 @@ class BkManageController extends Controller
             'status_updated_date' => $today,
         ]);
 
-        $messages = $report->messages()->get()->map(fn (ReportMessage $m): array => [
-            'sender' => $m->sender,
-            'sender_label' => $m->sender === 'bk' ? 'Guru BK' : 'Kamu (Pelapor)',
-            'body' => $m->body,
-            'date' => $m->sent_date ? $m->sent_date->translatedFormat('d M Y') : '-',
-        ])->values()->all();
+        $messages = $report->messages()->get()
+            ->map(fn (ReportMessage $m): array => $this->formatPublicMessageDto($m))
+            ->values()
+            ->all();
 
         return response()->json([
             'success' => true,
             'message' => 'Balasanmu berhasil dikirim ke Guru BK.',
             'messages' => $messages,
-            'sent' => [
-                'sender' => $msg->sender,
-                'sender_label' => 'Kamu (Pelapor)',
-                'body' => $msg->body,
-                'date' => $msg->sent_date->translatedFormat('d M Y'),
-            ],
+            'sent' => $this->formatPublicMessageDto($msg),
         ]);
+    }
+
+    /**
+     * Format DTO pesan dua arah sesuai Opsi A: jam H:i hanya dicatat/ditampilkan pada aksi Guru BK (FR-14).
+     *
+     * @return array<string, mixed>
+     */
+    private function formatPublicMessageDto(ReportMessage $msg): array
+    {
+        $isBk = $msg->sender === 'bk';
+        $bkReadTime = (! $isBk && $msg->read_at)
+            ? $msg->read_at->copy()->timezone('Asia/Jakarta')->format('H:i').' WIB'
+            : null;
+
+        return [
+            'sender' => $msg->sender,
+            'sender_label' => $isBk ? 'Guru BK' : 'Kamu (Pelapor)',
+            'body' => $msg->body,
+            'date' => $msg->sent_date ? $msg->sent_date->translatedFormat('d M Y') : '-',
+            'time' => $isBk ? ($msg->bk_sent_time ?: null) : null,
+            'is_read' => $msg->read_at !== null,
+            'read_time' => $bkReadTime,
+        ];
     }
 
     /**
@@ -889,11 +1140,12 @@ class BkManageController extends Controller
      */
     public function downloadPoster(): View
     {
-        $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+        $config = SchoolConfigService::getConfig();
         $reportUrl = url('/s/lapor');
 
         return view('bk.poster-print', [
-            'schoolName' => $schoolName,
+            'schoolName' => $config['school_name'],
+            'schoolConfig' => $config,
             'reportUrl' => $reportUrl,
             'qrScanUrl' => $reportUrl,
         ]);
@@ -906,13 +1158,13 @@ class BkManageController extends Controller
     private function seedDefaultCategories(): void
     {
         $defaults = [
-            ['label' => 'Ejekan & Intimidasi Verbal', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 1],
-            ['label' => 'Perundungan Fisik & Pemukulan', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 2],
-            ['label' => 'Pengucilan & Diskriminasi Sosial', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 3],
-            ['label' => 'Pelecehan Melalui Chat & Medsos', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 4],
-            ['label' => 'Sentuhan atau Perilaku Tidak Pantas', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 5],
-            ['label' => 'Pemerasan & Tekanan Kelompok', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => false, 'order_index' => 6],
-            ['label' => 'Masalah Pribadi & Lainnya', 'active' => true, 'permanent' => true, 'visible_to_kesiswaan' => false, 'order_index' => 7],
+            ['label' => 'Ejekan & Intimidasi Verbal', 'permendikbud_type' => 'Perundungan Verbal / Kekerasan Psikis (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 1],
+            ['label' => 'Perundungan Fisik & Pemukulan', 'permendikbud_type' => 'Kekerasan Fisik (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 2],
+            ['label' => 'Pengucilan & Diskriminasi Sosial', 'permendikbud_type' => 'Diskriminasi & Intoleransi (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 3],
+            ['label' => 'Pelecehan Melalui Chat & Medsos', 'permendikbud_type' => 'Perundungan Daring (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 4],
+            ['label' => 'Sentuhan atau Perilaku Tidak Pantas', 'permendikbud_type' => 'Kekerasan Seksual (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 5],
+            ['label' => 'Pemerasan & Tekanan Kelompok', 'permendikbud_type' => 'Kekerasan Psikis / Pemerasan (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => false, 'order_index' => 6],
+            ['label' => 'Masalah Pribadi & Lainnya', 'permendikbud_type' => 'Pendampingan Konseling / Lainnya', 'active' => true, 'permanent' => true, 'visible_to_kesiswaan' => false, 'order_index' => 7],
         ];
 
         foreach ($defaults as $cat) {
