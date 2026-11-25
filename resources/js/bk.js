@@ -135,16 +135,14 @@ export function registerBk(Alpine, navigateTo) {
         reportUrl: initialData.reportUrl || (window.location.origin + '/s/lapor'),
         qrScanUrl: initialData.qrScanUrl || (window.location.origin + '/s/qr'),
         qrSvgHtml: '',
-        dragging: null,
-        dropTarget: '',
-        orderMessage: '',
+        posterQrSvgHtml: '',
         editing: false,
         editingId: null,
+        deleteTargetId: null,
+        deleteTargetLabel: '',
         categoryLabel: '',
         categoryPermendikbud: 'Perundungan / Bullying (Permendikbudristek 46/2023)',
-        categoryActive: true,
         categoryPermanent: false,
-        categoryVisibleKesiswaan: true,
         locationLabel: '',
         locationActive: true,
         staffId: null,
@@ -157,10 +155,32 @@ export function registerBk(Alpine, navigateTo) {
         staffQuery: '',
         trainingMode: Boolean(initialData.trainingMode),
         nlpEnabled: Boolean(initialData.nlpEnabled),
+        readingDayStart: initialData.readingDayStart || 'Senin',
+        readingDayEnd: initialData.readingDayEnd || 'Jumat',
+        readingTimeStart: initialData.readingTimeStart || '07:00',
+        readingTimeEnd: initialData.readingTimeEnd || '15:00',
+        logoPreviewUrl: initialData.schoolLogoUrl || '',
+        logoFileName: '',
         saving: false,
 
         get csrfToken() {
             return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        },
+
+        get formattedReadingHours() {
+            const dayPart = this.readingDayStart === this.readingDayEnd
+                ? this.readingDayStart
+                : `${this.readingDayStart}–${this.readingDayEnd}`;
+            const tStart = (this.readingTimeStart || '07:00').replace(':', '.');
+            const tEnd = (this.readingTimeEnd || '15:00').replace(':', '.');
+            return `${dayPart}, ${tStart}–${tEnd} WIB`;
+        },
+
+        onLogoSelected(event) {
+            const file = event?.target?.files?.[0];
+            if (!file) return;
+            this.logoFileName = file.name;
+            this.logoPreviewUrl = URL.createObjectURL(file);
         },
 
         init() {
@@ -182,67 +202,13 @@ export function registerBk(Alpine, navigateTo) {
             window.dispatchEvent(new CustomEvent('auth-notice', { detail: { title, message } }));
         },
 
-        // --- Drag & Drop / Reordering ---
-        startDrag(event, list, id) {
-            if (window.matchMedia('(max-width: 1023px)').matches || this[list].find(item => item.id === id)?.permanent) {
-                event.preventDefault();
-                return;
-            }
-            this.dragging = { list, id };
-            event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('text/plain', id);
-        },
-        dragOver(list, id) {
-            if (this.dragging?.list === list && !this[list].find(item => item.id === id)?.permanent) this.dropTarget = id;
-        },
-        dropRow(list, targetId) {
-            if (this.dragging?.list !== list) return;
-            const from = this[list].findIndex(item => item.id === this.dragging.id);
-            const to = this[list].findIndex(item => item.id === targetId);
-            this.reorder(list, from, to);
-            this.endDrag();
-        },
-        moveRow(list, id, direction) {
-            const index = this[list].findIndex(item => item.id === id);
-            this.reorder(list, index, index + direction);
-        },
-        async reorder(list, from, to) {
-            if (from < 0 || to < 0 || to >= this[list].length || from === to || this[list][from].permanent || this[list][to].permanent) return;
-            const rows = [...this[list]];
-            const [item] = rows.splice(from, 1);
-            rows.splice(to, 0, item);
-            this[list] = rows;
-            this.orderMessage = `${item.label} dipindahkan ke urutan ${to + 1}.`;
-
-            try {
-                const endpoint = list === 'categories' ? '/bk/manage/categories/reorder' : '/bk/manage/locations/reorder';
-                await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': this.csrfToken,
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({ order: this[list].map(r => r.id) }),
-                });
-            } catch (e) {
-                console.error('Failed to sync reorder', e);
-            }
-        },
-        endDrag() {
-            this.dragging = null;
-            this.dropTarget = '';
-        },
-
         // --- Category CRUD ---
         openCategory(item = null) {
             this.editing = !!item;
             this.editingId = item ? item.id : null;
             this.categoryLabel = item?.label || '';
             this.categoryPermendikbud = item?.permendikbud_type || 'Perundungan / Bullying (Permendikbudristek 46/2023)';
-            this.categoryActive = item?.active ?? true;
             this.categoryPermanent = item?.permanent ?? false;
-            this.categoryVisibleKesiswaan = item?.visible_to_kesiswaan ?? true;
             this.openModal('modal-kategori');
         },
         async saveCategory() {
@@ -264,8 +230,6 @@ export function registerBk(Alpine, navigateTo) {
                     body: JSON.stringify({
                         label: this.categoryLabel.trim(),
                         permendikbud_type: this.categoryPermendikbud,
-                        active: this.categoryActive,
-                        visible_to_kesiswaan: this.categoryVisibleKesiswaan,
                     }),
                 });
                 const data = await res.json();
@@ -273,10 +237,12 @@ export function registerBk(Alpine, navigateTo) {
                     if (this.editing) {
                         const idx = this.categories.findIndex(c => c.id === this.editingId);
                         if (idx !== -1) {
-                            this.categories[idx].label = this.categoryLabel.trim();
-                            this.categories[idx].permendikbud_type = this.categoryPermendikbud;
-                            this.categories[idx].active = this.categoryActive;
-                            this.categories[idx].visible_to_kesiswaan = this.categoryVisibleKesiswaan;
+                            this.categories[idx] = data.category || {
+                                ...this.categories[idx],
+                                label: this.categoryLabel.trim(),
+                                permendikbud_type: this.categoryPermendikbud,
+                                active: true,
+                            };
                         }
                     } else if (data.category) {
                         this.categories.push(data.category);
@@ -293,34 +259,20 @@ export function registerBk(Alpine, navigateTo) {
                 this.saving = false;
             }
         },
-        async toggleCategory(item) {
-            if (item.permanent) return;
-            try {
-                const res = await fetch(`/bk/manage/categories/${item.id}/toggle`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': this.csrfToken,
-                        'Accept': 'application/json',
-                    },
-                });
-                const data = await res.json();
-                if (data.success) {
-                    item.active = data.active;
-                    this.showNotice('Status Berubah', data.message);
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        },
-        async deleteCategory(item) {
+        openDeleteCategory(item) {
             if (item.permanent) {
                 this.showNotice('Dilindungi', 'Kategori ini dilindungi sistem dan tidak dapat dihapus.');
                 return;
             }
-            if (!confirm(`Hapus kategori aduan "${item.label}"?`)) return;
-
+            this.deleteTargetId = item.id;
+            this.deleteTargetLabel = item.label || 'Kategori';
+            this.openModal('modal-hapus-kategori');
+        },
+        async confirmDeleteCategory() {
+            if (!this.deleteTargetId) return;
+            this.saving = true;
             try {
-                const res = await fetch(`/bk/manage/categories/${item.id}`, {
+                const res = await fetch(`/bk/manage/categories/${this.deleteTargetId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': this.csrfToken,
@@ -329,7 +281,8 @@ export function registerBk(Alpine, navigateTo) {
                 });
                 const data = await res.json();
                 if (data.success) {
-                    this.categories = this.categories.filter(c => c.id !== item.id);
+                    this.categories = this.categories.filter(c => c.id !== this.deleteTargetId);
+                    this.closeModal();
                     this.showNotice('Berhasil Dihapus', data.message);
                 } else {
                     this.showNotice('Gagal', data.message);
@@ -337,6 +290,8 @@ export function registerBk(Alpine, navigateTo) {
             } catch (err) {
                 console.error(err);
                 this.showNotice('Terjadi Kesalahan', 'Gagal menghapus kategori.');
+            } finally {
+                this.saving = false;
             }
         },
 
@@ -406,10 +361,20 @@ export function registerBk(Alpine, navigateTo) {
                 console.error(err);
             }
         },
-        async deleteLocation(item) {
-            if (!confirm(`Hapus titik lokasi "${item.label}"?`)) return;
+        openDeleteLocation(item) {
+            if (item.permanent) {
+                this.showNotice('Dilindungi', 'Lokasi ini dilindungi sistem dan tidak dapat dihapus.');
+                return;
+            }
+            this.deleteTargetId = item.id;
+            this.deleteTargetLabel = item.label || 'Lokasi';
+            this.openModal('modal-hapus-lokasi');
+        },
+        async confirmDeleteLocation() {
+            if (!this.deleteTargetId) return;
+            this.saving = true;
             try {
-                const res = await fetch(`/bk/manage/locations/${item.id}`, {
+                const res = await fetch(`/bk/manage/locations/${this.deleteTargetId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': this.csrfToken,
@@ -418,7 +383,8 @@ export function registerBk(Alpine, navigateTo) {
                 });
                 const data = await res.json();
                 if (data.success) {
-                    this.locations = this.locations.filter(l => l.id !== item.id);
+                    this.locations = this.locations.filter(l => l.id !== this.deleteTargetId);
+                    this.closeModal();
                     this.showNotice('Berhasil Dihapus', data.message);
                 } else {
                     this.showNotice('Gagal', data.message);
@@ -426,6 +392,8 @@ export function registerBk(Alpine, navigateTo) {
             } catch (err) {
                 console.error(err);
                 this.showNotice('Terjadi Kesalahan', 'Gagal menghapus lokasi.');
+            } finally {
+                this.saving = false;
             }
         },
 
@@ -645,7 +613,8 @@ export function registerBk(Alpine, navigateTo) {
                 const qr = new QRCode(0, 'M');
                 qr.addData(this.reportUrl || this.qrScanUrl);
                 qr.make();
-                this.qrSvgHtml = qr.createSvg(220, 4);
+                this.qrSvgHtml = qr.createSvg(208, 4);
+                this.posterQrSvgHtml = qr.createSvg(124, 3);
             } catch (e) {
                 console.error('Failed to generate QR', e);
             }
@@ -658,7 +627,7 @@ export function registerBk(Alpine, navigateTo) {
             });
         },
         downloadQrPng() {
-            const svg = document.querySelector('#panel-qr svg');
+            const svg = document.querySelector('#qr-main-svg svg') || document.querySelector('#panel-qr svg');
             if (!svg) {
                 this.showNotice('Gagal', 'Elemen gambar QR tidak ditemukan.');
                 return;
@@ -1176,6 +1145,7 @@ export function registerBk(Alpine, navigateTo) {
                         status: this.caseStatus,
                         urgency: this.urgency,
                         assigned_counselor: this.caseHandler,
+                        category: this.categoryChoice || undefined,
                     }),
                 });
                 const data = await res.json();

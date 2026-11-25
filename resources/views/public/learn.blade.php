@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <title>Ruang Belajar &amp; Pengumuman Siswa — HiOwy!</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon-owy.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -51,7 +53,7 @@
             </p>
         </div>
 
-        <!-- Panduan Dasar Wajib Edukasi (FR-55) -->
+        <!-- Panduan Dasar Wajib Edukasi -->
         <section class="grid grid-cols-1 md:grid-cols-2 gap-4" aria-label="Panduan Dasar Anti-Perundungan">
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-2.5">
                 <div class="flex items-center gap-2 text-blue-700 font-bold text-sm">
@@ -105,7 +107,7 @@
             </div>
         </section>
 
-        <!-- Pengumuman & Materi Dinamis dari Guru BK (FR-56) -->
+        <!-- Pengumuman & Materi Dinamis dari Guru BK -->
         <section class="space-y-4">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-bold text-slate-900">Pengumuman &amp; Materi Terbaru dari Tim BK</h2>

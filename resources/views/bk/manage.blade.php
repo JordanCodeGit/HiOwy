@@ -6,7 +6,12 @@
     reportUrl: @js($reportUrl),
     qrScanUrl: @js($qrScanUrl),
     trainingMode: @js($trainingMode ?? false),
-    nlpEnabled: @js($nlpEnabled ?? false)
+    nlpEnabled: @js($nlpEnabled ?? false),
+    readingDayStart: @js(old('reading_day_start', $schoolConfig['reading_day_start'] ?? 'Senin')),
+    readingDayEnd: @js(old('reading_day_end', $schoolConfig['reading_day_end'] ?? 'Jumat')),
+    readingTimeStart: @js(old('reading_time_start', $schoolConfig['reading_time_start'] ?? '07:00')),
+    readingTimeEnd: @js(old('reading_time_end', $schoolConfig['reading_time_end'] ?? '15:00')),
+    schoolLogoUrl: @js($schoolConfig['school_logo_url'] ?? '')
 })" @keydown.escape.window="closeModal()" class="w-full bg-surface flex-1 px-8 py-6">
 <div class="flex flex-col w-full">
 <div class="flex flex-col gap-space-md mb-8">
@@ -110,47 +115,29 @@
 <table class="w-full text-left">
 <thead>
 <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-<th class="py-3.5 px-6 w-20 text-center">Urutan</th>
 <th class="py-3.5 px-6">Nama Jenis Kejadian</th>
-<th class="py-3.5 px-6 w-44">Status</th>
-<th class="py-3.5 px-6 w-36 text-right">Aksi</th>
+<th class="py-3.5 px-6 w-40 text-right">Aksi</th>
 </tr>
 </thead>
 <tbody class="divide-y-0" id="kategori-table-body">
-<template x-for="(item, index) in categories" :key="item.id">
-<tr :draggable="!item.permanent" @dragstart="startDrag($event, 'categories', item.id)" @dragover.prevent="dragOver('categories', item.id)" @drop.prevent="dropRow('categories', item.id)" @dragend="endDrag()" :class="{ 'bk-row-dragging': dragging?.id === item.id, 'bk-row-drop': dropTarget === item.id }" class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60">
-<td class="py-4 px-6 text-center">
-<div class="inline-flex items-center gap-1 cursor-grab bg-surface-container px-2.5 py-1 rounded-lg">
-<span class="font-label-md text-label-md font-bold text-on-surface" x-text="index + 1">
-</span>
-<span x-show="item.permanent" class="material-symbols-outlined text-[16px] text-outline" title="Kategori tetap (Wajib sistem)">lock</span>
-<div x-show="!item.permanent" class="flex flex-col">
-<button class="text-outline hover:text-on-surface leading-none cursor-pointer" title="Naikkan urutan" type="button" @click="moveRow('categories', item.id, -1)" :disabled="item.permanent || index === 0" aria-label="Pindahkan ke atas">
-<span class="material-symbols-outlined text-[14px]">expand_less</span>
-</button>
-<button class="text-outline hover:text-secondary leading-none cursor-pointer" title="Turunkan urutan" type="button" @click="moveRow('categories', item.id, 1)" :disabled="item.permanent || index >= categories.length - 1" aria-label="Pindahkan ke bawah">
-<span class="material-symbols-outlined text-[14px]">expand_more</span>
-</button>
-</div>
-</div>
-</td>
+<template x-for="item in categories" :key="item.id">
+<tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60">
 <td class="py-4 px-6">
-<span class="font-title-md text-title-md text-on-surface font-semibold block row-label-text" x-text="item.label">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-semibold row-label-text" x-text="item.label"></span>
+<span x-show="item.permanent" class="material-symbols-outlined text-[15px] text-outline" title="Kategori tetap (Wajib sistem)">lock</span>
+</div>
+<div class="flex flex-wrap items-center gap-2 mt-1.5">
+<template x-if="!item.visible_to_kesiswaan">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold border border-slate-200">
+<span class="material-symbols-outlined text-[13px]">lock</span>
+<span>Privasi Khusus BK</span>
 </span>
-<div class="flex flex-wrap items-center gap-2 mt-1">
-<span class="text-xs text-on-surface-variant flex items-center gap-1" x-text="item.visible_to_kesiswaan ? 'Terlihat Tim Kesiswaan' : 'Khusus Konselor BK'"></span>
+</template>
 <template x-if="item.permendikbud_type">
 <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-medium border border-blue-100" x-text="item.permendikbud_type"></span>
 </template>
 </div>
-</td>
-<td class="py-4 px-6">
-<button type="button" @click="toggleCategory(item)" :disabled="item.permanent" class="inline-flex items-center gap-1.5 font-label-md text-label-md font-semibold cursor-pointer transition-colors" :class="item.active ? 'text-emerald-700' : 'text-outline'" :title="item.permanent ? 'Kategori sistem tetap aktif' : 'Klik untuk mengubah status'">
-<span class="w-2 h-2 rounded-full" :class="item.active ? 'bg-emerald-600' : 'bg-outline'">
-</span>
-<span x-text="item.active ? 'Aktif' : 'Nonaktif'">
-</span>
-</button>
 </td>
 <td class="py-4 px-6 text-right">
 <div class="inline-flex items-center gap-2 justify-end">
@@ -158,7 +145,7 @@
 <span class="material-symbols-outlined text-[16px]">edit</span>
 <span>Ubah</span>
 </button>
-<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors cursor-pointer" type="button" :disabled="item.permanent" @click="deleteCategory(item)" :class="{ 'opacity-40 cursor-not-allowed': item.permanent }">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors cursor-pointer" type="button" :disabled="item.permanent" @click="openDeleteCategory(item)" :class="{ 'opacity-40 cursor-not-allowed': item.permanent }">
 <span class="material-symbols-outlined text-[16px] staff-desktop-only">delete</span>
 <span class="staff-desktop-only">Hapus</span>
 </button>
@@ -194,30 +181,14 @@
 <table class="w-full text-left">
 <thead>
 <tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-<th class="py-3.5 px-6 w-20 text-center">Urutan</th>
 <th class="py-3.5 px-6">Nama Titik Lokasi</th>
 <th class="py-3.5 px-6 w-36">Status</th>
-<th class="py-3.5 px-6 w-36 text-right">Aksi</th>
+<th class="py-3.5 px-6 w-40 text-right">Aksi</th>
 </tr>
 </thead>
 <tbody class="divide-y-0" id="location-table-body">
-<template x-for="(item, index) in locations" :key="item.id">
-<tr :draggable="!item.permanent" @dragstart="startDrag($event, 'locations', item.id)" @dragover.prevent="dragOver('locations', item.id)" @drop.prevent="dropRow('locations', item.id)" @dragend="endDrag()" :class="{ 'bk-row-dragging': dragging?.id === item.id, 'bk-row-drop': dropTarget === item.id }" class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60">
-<td class="py-4 px-6 text-center">
-<div class="inline-flex items-center gap-1 cursor-grab bg-surface-container px-2.5 py-1 rounded-lg">
-<span class="font-label-md text-label-md font-bold text-on-surface" x-text="index + 1">
-</span>
-<span x-show="item.permanent" class="material-symbols-outlined text-[16px] text-outline" title="Lokasi tetap">lock</span>
-<div x-show="!item.permanent" class="flex flex-col">
-<button class="text-outline hover:text-secondary leading-none cursor-pointer" type="button" @click="moveRow('locations', item.id, -1)" :disabled="item.permanent || index === 0" aria-label="Pindahkan ke atas">
-<span class="material-symbols-outlined text-[14px]">expand_less</span>
-</button>
-<button class="text-outline hover:text-secondary leading-none cursor-pointer" type="button" @click="moveRow('locations', item.id, 1)" :disabled="item.permanent || index >= locations.length - 1" aria-label="Pindahkan ke bawah">
-<span class="material-symbols-outlined text-[14px]">expand_more</span>
-</button>
-</div>
-</div>
-</td>
+<template x-for="item in locations" :key="item.id">
+<tr class="hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/60">
 <td class="py-4 px-6">
 <span class="font-title-md text-title-md font-semibold text-on-surface block" x-text="item.label">
 </span>
@@ -236,7 +207,7 @@
 <span class="material-symbols-outlined text-[16px]">edit</span>
 <span>Ubah</span>
 </button>
-<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors cursor-pointer" type="button" :disabled="item.permanent" @click="deleteLocation(item)">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-error-container text-error font-label-md text-label-md font-semibold transition-colors cursor-pointer" type="button" :disabled="item.permanent" @click="openDeleteLocation(item)" :class="{ 'opacity-40 cursor-not-allowed': item.permanent }">
 <span class="material-symbols-outlined text-[16px] staff-desktop-only">delete</span>
 <span class="staff-desktop-only">Hapus</span>
 </button>
@@ -252,29 +223,33 @@
 </section>
 
 {{-- =========================================================================
-     TAB 3: QR SEKOLAH (1 QR CODE UNTUK SEMUA TITIK SEKOLAH)
+     TAB 3: QR SEKOLAH & POSTER PANDUAN PELAPORAN SISWA
      ========================================================================= --}}
 <section x-cloak x-show="tab === 'qr'" x-transition.opacity class="flex flex-col gap-6" id="panel-qr">
 <div class="bg-surface-container-lowest rounded-2xl shadow-xs border border-surface-container/60 overflow-hidden flex flex-col lg:flex-row">
-<div class="w-full lg:w-[380px] xl:w-[420px] shrink-0 p-8 flex flex-col justify-between items-center text-center border-b lg:border-b-0 lg:border-r border-surface-container/60 bg-surface-container-lowest">
+<div class="w-full lg:w-[360px] xl:w-[390px] shrink-0 p-7 flex flex-col justify-between items-center text-center border-b lg:border-b-0 lg:border-r border-surface-container/60 bg-surface-container-lowest">
 <div class="w-full flex flex-col items-center">
-<div class="w-full h-1.5 rounded-full bg-secondary mb-6">
+<div class="w-full h-1.5 rounded-full bg-secondary mb-5">
 </div>
-<div class="flex items-center gap-3 mb-5 self-start text-left">
-<div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary shrink-0">
-<span class="material-symbols-outlined text-[28px]">school</span>
+<div class="flex items-center gap-3 mb-4 self-start text-left">
+<div class="w-11 h-11 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary shrink-0 overflow-hidden">
+@if(!empty($schoolConfig['school_logo_url']))
+<img src="{{ $schoolConfig['school_logo_url'] }}" alt="{{ $schoolName }}" class="w-full h-full object-contain p-1">
+@else
+<span class="material-symbols-outlined text-[26px]">school</span>
+@endif
 </div>
 <div class="flex flex-col">
 <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Tautan Aduan Resmi</span>
 <span class="font-title-lg text-title-lg font-bold text-on-surface">{{ $schoolName }}</span>
 </div>
 </div>
-<div class="bk-hover-card p-5 bg-surface-container-lowest rounded-2xl border border-surface-container shadow-xs my-2 flex flex-col items-center justify-center min-w-[240px] min-h-[240px]" x-html="qrSvgHtml">
+<div id="qr-main-svg" class="bk-hover-card p-4 bg-surface-container-lowest rounded-2xl border border-surface-container shadow-xs my-2 flex flex-col items-center justify-center min-w-[232px] min-h-[232px]" x-html="qrSvgHtml">
 </div>
 <div class="mt-4 p-4 bg-surface-container rounded-xl w-full flex flex-col items-center justify-center text-center">
 <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Tautan Formulir Pengaduan Siswa</span>
 <div class="flex items-center gap-2 mt-1.5 max-w-full">
-<a :href="reportUrl" target="_blank" class="font-title-md text-title-md font-semibold text-secondary hover:underline truncate max-w-[270px]" x-text="reportUrl">
+<a :href="reportUrl" target="_blank" class="font-title-md text-title-md font-semibold text-secondary hover:underline truncate max-w-[240px]" x-text="reportUrl">
   {{ $reportUrl }}
 </a>
 <button class="text-secondary hover:text-on-surface transition-colors p-1.5 rounded-lg hover:bg-surface-container-high cursor-pointer shrink-0" title="Salin tautan formulir" type="button" @click="copyReportUrl()" aria-label="Salin tautan formulir">
@@ -285,50 +260,94 @@
   Siswa dapat langsung mengakses formulir melalui tautan di atas atau memindai kode QR.
 </span>
 </div>
-</div>
-</div>
-<div class="p-8 flex flex-col justify-between flex-1 gap-6 bg-surface-container-low/30">
-<div class="flex flex-col gap-4">
-<div class="flex items-center gap-2.5 text-secondary">
-<span class="material-symbols-outlined text-[24px]">print</span>
-<span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Panduan Pencetakan &amp; Publikasi</span>
-</div>
-<div>
-<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Aset Cetak &amp; Distribusi Pengumuman</h3>
-<p class="font-body-md text-body-md text-on-surface-variant mt-1.5 leading-relaxed">
-          Gunakan materi resmi format A4 untuk disosialisasikan dan ditempelkan di majalah dinding (mading), papan pengumuman ruang BK, perpustakaan, lobi sekolah, dan setiap ruang kelas.
-        </p>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-<div class="p-3.5 bg-surface-container-lowest rounded-xl border border-surface-container flex items-start gap-3">
-<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0 mt-0.5">
-<span class="material-symbols-outlined text-[18px]">verified</span>
-</div>
-<div class="flex flex-col">
-<span class="font-title-md text-title-md font-semibold text-on-surface">Resolusi Siap Cetak</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Format vector 300 DPI tidak pecah saat dicetak poster besar.</span>
-</div>
-</div>
-<div class="p-3.5 bg-surface-container-lowest rounded-xl border border-surface-container flex items-start gap-3">
-<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-secondary shrink-0 mt-0.5">
-<span class="material-symbols-outlined text-[18px]">campaign</span>
-</div>
-<div class="flex flex-col">
-<span class="font-title-md text-title-md font-semibold text-on-surface">Kanal Aman &amp; Terlindungi</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Mengarahkan siswa langsung ke formulir terenkripsi BK.</span>
-</div>
-</div>
-</div>
-</div>
-<div class="pt-4 border-t border-surface-container/60 flex flex-col sm:flex-row items-center gap-3">
-<button class="w-full sm:w-auto flex-1 px-5 py-3.5 bg-primary hover:bg-inverse-surface text-on-primary rounded-xl font-title-md text-title-md font-semibold transition-all shadow-xs flex items-center justify-center gap-2.5 cursor-pointer" type="button" @click="openPosterA4()">
-<span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
-<span>Unduh Poster Panduan PDF (A4 Landscape)</span>
-</button>
-<button class="w-full sm:w-auto flex-1 px-5 py-3.5 bg-secondary-fixed text-on-secondary-fixed-variant hover:bg-secondary-fixed-dim rounded-xl font-title-md text-title-md font-semibold transition-all flex items-center justify-center gap-2.5 cursor-pointer" type="button" @click="downloadQrPng()">
+<button class="w-full mt-4 px-5 py-3 bg-secondary-fixed text-on-secondary-fixed-variant hover:bg-secondary-fixed-dim rounded-xl font-title-md text-title-md font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer" type="button" @click="downloadQrPng()">
 <span class="material-symbols-outlined text-[20px]">image</span>
 <span>Unduh Gambar QR (PNG)</span>
 </button>
+</div>
+</div>
+<div class="p-7 flex flex-col justify-between flex-1 gap-5 bg-surface-container-low/30">
+<div class="flex flex-col gap-3">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<div>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[20px]">campaign</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Poster Panduan Pelaporan Siswa</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface mt-0.5">Pratinjau Poster Siap Cetak (A4 Landscape)</h3>
+</div>
+<button class="px-4 py-2.5 bg-primary hover:bg-inverse-surface text-on-primary rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-2 cursor-pointer" type="button" @click="openPosterA4()">
+<span class="material-symbols-outlined text-[18px]">print</span>
+<span>Buka &amp; Cetak Poster PDF</span>
+</button>
+</div>
+
+{{-- Inline Pratinjau Poster Panduan Pelaporan Siswa --}}
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+<div class="h-2 w-full bg-gradient-to-r from-[#006398] to-sky-400"></div>
+<div class="p-5 flex flex-col gap-4">
+<div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-lg bg-sky-100 text-[#006398] flex items-center justify-center shrink-0 overflow-hidden">
+@if(!empty($schoolConfig['school_logo_url']))
+<img src="{{ $schoolConfig['school_logo_url'] }}" alt="{{ $schoolName }}" class="w-full h-full object-contain p-1">
+@else
+<span class="material-symbols-outlined text-[20px]">school</span>
+@endif
+</div>
+<div>
+<p class="text-sm font-extrabold text-slate-900 leading-tight">{{ $schoolName }}</p>
+<p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Layanan Bimbingan &amp; Konseling (BK) @if(!empty($schoolConfig['emergency_contact'])) • Darurat: {{ $schoolConfig['emergency_contact'] }} @endif</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-[#006398] text-white text-[11px] font-bold">HiOwy! Portal Pengaduan Siswa</span>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+<div class="md:col-span-4 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+<div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs" x-html="posterQrSvgHtml"></div>
+<p class="text-[10px] text-slate-500 mt-2 break-all">Pindai QR atau buka:<br><strong class="text-[#006398]" x-text="reportUrl">{{ $reportUrl }}</strong></p>
+</div>
+
+<div class="md:col-span-8 flex flex-col gap-3">
+<div class="flex items-center gap-3">
+<div class="flex-1">
+<span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold uppercase tracking-wider mb-1">Kanal Aman &amp; Terlindungi</span>
+<h4 class="text-base font-extrabold text-slate-900 leading-snug">Punya Masalah di Sekolah? Kamu Tidak Sendirian.</h4>
+<p class="text-[11px] text-slate-600 mt-1 leading-relaxed">Laporkan perundungan, intimidasi, atau curhat secara aman bersama Owy &amp; Guru BK. Jam baca: {{ $schoolConfig['reading_hours'] }}.</p>
+</div>
+<img src="{{ asset('maskot_owy/maskot_6.png') }}" alt="Maskot Owy" class="w-16 h-16 object-contain shrink-0 hidden sm:block drop-shadow-xs">
+</div>
+
+<div class="grid grid-cols-3 gap-2">
+<div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center">
+<span class="w-5 h-5 rounded-full bg-[#006398] text-white text-[10px] font-extrabold inline-flex items-center justify-center mb-1">1</span>
+<p class="text-[11px] font-bold text-slate-900">Pindai QR</p>
+<p class="text-[10px] text-slate-500 leading-tight mt-0.5">Gunakan kamera HP tanpa instal aplikasi.</p>
+</div>
+<div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center">
+<span class="w-5 h-5 rounded-full bg-[#006398] text-white text-[10px] font-extrabold inline-flex items-center justify-center mb-1">2</span>
+<p class="text-[11px] font-bold text-slate-900">Ceritakan</p>
+<p class="text-[10px] text-slate-500 leading-tight mt-0.5">Jawab pertanyaan singkat, bisa anonim.</p>
+</div>
+<div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center">
+<span class="w-5 h-5 rounded-full bg-[#006398] text-white text-[10px] font-extrabold inline-flex items-center justify-center mb-1">3</span>
+<p class="text-[11px] font-bold text-slate-900">Didampingi BK</p>
+<p class="text-[10px] text-slate-500 leading-tight mt-0.5">Simpan kode tiket untuk pantau respons BK.</p>
+</div>
+</div>
+
+<div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-[10px] text-emerald-900">
+<span class="material-symbols-outlined text-emerald-600 text-[18px] shrink-0">verified_user</span>
+<span><strong>Jaminan Kerahasiaan:</strong> Identitas dan cerita pelapor terenkripsi serta dilindungi sesuai kode etik konseling sekolah.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant">
+  Tempelkan poster A4 Landscape ini di mading, ruang kelas, papan pengumuman BK, perpustakaan, dan area strategis sekolah.
+</p>
 </div>
 </div>
 </div>
@@ -451,7 +470,7 @@
 </section>
 
 {{-- =========================================================================
-     TAB 5: KONFIGURASI SEKOLAH & KEBIJAKAN (FR-03, FR-04, FR-12, FR-57, FR-65)
+     TAB 5: KONFIGURASI SEKOLAH & KEBIJAKAN
      ========================================================================= --}}
 <section x-cloak x-show="tab === 'sekolah'" x-transition.opacity class="flex flex-col gap-6" id="panel-sekolah">
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -459,7 +478,7 @@
 @csrf
 <div class="px-6 py-4 bg-surface-container-low/50 border-b border-surface-container/60 flex items-center justify-between">
 <div>
-<h2 class="font-title-md text-title-md font-bold text-on-surface">Identitas Sekolah, Layanan &amp; Privasi (FR-57)</h2>
+<h2 class="font-title-md text-title-md font-bold text-on-surface">Identitas Sekolah, Layanan &amp; Privasi</h2>
 <p class="text-xs text-on-surface-variant">Pengaturan ini tampil pada portal pelapor, lacak aduan, dan poster QR sekolah.</p>
 </div>
 </div>
@@ -471,35 +490,76 @@
 <div class="flex flex-col gap-1.5">
 <label for="cfg-emergency" class="text-xs font-semibold text-on-surface">Kontak Darurat BK (Telepon / WhatsApp)</label>
 <input id="cfg-emergency" name="emergency_contact" type="text" maxlength="64" placeholder="Contoh: 081234567890" value="{{ old('emergency_contact', $schoolConfig['emergency_contact']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
-<span class="text-[11px] text-on-surface-variant">Ditautkan ke WhatsApp/Telepon BK pada halaman Lapor, Sukses Kirim, dan Lacak Aduan (FR-03).</span>
+<span class="text-[11px] text-on-surface-variant">Ditautkan ke WhatsApp/Telepon BK pada halaman Lapor, Sukses Kirim, dan Lacak Aduan.</span>
 </div>
-<div class="flex flex-col gap-1.5 md:col-span-2">
-<label for="cfg-reading-hours" class="text-xs font-semibold text-on-surface">Keterangan Jam Baca Laporan BK</label>
-<input id="cfg-reading-hours" name="reading_hours" type="text" maxlength="160" value="{{ old('reading_hours', $schoolConfig['reading_hours']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
+@php($daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'])
+<div class="md:col-span-2 p-4 rounded-xl bg-surface-container-low/60 border border-surface-container flex flex-col gap-3">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<span class="text-xs font-bold text-on-surface">Keterangan Jam Baca Laporan BK</span>
+<span class="text-[11px] font-semibold text-secondary bg-secondary-fixed/60 px-2.5 py-0.5 rounded-full" x-text="'Tampil: ' + formattedReadingHours"></span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-on-surface">Rentang Hari Kerja Layanan BK</label>
+<div class="grid grid-cols-11 items-center gap-2">
+<select id="cfg-day-start" name="reading_day_start" x-model="readingDayStart" class="col-span-5 px-3 py-2.5 bg-white rounded-xl border border-outline-variant/40 text-sm">
+@foreach($daysOfWeek as $day)
+<option value="{{ $day }}">{{ $day }}</option>
+@endforeach
+</select>
+<span class="col-span-1 text-center text-xs font-semibold text-outline">s.d.</span>
+<select id="cfg-day-end" name="reading_day_end" x-model="readingDayEnd" class="col-span-5 px-3 py-2.5 bg-white rounded-xl border border-outline-variant/40 text-sm">
+@foreach($daysOfWeek as $day)
+<option value="{{ $day }}">{{ $day }}</option>
+@endforeach
+</select>
+</div>
+<span class="text-[11px] text-on-surface-variant">Pilih rentang hari aktif layanan BK di sekolah.</span>
 </div>
 <div class="flex flex-col gap-1.5">
-<label for="cfg-website" class="text-xs font-semibold text-on-surface">Tautan Website Resmi Sekolah (FR-04)</label>
+<label class="text-xs font-semibold text-on-surface">Rentang Jam Kerja Sekolah (WIB)</label>
+<div class="grid grid-cols-11 items-center gap-2">
+<input id="cfg-time-start" name="reading_time_start" type="time" x-model="readingTimeStart" required class="col-span-5 px-3 py-2.5 bg-white rounded-xl border border-outline-variant/40 text-sm">
+<span class="col-span-1 text-center text-xs font-semibold text-outline">s.d.</span>
+<input id="cfg-time-end" name="reading_time_end" type="time" x-model="readingTimeEnd" required class="col-span-5 px-3 py-2.5 bg-white rounded-xl border border-outline-variant/40 text-sm">
+</div>
+<span class="text-[11px] text-on-surface-variant">Jam operasional selama hari sekolah (Waktu Indonesia Barat).</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label for="cfg-website" class="text-xs font-semibold text-on-surface">Tautan Website Resmi Sekolah</label>
 <input id="cfg-website" name="school_website_url" type="url" maxlength="255" placeholder="https://smptelkompwt.sch.id" value="{{ old('school_website_url', $schoolConfig['school_website_url']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
 <span class="text-[11px] text-on-surface-variant">Kosongkan bila tidak ingin menampilkan tautan di menu navigasi pelapor.</span>
 </div>
 <div class="flex flex-col gap-1.5">
-<label for="cfg-story-max" class="text-xs font-semibold text-on-surface">Batas Karakter Kronologi (FR-12)</label>
+<label for="cfg-story-max" class="text-xs font-semibold text-on-surface">Batas Karakter Kronologi</label>
 <input id="cfg-story-max" name="story_max_length" type="number" min="200" max="10000" value="{{ old('story_max_length', $schoolConfig['story_max_length']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
 </div>
 <div class="flex flex-col gap-1.5">
-<label for="cfg-retention-date" class="text-xs font-semibold text-on-surface">Tanggal Akhir Tahun Ajaran / Retensi Arsip (FR-65)</label>
+<label for="cfg-retention-date" class="text-xs font-semibold text-on-surface">Tanggal Akhir Tahun Ajaran / Retensi Arsip</label>
 <input id="cfg-retention-date" name="retention_date" type="date" value="{{ old('retention_date', $schoolConfig['retention_date']) }}" class="w-full px-3.5 py-2.5 bg-surface-container-low rounded-xl border border-outline-variant/40 text-sm">
 <span class="text-[11px] text-on-surface-variant">Pada tanggal ini, laporan arsip/selesai diringkas menjadi statistik dan dibersihkan otomatis; laporan terbuka tetap aman.</span>
 </div>
-<div class="flex flex-col gap-1.5">
-<label for="cfg-logo" class="text-xs font-semibold text-on-surface">Logo Sekolah (PNG/JPG maks 2MB)</label>
-<input id="cfg-logo" name="school_logo" type="file" accept="image/png,image/jpeg,image/webp" class="w-full px-3 py-2 bg-surface-container-low rounded-xl border border-outline-variant/40 text-xs">
-@if(!empty($schoolConfig['school_logo_url']))
-<div class="flex items-center gap-2 mt-1">
-<img src="{{ $schoolConfig['school_logo_url'] }}" alt="Logo sekolah" class="w-8 h-8 rounded object-contain border border-surface-container">
-<span class="text-[11px] text-emerald-700 font-medium">Logo aktif terpasang</span>
+<div class="flex flex-col gap-2">
+<label for="cfg-logo" class="text-xs font-semibold text-on-surface">Logo Sekolah (PNG/JPG/WEBP maks 2MB)</label>
+<input id="cfg-logo" x-ref="logoInput" name="school_logo" type="file" accept="image/png,image/jpeg,image/webp" @change="onLogoSelected($event)" class="sr-only">
+<div class="flex flex-wrap items-center gap-2">
+<button type="button" @click="$refs.logoInput.click()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold border border-outline-variant/40 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[17px] text-secondary">add_photo_alternate</span>
+<span>Pilih Gambar</span>
+</button>
+<button type="submit" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-secondary hover:bg-secondary/90 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[17px]">upload</span>
+<span>Unggah Logo</span>
+</button>
 </div>
-@endif
+<div class="flex items-center gap-2.5 mt-0.5" x-show="logoPreviewUrl || logoFileName">
+<template x-if="logoPreviewUrl">
+<img :src="logoPreviewUrl" alt="Logo sekolah" class="w-9 h-9 rounded-lg object-contain border border-surface-container bg-white p-0.5 shrink-0">
+</template>
+<span class="text-[11px] font-medium truncate" :class="logoFileName ? 'text-secondary' : 'text-emerald-700'" x-text="logoFileName ? ('Siap diunggah: ' + logoFileName) : 'Logo aktif terpasang'"></span>
+</div>
 </div>
 </div>
 <div class="px-6 py-4 bg-surface-container-low/40 border-t border-surface-container flex justify-end">
@@ -573,27 +633,11 @@ Meringkas laporan yang sudah diarsipkan atau berstatus selesai menjadi statistik
 @endforeach
 </select>
 </div>
-<div class="p-3.5 bg-surface-container-low/70 rounded-xl border border-surface-container flex items-center justify-between gap-4">
-<div class="flex flex-col">
-<span class="font-title-md text-title-md font-semibold text-on-surface">Status Kategori</span>
-<span x-text="categoryActive ? 'Aktif (Ditampilkan ke Siswa)' : 'Disembunyikan / Nonaktif sementara'" class="font-body-sm text-body-sm text-on-surface-variant" id="modal-status-text">Aktif (Ditampilkan ke Siswa)</span>
-</div>
-<label class="relative inline-flex items-center cursor-pointer shrink-0">
-<input x-model="categoryActive" :disabled="categoryPermanent" class="sr-only peer" id="modal-toggle-status" type="checkbox">
-<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary">
-</div>
-</label>
-</div>
-<div class="p-3.5 bg-surface-container-low/70 rounded-xl border border-surface-container flex items-center justify-between gap-4">
-<div class="flex flex-col">
-<span class="font-title-md text-title-md font-semibold text-on-surface">Terlihat Tim Kesiswaan</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Izinkan staf Kesiswaan memonitor jenis kasus ini.</span>
-</div>
-<label class="relative inline-flex items-center cursor-pointer shrink-0">
-<input x-model="categoryVisibleKesiswaan" class="sr-only peer" type="checkbox">
-<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary">
-</div>
-</label>
+<div class="p-3.5 bg-surface-container-low/70 rounded-xl border border-surface-container flex items-start gap-2.5">
+<span class="material-symbols-outlined text-secondary text-[19px] shrink-0 mt-0.5">info</span>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+  Semua kategori yang dibuat Tim BK langsung tampil bagi siswa saat melapor dan otomatis masuk ke akun Tim Kesiswaan, kecuali kategori <strong>Masalah Pribadi &amp; Teman Cerita</strong> yang bersifat khusus konselor BK.
+</p>
 </div>
 </div>
 <div class="px-6 py-4 border-t border-surface-container bg-surface-container-low/30 flex items-center justify-end gap-3">
@@ -601,6 +645,66 @@ Meringkas laporan yang sudah diarsipkan atau berstatus selesai menjadi statistik
 <button :disabled="saving" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary font-title-md text-title-md font-semibold hover:bg-inverse-surface active:scale-[0.99] transition-all shadow-xs flex items-center gap-2 cursor-pointer" type="button" @click="saveCategory()">
 <span class="material-symbols-outlined text-[19px]">check</span>
 <span x-text="saving ? 'Menyimpan...' : 'Simpan Perubahan'">Simpan Perubahan</span>
+</button>
+</div>
+</div>
+</div>
+</template>
+
+{{-- =========================================================================
+     MODAL: HAPUS KATEGORI ADUAN (DISAMAKAN DENGAN HAPUS AKSES STAF)
+     ========================================================================= --}}
+<template x-teleport="body">
+<div @keydown.escape.window="closeModal()" role="dialog" aria-modal="true" tabindex="-1" @click.self="closeModal()" @keydown.tab="trapFocus($event)" x-cloak x-show="modal === 'modal-hapus-kategori'" x-transition.opacity class="bk-modal fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" id="modal-hapus-kategori">
+<div class="bg-surface-container-lowest rounded-2xl max-w-md w-full shadow-2xl flex flex-col border border-surface-container my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+<div class="p-6 flex flex-col items-center text-center gap-4">
+<div class="w-14 h-14 rounded-2xl bg-error-container text-error flex items-center justify-center shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[32px]">warning</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<h3 class="font-display text-base font-bold text-on-surface">Hapus Kategori Aduan?</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Kategori <strong x-text="deleteTargetLabel" class="text-on-surface font-semibold">Kategori</strong> akan dihapus dari daftar pilihan pelaporan siswa. Tindakan ini tidak dapat dibatalkan.</p>
+</div>
+<div class="w-full p-3 bg-error-container/30 border border-error/20 rounded-xl text-left flex items-start gap-2.5">
+<span class="material-symbols-outlined text-error text-[18px] shrink-0 mt-0.5">shield</span>
+<span class="text-xs text-error leading-snug">Riwayat laporan siswa yang sebelumnya dikirim dengan kategori ini tetap tersimpan aman di portal BK dan arsip sekolah.</span>
+</div>
+</div>
+<div class="px-6 py-4 border-t border-surface-container bg-surface-container-low/30 flex items-center justify-end gap-3">
+<button class="px-4 py-2.5 rounded-xl border border-outline-variant/60 text-on-surface hover:bg-surface-container text-sm font-medium transition-colors cursor-pointer" type="button" @click="closeModal()">Batal</button>
+<button :disabled="saving" class="px-5 py-2.5 rounded-xl bg-error text-white text-sm font-semibold hover:bg-red-700 active:scale-[0.99] transition-all shadow-xs flex items-center gap-2 cursor-pointer" type="button" @click="confirmDeleteCategory()">
+<span class="material-symbols-outlined text-[19px]">delete_forever</span>
+<span x-text="saving ? 'Menghapus...' : 'Ya, Hapus Kategori'">Ya, Hapus Kategori</span>
+</button>
+</div>
+</div>
+</div>
+</template>
+
+{{-- =========================================================================
+     MODAL: HAPUS TITIK LOKASI (DISAMAKAN DENGAN HAPUS AKSES STAF)
+     ========================================================================= --}}
+<template x-teleport="body">
+<div @keydown.escape.window="closeModal()" role="dialog" aria-modal="true" tabindex="-1" @click.self="closeModal()" @keydown.tab="trapFocus($event)" x-cloak x-show="modal === 'modal-hapus-lokasi'" x-transition.opacity class="bk-modal fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" id="modal-hapus-lokasi">
+<div class="bg-surface-container-lowest rounded-2xl max-w-md w-full shadow-2xl flex flex-col border border-surface-container my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+<div class="p-6 flex flex-col items-center text-center gap-4">
+<div class="w-14 h-14 rounded-2xl bg-error-container text-error flex items-center justify-center shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[32px]">warning</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<h3 class="font-display text-base font-bold text-on-surface">Hapus Titik Lokasi?</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Titik lokasi <strong x-text="deleteTargetLabel" class="text-on-surface font-semibold">Lokasi</strong> akan dihapus dari daftar pilihan lokasi kejadian siswa. Tindakan ini tidak dapat dibatalkan.</p>
+</div>
+<div class="w-full p-3 bg-error-container/30 border border-error/20 rounded-xl text-left flex items-start gap-2.5">
+<span class="material-symbols-outlined text-error text-[18px] shrink-0 mt-0.5">shield</span>
+<span class="text-xs text-error leading-snug">Data lokasi pada laporan siswa yang sudah masuk sebelumnya tetap tersimpan aman di sistem.</span>
+</div>
+</div>
+<div class="px-6 py-4 border-t border-surface-container bg-surface-container-low/30 flex items-center justify-end gap-3">
+<button class="px-4 py-2.5 rounded-xl border border-outline-variant/60 text-on-surface hover:bg-surface-container text-sm font-medium transition-colors cursor-pointer" type="button" @click="closeModal()">Batal</button>
+<button :disabled="saving" class="px-5 py-2.5 rounded-xl bg-error text-white text-sm font-semibold hover:bg-red-700 active:scale-[0.99] transition-all shadow-xs flex items-center gap-2 cursor-pointer" type="button" @click="confirmDeleteLocation()">
+<span class="material-symbols-outlined text-[19px]">delete_forever</span>
+<span x-text="saving ? 'Menghapus...' : 'Ya, Hapus Lokasi'">Ya, Hapus Lokasi</span>
 </button>
 </div>
 </div>
@@ -956,8 +1060,6 @@ Meringkas laporan yang sudah diarsipkan atau berstatus selesai menjadi statistik
 </div>
 </template>
 
-<p class="mt-4 text-xs text-outline" aria-live="polite" x-text="orderMessage">
-</p>
 </div>
 </main>
 </x-layouts.bk>

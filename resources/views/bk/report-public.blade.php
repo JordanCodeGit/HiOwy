@@ -6,11 +6,22 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ !empty($trainingMode) ? '[MODE LATIHAN] ' : '' }}Formulir Pengaduan Siswa — {{ $schoolName }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon-owy.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400..600,0..1,-50..200" />
+    <style>
+        @keyframes owyFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+        .owy-float {
+            animation: owyFloat 3.2s ease-in-out infinite;
+        }
+    </style>
 </head>
 <body class="bg-surface text-on-surface min-h-screen flex flex-col justify-between font-sans antialiased" x-data="publicReporter()">
 
@@ -58,7 +69,7 @@
         </div>
     </header>
 
-    <!-- Pop-up Pemberitahuan Privasi Owy (FR-02) -->
+    <!-- Pop-up Pemberitahuan Privasi Owy -->
     <div x-cloak x-show="privacyModalOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4" role="dialog" aria-modal="true" aria-labelledby="owy-privacy-title">
         <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-primary-container text-on-primary px-6 py-5 flex items-center gap-4">
@@ -110,19 +121,19 @@
         </div>
         @endif
 
-        <!-- Navigation Tabs: Buat Aduan vs Lacak Tiket -->
+        <!-- Navigation Tabs: Buat Aduan vs Lacak Aduan Saya -->
         <div class="flex items-center justify-center p-1 bg-surface-container-low rounded-2xl max-w-sm mx-auto w-full shadow-2xs border border-surface-container">
-            <button type="button" @click="activeTab = 'form'" :class="activeTab === 'form' ? 'bg-white text-on-surface font-bold shadow-xs' : 'text-on-surface-variant hover:text-on-surface font-medium'" class="flex-1 py-2 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+            <button type="button" @click="switchTab('form')" :class="activeTab === 'form' ? 'bg-white text-on-surface font-bold shadow-xs' : 'text-on-surface-variant hover:text-on-surface font-medium'" class="flex-1 py-2 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">edit_note</span>
                 <span>Buat Aduan</span>
             </button>
-            <button type="button" @click="activeTab = 'track'" :class="activeTab === 'track' ? 'bg-white text-on-surface font-bold shadow-xs' : 'text-on-surface-variant hover:text-on-surface font-medium'" class="flex-1 py-2 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+            <button type="button" @click="switchTab('track')" :class="activeTab === 'track' ? 'bg-white text-on-surface font-bold shadow-xs' : 'text-on-surface-variant hover:text-on-surface font-medium'" class="flex-1 py-2 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">search_check</span>
                 <span>Lacak Aduan Saya</span>
             </button>
         </div>
 
-        <!-- Jam Baca & Kontak Darurat BK Strip (FR-03) -->
+        <!-- Jam Baca & Kontak Darurat BK Strip -->
         <div class="rounded-2xl bg-blue-50/70 border border-blue-200/80 px-4 py-3 text-xs text-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div class="flex items-start sm:items-center gap-2">
                 <span class="material-symbols-outlined text-[18px] text-blue-700 shrink-0">schedule</span>
@@ -137,7 +148,7 @@
             @endif
         </div>
 
-        <!-- Ringkasan Privasi Owy Inline Banner (Collapsible FR-02) -->
+        <!-- Ringkasan Privasi Owy Inline Banner -->
         <div class="rounded-2xl bg-white border border-slate-200/90 px-4 py-3 text-xs text-slate-600 shadow-2xs" x-data="{ openPrivacy: false }">
             <button type="button" @click="openPrivacy = !openPrivacy" class="w-full flex items-center justify-between gap-2 text-left font-semibold text-slate-800 cursor-pointer">
                 <span class="flex items-center gap-2">
@@ -154,14 +165,14 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 1: FORMULIR PENGADUAN SISWA -->
+        <!-- TAB 1: FORMULIR PENGADUAN SISWA (1 PERTANYAAN PER HALAMAN + MASKOT OWY)   -->
         <!-- ========================================================================= -->
         <div x-show="activeTab === 'form'" x-transition.opacity>
 
-            <!-- Success Card (When submitted - FR-20: Tampil 1 kali + peringatan simpan) -->
-            <div x-cloak x-show="submitted" class="bg-surface-container-lowest rounded-2xl border border-surface-container p-6 sm:p-8 text-center flex flex-col items-center gap-4 shadow-sm animate-in fade-in zoom-in-95 duration-200">
-                <div class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-xs">
-                    <span class="material-symbols-outlined text-[36px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+            <!-- Layar Sukses Setelah Pengiriman (Wajib Salin Kode Terlebih Dahulu) -->
+            <div x-cloak x-show="submitted" class="bg-surface-container-lowest rounded-3xl border border-surface-container p-6 sm:p-8 text-center flex flex-col items-center gap-4 shadow-sm animate-in fade-in zoom-in-95 duration-200">
+                <div class="w-24 h-24 rounded-3xl bg-emerald-50 border border-emerald-200 flex items-center justify-center p-2 shadow-xs">
+                    <img src="{{ asset('maskot_owy/maskot_5.png') }}" alt="Owy merayakan aduan berhasil terkirim" class="w-full h-full object-contain owy-float">
                 </div>
                 <div class="flex flex-col gap-1">
                     @if(!empty($trainingMode))
@@ -169,28 +180,37 @@
                     @endif
                     <h2 class="text-xl sm:text-2xl font-bold text-on-surface">Aduanmu Telah Diterima Guru BK</h2>
                     <p class="text-xs sm:text-sm text-on-surface-variant max-w-md mx-auto leading-relaxed mt-1">
-                        Terima kasih sudah berani bersuara. Tim Konselor {{ $schoolName }} mendengarkan ceritamu secara tertutup dan terlindungi.
+                        Terima kasih sudah berani bersuara. Owy dan Tim Konselor {{ $schoolName }} siap mendengarkan dan mendampingimu secara tertutup.
                     </p>
                 </div>
 
-                <!-- Ticket Box -->
-                <div class="w-full max-w-md p-4 bg-surface-container-low rounded-2xl border border-surface-container flex flex-col gap-3 my-2 text-left">
-                    <div class="flex items-center justify-between pb-3 border-b border-surface-container/60">
-                        <span class="text-xs font-semibold text-on-surface-variant">Kode Laporan (Tampil Satu Kali)</span>
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-mono font-bold text-base text-blue-700" x-text="ticketCode"></span>
-                            <button type="button" @click="copyTicketCode()" class="p-1 rounded-lg hover:bg-surface-container text-slate-500 hover:text-slate-900 transition-colors cursor-pointer" title="Salin kode laporan">
-                                <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                <!-- Kotak Kode Tiket + Wajib Salin -->
+                <div class="w-full max-w-md p-5 bg-surface-container-low rounded-2xl border border-surface-container flex flex-col gap-3.5 my-1 text-left">
+                    <div class="flex flex-col gap-2.5 pb-3.5 border-b border-surface-container/80">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-semibold text-on-surface-variant">Kode Laporan Kamu</span>
+                            <span x-show="ticketCopied" x-cloak class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                                <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                                <span>Tersalin</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl border-2 transition-colors" :class="ticketCopied ? 'border-emerald-400' : 'border-blue-300'">
+                            <span class="font-mono font-extrabold text-lg sm:text-xl tracking-widest text-blue-700 select-all" x-text="ticketCode"></span>
+                            <button type="button" @click="copyTicketCode()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0" :class="ticketCopied ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white animate-pulse'">
+                                <span class="material-symbols-outlined text-[16px]" x-text="ticketCopied ? 'check' : 'content_copy'">content_copy</span>
+                                <span x-text="ticketCopied ? 'Kode Tersalin' : 'Salin Kode'">Salin Kode</span>
                             </button>
                         </div>
+                        <p class="text-[11px] leading-relaxed flex items-start gap-1.5" :class="ticketCopied ? 'text-emerald-800' : 'text-amber-800'">
+                            <span class="material-symbols-outlined text-[15px] shrink-0 mt-0.5" x-text="ticketCopied ? 'verified' : 'info'">info</span>
+                            <span x-text="ticketCopied ? 'Kode berhasil disalin! Simpan di tempat aman dan jangan bagikan ke siapa pun. Sekarang kamu bisa memantau status atau mengirim aduan lain.' : 'Salin kode laporanmu terlebih dahulu agar tidak hilang. Tombol Pantau Status dan Kirim Aduan Lain akan aktif setelah kode disalin.'"></span>
+                        </p>
                     </div>
-                    <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
-                        <strong>Penting (FR-20):</strong> Salin atau catat kode di atas sekarang juga dan <strong>jangan bagikan kepada siapa pun</strong>. Demi keamanan, kode hanya ditampilkan sekali pada layar ini dan tidak dapat dimunculkan ulang bila halaman ditutup.
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
+
+                    <div class="grid grid-cols-2 gap-2.5 text-xs">
                         <div>
                             <span class="text-slate-400 block">Kategori:</span>
-                            <span class="font-semibold text-slate-800 truncate block" x-text="category || 'Umum'"></span>
+                            <span class="font-semibold text-slate-800 truncate block" x-text="submittedCategoryLabel || 'Umum'"></span>
                         </div>
                         <div>
                             <span class="text-slate-400 block">Lokasi:</span>
@@ -202,11 +222,12 @@
                         </div>
                         <div>
                             <span class="text-slate-400 block">Kerahasiaan:</span>
-                            <span class="font-semibold text-slate-800" x-text="isAnonymous ? 'Anonim (Terproteksi)' : 'Ingin Dihubungi BK'"></span>
+                            <span class="font-semibold text-slate-800" x-text="submittedAnonymous ? 'Anonim (Terproteksi)' : 'Ingin Dihubungi BK'"></span>
                         </div>
                     </div>
+
                     @if(!empty($schoolConfig['emergency_contact']))
-                    <div class="pt-2 border-t border-surface-container/60 flex items-center justify-between gap-2 text-xs">
+                    <div class="pt-2.5 border-t border-surface-container/60 flex items-center justify-between gap-2 text-xs">
                         <span class="text-slate-600 font-medium">Butuh respons darurat langsung?</span>
                         <a href="{{ $schoolConfig['emergency_wa_url'] ?: $schoolConfig['emergency_tel_url'] }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] transition-colors">
                             <span class="material-symbols-outlined text-[14px]">call</span>
@@ -216,120 +237,196 @@
                     @endif
                 </div>
 
-                <div class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md mt-2">
-                    <button type="button" @click="goToTrack(ticketCode)" class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span class="material-symbols-outlined text-[18px]">search</span>
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md mt-1">
+                    <button type="button" @click="goToTrack(ticketCode)" :disabled="!ticketCopied" :title="!ticketCopied ? 'Salin kode laporan terlebih dahulu' : 'Pantau status tiket ini'" class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]" x-text="ticketCopied ? 'search' : 'lock'">lock</span>
                         <span>Pantau Status Tiket</span>
                     </button>
-                    <button type="button" @click="resetForm()" class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold text-xs sm:text-sm border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span class="material-symbols-outlined text-[18px]">replay</span>
+                    <button type="button" @click="resetForm()" :disabled="!ticketCopied" :title="!ticketCopied ? 'Salin kode laporan terlebih dahulu' : 'Buat laporan baru'" class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-surface-container hover:bg-surface-container-high disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed text-on-surface font-semibold text-xs sm:text-sm border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]" x-text="ticketCopied ? 'replay' : 'lock'">lock</span>
                         <span>Kirim Aduan Lain</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Form Card (Before submitted) -->
-            <div x-show="!submitted" class="bg-surface-container-lowest rounded-2xl border border-surface-container/80 shadow-sm p-6 sm:p-8 flex flex-col gap-6">
+            <!-- Wizard Pengaduan 1 Pertanyaan per Halaman dengan Owy -->
+            <div x-show="!submitted" class="bg-surface-container-lowest rounded-3xl border border-surface-container/80 shadow-sm overflow-hidden flex flex-col">
 
-                <!-- Header Info -->
-                <div>
-                    <div class="flex items-center gap-2 text-secondary font-semibold text-xs uppercase tracking-wider mb-1.5">
-                        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
-                        <span>{{ !empty($trainingMode) ? '[Mode Latihan] Simulasi Pelaporan Siswa' : 'Ruang Dialog Bebas Tekanan & Rasa Takut' }}</span>
+                <!-- Progress Bar & Owy Companion Banner -->
+                <div class="bg-gradient-to-br from-sky-50 via-blue-50/70 to-white px-6 pt-5 pb-5 border-b border-blue-100/80">
+                    <div class="flex items-center justify-between gap-2 mb-2.5">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-700">
+                            <span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+                            <span x-text="'Langkah ' + currentStep + ' dari ' + totalSteps">Langkah 1 dari 8</span>
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <template x-for="n in totalSteps" :key="n">
+                                <button type="button" @click="jumpToStep(n)" :disabled="n > maxReachedStep" :title="'Langkah ' + n" class="h-2 rounded-full transition-all duration-300" :class="n === currentStep ? 'w-6 bg-blue-600' : (n < currentStep ? 'w-2.5 bg-blue-400 hover:bg-blue-500 cursor-pointer' : (n <= maxReachedStep ? 'w-2.5 bg-blue-200 cursor-pointer' : 'w-2 bg-slate-200 cursor-default'))"></button>
+                            </template>
+                        </div>
                     </div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">Kirim Aduan atau Ceritamu</h2>
-                    <p class="text-xs sm:text-sm text-on-surface-variant mt-1.5 leading-relaxed">
-                        Ceritakan apa yang kamu alami atau saksikan. Formulir ini dipantau langsung oleh Guru BK secara tertutup tanpa sorotan teman sekelas.
-                    </p>
+                    <div class="w-full h-1.5 bg-blue-100 rounded-full overflow-hidden mb-4">
+                        <div class="h-full bg-blue-600 rounded-full transition-all duration-300" :style="'width: ' + Math.round((currentStep / totalSteps) * 100) + '%'"></div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white border border-blue-100 shadow-xs flex items-center justify-center p-2 shrink-0">
+                            <img :src="currentOwy.image" :alt="currentOwy.alt" class="w-full h-full object-contain owy-float transition-all duration-200">
+                        </div>
+                        <div class="flex-1 bg-white rounded-2xl rounded-tl-sm border border-blue-100 px-4 py-3 shadow-2xs">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 block mb-0.5" x-text="currentOwy.badge">Owy Menemanimu</span>
+                            <p class="text-xs sm:text-sm font-medium text-slate-700 leading-relaxed" x-text="currentOwy.speech"></p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Feedback Error Banner -->
-                <div x-cloak x-show="errorMessage" class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-lg shrink-0">error</span>
-                    <span x-text="errorMessage"></span>
-                </div>
-
-                <!-- Form -->
-                <form @submit.prevent="submitReport()" class="flex flex-col gap-5">
+                <!-- Form Body -->
+                <form @submit.prevent="submitReport()" class="p-6 sm:p-8 flex flex-col gap-5">
                     @csrf
                     <div class="hidden" aria-hidden="true">
                         <label for="website-field">Website</label>
                         <input id="website-field" type="text" name="website" x-model="website" tabindex="-1" autocomplete="off">
                     </div>
 
-                    <!-- 1. Jenis Kejadian -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center justify-between">
-                            <span>Jenis Kejadian / Masalah <span class="text-red-500">*</span></span>
-                            <span class="text-[11px] text-slate-400 font-normal normal-case">Pilih yang paling sesuai</span>
-                        </label>
-                        <select x-model="category" required class="w-full px-4 py-3 bg-surface-container-low text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/40 focus:ring-2 focus:ring-secondary focus:outline-none transition-all">
-                            <option value="">-- Pilih Jenis Kejadian --</option>
+                    <!-- Error Banner -->
+                    <div x-cloak x-show="errorMessage" x-transition class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-lg shrink-0">error</span>
+                        <span x-text="errorMessage"></span>
+                    </div>
+
+                    <!-- LANGKAH 1: MELAPOR SEBAGAI -->
+                    <div x-show="currentStep === 1" x-transition.opacity class="flex flex-col gap-4">
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-bold text-on-surface">Kamu melapor sebagai siapa?</h2>
+                            <p class="text-xs text-on-surface-variant mt-1">Pilih peran yang paling sesuai dengan kondisimu saat ini.</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            @php
+                                $roles = [
+                                    ['value' => 'Siswa (Korban Langsung)', 'title' => 'Korban Langsung', 'desc' => 'Aku mengalami langsung kejadian ini', 'icon' => 'person'],
+                                    ['value' => 'Saksi Kejadian', 'title' => 'Saksi Kejadian', 'desc' => 'Aku melihat atau mengetahui kejadian ini', 'icon' => 'visibility'],
+                                    ['value' => 'Teman Korban', 'title' => 'Teman Korban', 'desc' => 'Aku membantu melaporkan untuk temanku', 'icon' => 'group'],
+                                    ['value' => 'Orang Tua / Wali Siswa', 'title' => 'Orang Tua / Wali', 'desc' => 'Melapor mewakili putra/putri kami', 'icon' => 'family_restroom'],
+                                ];
+                            @endphp
+                            @foreach($roles as $role)
+                            <button type="button" @click="reporterRole = @js($role['value']); errorMessage = ''"
+                                :class="reporterRole === @js($role['value']) ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200 text-blue-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-700'"
+                                class="p-4 rounded-2xl border text-left transition-all flex items-start gap-3 cursor-pointer">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" :class="reporterRole === @js($role['value']) ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-slate-200'">
+                                    <span class="material-symbols-outlined text-[20px]">{{ $role['icon'] }}</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <span class="text-sm font-bold block">{{ $role['title'] }}</span>
+                                    <span class="text-[11px] text-slate-500 leading-snug block mt-0.5">{{ $role['desc'] }}</span>
+                                </div>
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- LANGKAH 2: JENIS KEJADIAN -->
+                    <div x-cloak x-show="currentStep === 2" x-transition.opacity class="flex flex-col gap-4">
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-bold text-on-surface">Jenis kejadian apa yang kamu alami atau saksikan?</h2>
+                            <p class="text-xs text-on-surface-variant mt-1">Pilih satu kategori yang paling mendekati ceritamu. <span class="text-red-500">*</span></p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             @foreach ($categories as $cat)
-                                <option value="{{ $cat->label }}">{{ $cat->label }}</option>
+                            <button type="button" @click="category = @js($cat->label); errorMessage = ''"
+                                :class="category === @js($cat->label) ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200 text-blue-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-800'"
+                                class="p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-2.5 cursor-pointer">
+                                <span class="text-xs sm:text-sm font-semibold leading-snug">{{ $cat->label }}</span>
+                                <span class="material-symbols-outlined text-[19px] shrink-0" :class="category === @js($cat->label) ? 'text-blue-600' : 'text-slate-300'" x-text="category === @js($cat->label) ? 'check_circle' : 'radio_button_unchecked'"></span>
+                            </button>
                             @endforeach
-                        </select>
+                        </div>
                     </div>
 
-                    <!-- 2. Titik Lokasi Kejadian + Opsi Lainnya Ketik Sendiri (FR-10) -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center justify-between">
-                            <span>Titik Lokasi Kejadian <span class="text-red-500">*</span></span>
-                            <span class="text-[11px] text-slate-400 font-normal normal-case">Di mana kejadian berlangsung?</span>
-                        </label>
-                        <select x-model="location" required class="w-full px-4 py-3 bg-surface-container-low text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/40 focus:ring-2 focus:ring-secondary focus:outline-none transition-all">
-                            <option value="">-- Pilih Lokasi Kejadian --</option>
+                    <!-- LANGKAH 3: TITIK LOKASI KEJADIAN -->
+                    <div x-cloak x-show="currentStep === 3" x-transition.opacity class="flex flex-col gap-4">
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-bold text-on-surface">Di mana kejadian itu berlangsung?</h2>
+                            <p class="text-xs text-on-surface-variant mt-1">Pilih lokasi kejadian atau pilih Lainnya untuk menuliskan sendiri. <span class="text-red-500">*</span></p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             @foreach ($locations as $loc)
-                                <option value="{{ $loc->label }}">{{ $loc->label }}</option>
+                            <button type="button" @click="location = @js($loc->label); errorMessage = ''"
+                                :class="location === @js($loc->label) ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200 text-blue-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-800'"
+                                class="p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-2.5 cursor-pointer">
+                                <span class="flex items-center gap-2 text-xs sm:text-sm font-semibold">
+                                    <span class="material-symbols-outlined text-[18px]" :class="location === @js($loc->label) ? 'text-blue-600' : 'text-slate-400'">pin_drop</span>
+                                    <span>{{ $loc->label }}</span>
+                                </span>
+                                <span class="material-symbols-outlined text-[19px] shrink-0" :class="location === @js($loc->label) ? 'text-blue-600' : 'text-slate-300'" x-text="location === @js($loc->label) ? 'check_circle' : 'radio_button_unchecked'"></span>
+                            </button>
                             @endforeach
-                            <option value="__other__">Lainnya (ketik sendiri tempat kejadian)</option>
-                        </select>
-                        <div x-cloak x-show="location === '__other__'" x-transition class="flex flex-col gap-1">
-                            <label class="text-[11px] font-bold text-slate-700">Sebutkan Tempat Kejadian Lainnya <span class="text-red-500">*</span></label>
-                            <input type="text" x-model="customLocation" :required="location === '__other__'" maxlength="120" placeholder="Contoh: Perpustakaan lantai 2, area parkir, luar gerbang..." class="w-full px-4 py-2.5 bg-white text-on-surface rounded-xl text-xs sm:text-sm border border-blue-300 focus:ring-2 focus:ring-secondary focus:outline-none">
+                            <button type="button" @click="location = '__other__'; errorMessage = ''"
+                                :class="location === '__other__' ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200 text-blue-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-800'"
+                                class="p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-2.5 cursor-pointer">
+                                <span class="flex items-center gap-2 text-xs sm:text-sm font-semibold">
+                                    <span class="material-symbols-outlined text-[18px]" :class="location === '__other__' ? 'text-blue-600' : 'text-slate-400'">edit_location_alt</span>
+                                    <span>Lainnya (ketik sendiri)</span>
+                                </span>
+                                <span class="material-symbols-outlined text-[19px] shrink-0" :class="location === '__other__' ? 'text-blue-600' : 'text-slate-300'" x-text="location === '__other__' ? 'check_circle' : 'radio_button_unchecked'"></span>
+                            </button>
+                        </div>
+                        <div x-cloak x-show="location === '__other__'" x-transition class="flex flex-col gap-1.5 pt-1">
+                            <label for="custom-location-input" class="text-xs font-bold text-slate-700">Sebutkan Tempat Kejadian Lainnya <span class="text-red-500">*</span></label>
+                            <input id="custom-location-input" type="text" x-model="customLocation" maxlength="120" placeholder="Contoh: Perpustakaan lantai 2, area parkir, luar gerbang..." class="w-full px-4 py-3 bg-white text-on-surface rounded-xl text-xs sm:text-sm border border-blue-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                     </div>
 
-                    <!-- 3. Tingkat Urgensi Bantuan -->
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center justify-between">
-                            <span>Kebutuhan Respons Bantuan</span>
-                            <span class="text-[11px] text-slate-400 font-normal normal-case">Pilih kondisi yang kamu hadapi</span>
-                        </label>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                            <label class="flex items-center gap-2.5 p-3 rounded-xl border transition-all cursor-pointer" :class="urgency === 'Darurat' ? 'bg-red-50/70 border-red-300 ring-1 ring-red-400 text-red-900' : 'bg-surface-container-low/50 border-surface-container hover:bg-surface-container-low text-slate-700'">
-                                <input type="radio" x-model="urgency" value="Darurat" class="text-red-600 focus:ring-red-500">
-                                <div class="flex flex-col">
-                                    <span class="text-xs font-bold flex items-center gap-1">
-                                        <span class="w-2 h-2 rounded-full bg-red-600"></span> Darurat
-                                    </span>
-                                    <span class="text-[10px] text-slate-500 leading-tight">Ada ancaman fisik / bahaya</span>
-                                </div>
-                            </label>
-
-                            <label class="flex items-center gap-2.5 p-3 rounded-xl border transition-all cursor-pointer" :class="urgency === 'Sedang' ? 'bg-amber-50/70 border-amber-300 ring-1 ring-amber-400 text-amber-900' : 'bg-surface-container-low/50 border-surface-container hover:bg-surface-container-low text-slate-700'">
-                                <input type="radio" x-model="urgency" value="Sedang" class="text-amber-600 focus:ring-amber-500">
-                                <div class="flex flex-col">
-                                    <span class="text-xs font-bold flex items-center gap-1">
-                                        <span class="w-2 h-2 rounded-full bg-amber-600"></span> Penting
-                                    </span>
-                                    <span class="text-[10px] text-slate-500 leading-tight">Tekanan berat berulang</span>
-                                </div>
-                            </label>
-
-                            <label class="flex items-center gap-2.5 p-3 rounded-xl border transition-all cursor-pointer" :class="urgency === 'Rendah' ? 'bg-emerald-50/70 border-emerald-300 ring-1 ring-emerald-400 text-emerald-900' : 'bg-surface-container-low/50 border-surface-container hover:bg-surface-container-low text-slate-700'">
-                                <input type="radio" x-model="urgency" value="Rendah" class="text-emerald-600 focus:ring-emerald-500">
-                                <div class="flex flex-col">
-                                    <span class="text-xs font-bold flex items-center gap-1">
-                                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span> Konseling
-                                    </span>
-                                    <span class="text-[10px] text-slate-500 leading-tight">Butuh teman bercerita</span>
-                                </div>
-                            </label>
+                    <!-- LANGKAH 4: KEBUTUHAN RESPONS BANTUAN -->
+                    <div x-cloak x-show="currentStep === 4" x-transition.opacity class="flex flex-col gap-4">
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-bold text-on-surface">Kebutuhan Respons Bantuan</h2>
+                            <p class="text-xs text-on-surface-variant mt-1">Pilih kondisi yang paling menggambarkan kebutuhanmu agar Guru BK bisa memprioritaskan bantuan.</p>
                         </div>
-                        <div x-cloak x-show="urgency === 'Darurat'" x-transition class="mt-1 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900">
+                        <div class="flex flex-col gap-3">
+                            <button type="button" @click="urgency = 'Darurat'; errorMessage = ''"
+                                :class="urgency === 'Darurat' ? 'bg-rose-50 border-rose-400 ring-2 ring-rose-200 text-rose-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-700'"
+                                class="p-4 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-rose-600 shrink-0"></span>
+                                    <div>
+                                        <span class="text-sm font-bold block">Darurat</span>
+                                        <span class="text-xs text-slate-500 block">Ada ancaman fisik, kekerasan langsung, atau bahaya mendesak</span>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-[20px]" :class="urgency === 'Darurat' ? 'text-rose-600' : 'text-slate-300'" x-text="urgency === 'Darurat' ? 'check_circle' : 'radio_button_unchecked'"></span>
+                            </button>
+
+                            <button type="button" @click="urgency = 'Sedang'; dangerConfirmed = false; errorMessage = ''"
+                                :class="urgency === 'Sedang' ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-200 text-amber-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-700'"
+                                class="p-4 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-amber-500 shrink-0"></span>
+                                    <div>
+                                        <span class="text-sm font-bold block">Penting</span>
+                                        <span class="text-xs text-slate-500 block">Tekanan berat berulang, perundungan, atau intimidasi yang mengganggu</span>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-[20px]" :class="urgency === 'Sedang' ? 'text-amber-600' : 'text-slate-300'" x-text="urgency === 'Sedang' ? 'check_circle' : 'radio_button_unchecked'"></span>
+                            </button>
+
+                            <button type="button" @click="urgency = 'Rendah'; dangerConfirmed = false; errorMessage = ''"
+                                :class="urgency === 'Rendah' ? 'bg-emerald-50 border-emerald-400 ring-2 ring-emerald-200 text-emerald-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-700'"
+                                class="p-4 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3.5 h-3.5 rounded-full bg-emerald-600 shrink-0"></span>
+                                    <div>
+                                        <span class="text-sm font-bold block">Konseling</span>
+                                        <span class="text-xs text-slate-500 block">Butuh teman bercerita, saran, atau pendampingan tenang dari Guru BK</span>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-[20px]" :class="urgency === 'Rendah' ? 'text-emerald-600' : 'text-slate-300'" x-text="urgency === 'Rendah' ? 'check_circle' : 'radio_button_unchecked'"></span>
+                            </button>
+                        </div>
+
+                        <div x-cloak x-show="urgency === 'Darurat'" x-transition class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900">
                             <label class="flex items-start gap-2.5 text-xs cursor-pointer">
-                                <input type="checkbox" x-model="dangerConfirmed" class="mt-0.5 rounded text-rose-600 focus:ring-rose-500 border-rose-300">
+                                <input type="checkbox" x-model="dangerConfirmed" @change="errorMessage = ''" class="mt-0.5 rounded text-rose-600 focus:ring-rose-500 border-rose-300">
                                 <span>
                                     <strong class="font-bold">Konfirmasi Darurat:</strong> Saya menyatakan kejadian ini melibatkan ancaman fisik atau bahaya mendesak yang perlu notifikasi segera ke Guru BK.
                                 </span>
@@ -337,92 +434,116 @@
                         </div>
                     </div>
 
-                    <!-- 4. Peran Pelapor (FR-07) -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-xs font-bold text-on-surface uppercase tracking-wider">Melapor Sebagai</label>
-                        <select x-model="reporterRole" class="w-full px-4 py-3 bg-surface-container-low text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/40 focus:ring-2 focus:ring-secondary focus:outline-none">
-                            <option value="Siswa (Korban Langsung)">Korban (Mengalami Langsung)</option>
-                            <option value="Saksi Kejadian">Saksi (Melihat / Mengetahui Kejadian)</option>
-                            <option value="Teman Korban">Teman Korban</option>
-                            <option value="Orang Tua / Wali Siswa">Orang Tua / Wali Siswa</option>
-                        </select>
-                    </div>
-
-                    <!-- 4b. Tanggal Kejadian (Kalender + Tidak ingat pasti) & Waktu Kejadian (FR-09) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-xs font-bold text-on-surface uppercase tracking-wider">Tanggal Kejadian</label>
-                            <input type="date" x-model="incidentDate" :disabled="incidentDateUnknown" :required="!incidentDateUnknown" max="{{ now('Asia/Jakarta')->toDateString() }}" class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/40 focus:ring-2 focus:ring-secondary focus:outline-none disabled:opacity-50">
-                            <label class="inline-flex items-center gap-2 text-xs text-slate-600 cursor-pointer mt-0.5">
-                                <input type="checkbox" x-model="incidentDateUnknown" @change="if (incidentDateUnknown) incidentDate = ''" class="rounded text-blue-600 focus:ring-blue-500">
+                    <!-- LANGKAH 5: TANGGAL & WAKTU KEJADIAN -->
+                    <div x-cloak x-show="currentStep === 5" x-transition.opacity class="flex flex-col gap-4">
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-bold text-on-surface">Kapan kejadian tersebut berlangsung?</h2>
+                            <p class="text-xs text-on-surface-variant mt-1">Pilih tanggal (atau centang tidak ingat) beserta perkiraan bagian waktunya.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-surface-container-low/70 border border-surface-container flex flex-col gap-2.5">
+                            <label for="incident-date-input" class="text-xs font-bold text-on-surface uppercase tracking-wider">Tanggal Kejadian</label>
+                            <input id="incident-date-input" type="date" x-model="incidentDate" :disabled="incidentDateUnknown" max="{{ now('Asia/Jakarta')->toDateString() }}" class="w-full px-4 py-3 bg-white text-on-surface rounded-xl text-sm border border-outline-variant/40 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-50">
+                            <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer mt-0.5">
+                                <input type="checkbox" x-model="incidentDateUnknown" @change="if (incidentDateUnknown) incidentDate = ''; errorMessage = ''" class="rounded text-blue-600 focus:ring-blue-500">
                                 <span>Saya tidak ingat tanggal pastinya</span>
                             </label>
                         </div>
-
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-xs font-bold text-on-surface uppercase tracking-wider">Waktu Kejadian</label>
-                            <select x-model="incidentTime" class="w-full px-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/40 focus:ring-2 focus:ring-secondary focus:outline-none">
-                                <option value="Pagi (Jam Pelajaran Sekolah)">Pagi (Jam Pelajaran Sekolah)</option>
-                                <option value="Siang / Jam Istirahat">Siang / Jam Istirahat</option>
-                                <option value="Sore / Jam Pulang Sekolah">Sore / Jam Pulang Sekolah</option>
-                                <option value="Malam (Daring / Luar Sekolah)">Malam (Daring / Luar Sekolah)</option>
-                                <option value="Tidak ingat pasti">Tidak ingat pasti</option>
-                            </select>
-                            <span class="text-[11px] text-slate-400">Jam &amp; menit rinci sengaja tidak dikumpulkan demi privasi (FR-14).</span>
-                        </div>
-                    </div>
-
-                    <!-- 5. Pihak Terlibat (Opsional - FR-11) -->
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center justify-between">
-                            <span>Pihak yang Terlibat / Saksi <span class="text-[11px] font-normal text-slate-400 normal-case">(Boleh dikosongkan)</span></span>
-                        </label>
-                        <input type="text" x-model="involvedParties" placeholder="Misal: Kakak kelas, teman sekelas, atau kosongkan bila ragu" class="w-full px-4 py-3 bg-surface-container-low text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/40 focus:ring-2 focus:ring-secondary focus:outline-none">
-                    </div>
-
-                    <!-- 6. Cerita Kejadian (FR-12) -->
-                    <div class="flex flex-col gap-1.5">
-                        <div class="flex items-center justify-between">
-                            <label class="text-xs font-bold text-on-surface uppercase tracking-wider">Ceritakan Apa yang Terjadi <span class="text-red-500">*</span></label>
-                            <span class="text-[11px] text-slate-400" x-text="story.length + ' / {{ $storyMaxLength }} karakter'"></span>
-                        </div>
-                        <p class="text-[11px] text-slate-500">Pertanyaan pemandu: Apa yang terjadi? Sejak kapan berlangsung? Dan apa dampak atau dukungan yang kamu harapkan dari Guru BK?</p>
-                        <textarea x-model="story" required maxlength="{{ $storyMaxLength }}" rows="5" placeholder="Tuliskan ceritamu di sini dengan tenang. Jika memilih melapor anonim, hindari menulis nama atau ciri yang dapat langsung mengarah ke dirimu..." class="w-full p-4 bg-surface-container-low text-on-surface rounded-xl text-xs sm:text-sm border border-outline-variant/40 focus:ring-2 focus:ring-secondary focus:outline-none leading-relaxed transition-all"></textarea>
-                    </div>
-
-                    <!-- 7. Pengaturan Anonimitas atau Ingin Dihubungi Guru BK (FR-13) -->
-                    <div class="p-4 bg-surface-container-low rounded-xl border border-surface-container flex flex-col gap-3">
-                        <div class="flex items-center justify-between gap-4">
-                            <div class="flex flex-col">
-                                <span class="font-semibold text-xs sm:text-sm text-on-surface flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[17px] text-blue-600" style="font-variation-settings: 'FILL' 1;">security</span>
-                                    <span>Kirim Sebagai Anonim (Matikan jika ingin dihubungi Guru BK)</span>
-                                </span>
-                                <span class="text-[11px] text-on-surface-variant mt-0.5">
-                                    Saat mode Anonim aktif, nama, kelas, dan kontak tidak disimpan. Jika dimatikan, identitasmu terenkripsi khusus untuk Guru BK.
-                                </span>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-xs font-bold text-on-surface uppercase tracking-wider">Perkiraan Bagian Waktu</label>
+                            @php
+                                $timeOptions = [
+                                    'Pagi (Jam Pelajaran Sekolah)',
+                                    'Siang / Jam Istirahat',
+                                    'Sore / Jam Pulang Sekolah',
+                                    'Malam (Daring / Luar Sekolah)',
+                                    'Tidak ingat pasti',
+                                ];
+                            @endphp
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                @foreach($timeOptions as $timeOpt)
+                                <button type="button" @click="incidentTime = @js($timeOpt)"
+                                    :class="incidentTime === @js($timeOpt) ? 'bg-blue-50 border-blue-500 text-blue-900 font-bold' : 'bg-surface-container-low/50 border-surface-container text-slate-700 hover:bg-surface-container-low font-medium'"
+                                    class="px-3.5 py-2.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between gap-2 cursor-pointer">
+                                    <span>{{ $timeOpt }}</span>
+                                    <span class="material-symbols-outlined text-[16px]" :class="incidentTime === @js($timeOpt) ? 'text-blue-600' : 'text-slate-300'" x-text="incidentTime === @js($timeOpt) ? 'check_circle' : 'radio_button_unchecked'"></span>
+                                </button>
+                                @endforeach
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                                <input type="checkbox" x-model="isAnonymous" class="sr-only peer">
-                                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
+                            <span class="text-[11px] text-slate-400">Jam &amp; menit rinci sengaja tidak dikumpulkan demi menjaga privasimu.</span>
+                        </div>
+                    </div>
+
+                    <!-- LANGKAH 6: PIHAK TERLIBAT / SAKSI (OPSIONAL) -->
+                    <div x-cloak x-show="currentStep === 6" x-transition.opacity class="flex flex-col gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-lg sm:text-xl font-bold text-on-surface">Siapa pihak yang terlibat atau saksi?</h2>
+                                <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase">Opsional</span>
+                            </div>
+                            <p class="text-xs text-on-surface-variant mt-1">Kamu boleh menuliskan ciri, peran, atau langsung tekan <strong>Lanjut</strong> bila ragu atau ingin mengosongkan.</p>
+                        </div>
+                        <input type="text" x-model="involvedParties" maxlength="255" placeholder="Misal: Kakak kelas, teman sekelas, atau biarkan kosong..." class="w-full px-4 py-3.5 bg-surface-container-low text-on-surface rounded-2xl text-sm border border-outline-variant/40 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                    </div>
+
+                    <!-- LANGKAH 7: CERITAKAN APA YANG TERJADI -->
+                    <div x-cloak x-show="currentStep === 7" x-transition.opacity class="flex flex-col gap-3.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <h2 class="text-lg sm:text-xl font-bold text-on-surface">Ceritakan apa yang terjadi <span class="text-red-500">*</span></h2>
+                                <p class="text-xs text-on-surface-variant mt-1">Tulis dengan tenang sesuai bahasamu sendiri. Owy &amp; Guru BK siap mendengarkan.</p>
+                            </div>
+                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 shrink-0" x-text="story.length + ' / {{ $storyMaxLength }}'"></span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-100 text-[11px] text-blue-900 leading-relaxed">
+                            <strong>Pertanyaan pemandu:</strong> Apa yang terjadi? Sejak kapan berlangsung? Dan dukungan apa yang kamu harapkan dari Guru BK?
+                        </div>
+                        <textarea x-model="story" maxlength="{{ $storyMaxLength }}" rows="6" placeholder="Tuliskan ceritamu di sini dengan tenang. Jika memilih melapor anonim, hindari menulis nama atau ciri yang langsung mengarah ke dirimu..." class="w-full p-4 bg-surface-container-low text-on-surface rounded-2xl text-sm border border-outline-variant/40 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none leading-relaxed transition-all"></textarea>
+                    </div>
+
+                    <!-- LANGKAH 8: ANONIM VS INGIN DIHUBUNGI + KONFIRMASI KIRIM -->
+                    <div x-cloak x-show="currentStep === 8" x-transition.opacity class="flex flex-col gap-4">
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-bold text-on-surface">Pilihan Kerahasiaan &amp; Kirim Aduan</h2>
+                            <p class="text-xs text-on-surface-variant mt-1">Tentukan apakah kamu ingin melapor secara anonim atau bersedia dihubungi langsung oleh Guru BK.</p>
                         </div>
 
-                        <!-- Revealed fields if NOT anonymous -->
-                        <div x-cloak x-show="!isAnonymous" x-transition class="pt-3 border-t border-slate-200/80 space-y-3">
-                            <div class="p-3 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-900">
-                                <strong>Ketentuan Ingin Dihubungi Guru BK:</strong> <strong>Nama</strong> dan <strong>Kelas wajib diisi</strong> agar Guru BK mengetahui siswa yang perlu didampingi. <strong>Nomor WhatsApp / Kontak bersifat opsional</strong> (boleh dikosongkan).
-                            </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <button type="button" @click="isAnonymous = true; errorMessage = ''"
+                                :class="isAnonymous ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200 text-blue-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-700'"
+                                class="p-4 rounded-2xl border text-left transition-all flex items-start gap-3 cursor-pointer">
+                                <span class="material-symbols-outlined text-[22px] shrink-0" :class="isAnonymous ? 'text-blue-600' : 'text-slate-400'">visibility_off</span>
+                                <div>
+                                    <span class="text-sm font-bold block">Kirim Sebagai Anonim</span>
+                                    <span class="text-[11px] text-slate-500 block mt-0.5">Nama, kelas, dan kontak tidak disimpan. Kamu tetap bisa chat via kode tiket.</span>
+                                </div>
+                            </button>
+
+                            <button type="button" @click="isAnonymous = false; errorMessage = ''"
+                                :class="!isAnonymous ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200 text-blue-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-700'"
+                                class="p-4 rounded-2xl border text-left transition-all flex items-start gap-3 cursor-pointer">
+                                <span class="material-symbols-outlined text-[22px] shrink-0" :class="!isAnonymous ? 'text-blue-600' : 'text-slate-400'">support_agent</span>
+                                <div>
+                                    <span class="text-sm font-bold block">Ingin Dihubungi Guru BK</span>
+                                    <span class="text-[11px] text-slate-500 block mt-0.5">Identitasmu terenkripsi dan hanya bisa dilihat khusus oleh konselor BK.</span>
+                                </div>
+                            </button>
+                        </div>
+
+                        <!-- Form Identitas jika memilih Ingin Dihubungi -->
+                        <div x-cloak x-show="!isAnonymous" x-transition class="p-4 rounded-2xl bg-blue-50/50 border border-blue-200 space-y-3">
+                            <p class="text-[11px] text-blue-900">
+                                <strong>Ketentuan Ingin Dihubungi Guru BK:</strong> <strong>Nama</strong> dan <strong>Kelas wajib diisi</strong> agar Guru BK mengetahui siswa yang perlu didampingi. <strong>Nomor WhatsApp / Kontak bersifat opsional</strong>.
+                            </p>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div class="flex flex-col gap-1">
-                                    <label class="text-[11px] font-bold text-slate-700">Nama Lengkap / Panggilan <span class="text-red-600">* (Wajib)</span></label>
-                                    <input type="text" x-model="reporterName" :required="!isAnonymous" placeholder="Nama lengkapmu" class="w-full px-3 py-2 bg-white rounded-lg text-xs border border-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                    <label class="text-[11px] font-bold text-slate-700">Nama Lengkap / Panggilan <span class="text-red-600">*</span></label>
+                                    <input type="text" x-model="reporterName" placeholder="Nama lengkapmu" class="w-full px-3 py-2.5 bg-white rounded-xl text-xs border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 </div>
                                 <div class="flex flex-col gap-1">
-                                    <label class="text-[11px] font-bold text-slate-700">Kelas <span class="text-red-600">* (Wajib)</span></label>
+                                    <label class="text-[11px] font-bold text-slate-700">Kelas <span class="text-red-600">*</span></label>
                                     <div class="relative">
-                                        <select x-model="reporterClass" :required="!isAnonymous" class="w-full px-3 py-2 bg-white rounded-lg text-xs border border-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none appearance-none pr-8 cursor-pointer text-slate-800">
-                                            <option value="">-- Pilih Kelas (Wajib) --</option>
+                                        <select x-model="reporterClass" class="w-full px-3 py-2.5 bg-white rounded-xl text-xs border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none pr-8 cursor-pointer text-slate-800">
+                                            <option value="">-- Pilih Kelas --</option>
                                             <optgroup label="Kelas 7 (Tujuh)">
                                                 @foreach(['7A','7B','7C','7D','7E','7F','7G','7H','7I','7J'] as $cls)
                                                 <option value="{{ $cls }}">Kelas {{ $cls }}</option>
@@ -448,52 +569,93 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-1">
-                                    <label class="text-[11px] font-bold text-slate-700">No. WhatsApp / Kontak <span class="font-normal text-slate-500">(Opsional)</span></label>
-                                    <input type="text" x-model="reporterContact" placeholder="Boleh dikosongkan (08xxxx)" class="w-full px-3 py-2 bg-white rounded-lg text-xs border border-slate-200 focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                                    <label class="text-[11px] font-bold text-slate-700">No. WhatsApp <span class="font-normal text-slate-500">(Opsional)</span></label>
+                                    <input type="text" x-model="reporterContact" placeholder="Boleh dikosongkan" class="w-full px-3 py-2.5 bg-white rounded-xl text-xs border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Ringkasan Singkat Sebelum Kirim -->
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-surface-container text-xs space-y-2">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Ringkasan Aduanmu</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Peran:</span>
+                                    <span class="font-semibold text-slate-800 block truncate" x-text="reporterRole"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Jenis Kejadian:</span>
+                                    <span class="font-semibold text-slate-800 block truncate" x-text="category || '-'"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Lokasi:</span>
+                                    <span class="font-semibold text-slate-800 block truncate" x-text="resolvedLocationDisplay()"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Respons Bantuan:</span>
+                                    <span class="font-semibold text-slate-800 block" x-text="urgency === 'Darurat' ? 'Darurat' : (urgency === 'Sedang' ? 'Penting' : 'Konseling')"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if(!empty($turnstileSiteKey))
+                        <div class="pt-1">
+                            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                            <div class="cf-turnstile" data-sitekey="{{ $turnstileSiteKey }}"></div>
+                        </div>
+                        @endif
                     </div>
 
-                    @if(!empty($turnstileSiteKey))
-                    <div class="pt-1">
-                        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-                        <div class="cf-turnstile" data-sitekey="{{ $turnstileSiteKey }}"></div>
-                    </div>
-                    @endif
+                    <!-- Wizard Footer Navigation -->
+                    <div class="pt-4 border-t border-surface-container flex items-center justify-between gap-3">
+                        <button type="button" x-show="currentStep > 1" @click="prevStep()" class="px-4 py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold text-xs sm:text-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                            <span>Kembali</span>
+                        </button>
+                        <div x-show="currentStep === 1" class="text-[11px] text-slate-400">Jawabanmu tersimpan otomatis jika halaman dimuat ulang.</div>
 
-                    <!-- Submit Button -->
-                    <button type="submit" :disabled="submitting || (urgency === 'Darurat' && !dangerConfirmed)" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer mt-1">
-                        <template x-if="submitting">
-                            <span class="inline-flex items-center gap-2">
-                                <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                <span>Mengirimkan secara aman...</span>
-                            </span>
-                        </template>
-                        <template x-if="!submitting">
-                            <span class="inline-flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[19px]">send</span>
-                                <span>{{ !empty($trainingMode) ? 'Kirim Simulasi (Mode Latihan)' : 'Kirimkan Aduan Sekarang' }}</span>
-                            </span>
-                        </template>
-                    </button>
+                        <button type="button" x-show="currentStep < totalSteps" @click="nextStep()" class="ml-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span x-text="currentStep === 6 && !involvedParties.trim() ? 'Lewati / Lanjut' : 'Lanjut'">Lanjut</span>
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </button>
+
+                        <button type="submit" x-cloak x-show="currentStep === totalSteps" :disabled="submitting || (urgency === 'Darurat' && !dangerConfirmed)" class="ml-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs sm:text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
+                            <template x-if="submitting">
+                                <span class="inline-flex items-center gap-2">
+                                    <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                    <span>Mengirimkan secara aman...</span>
+                                </span>
+                            </template>
+                            <template x-if="!submitting">
+                                <span class="inline-flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[19px]">send</span>
+                                    <span>{{ !empty($trainingMode) ? 'Kirim Simulasi (Mode Latihan)' : 'Kirimkan Aduan Sekarang' }}</span>
+                                </span>
+                            </template>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
 
         <!-- ========================================================================= -->
-        <!-- TAB 2: LACAK STATUS TIKET ADUAN (FR-03 Jam Baca + Chat Centang 1/2 Opsi A) -->
+        <!-- TAB 2: LACAK ADUAN SAYA                                                   -->
         <!-- ========================================================================= -->
-        <div x-show="activeTab === 'track'" x-transition.opacity class="bg-surface-container-lowest rounded-2xl border border-surface-container p-6 sm:p-8 flex flex-col gap-6 shadow-sm">
-            <div>
-                <div class="flex items-center gap-2 text-blue-600 font-semibold text-xs uppercase tracking-wider mb-1.5">
-                    <span class="material-symbols-outlined text-[18px]">travel_explore</span>
-                    <span>Transparansi &amp; Keamanan Penanganan</span>
+        <div x-show="activeTab === 'track'" x-transition.opacity class="bg-surface-container-lowest rounded-3xl border border-surface-container p-6 sm:p-8 flex flex-col gap-6 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center p-2 shrink-0">
+                    <img src="{{ asset('maskot_owy/maskot_9.png') }}" alt="Owy membantu melacak aduan" class="w-full h-full object-contain owy-float">
                 </div>
-                <h2 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">Cek Status Aduanmu</h2>
-                <p class="text-xs sm:text-sm text-on-surface-variant mt-1.5 leading-relaxed">
-                    Masukkan kode laporan 10 karakter yang kamu peroleh saat mengirim aduan untuk melihat status penanganan, jam dibaca oleh Guru BK, serta membalas pesan secara dua arah.
-                </p>
+                <div>
+                    <div class="flex items-center gap-1.5 text-blue-600 font-semibold text-xs uppercase tracking-wider mb-1">
+                        <span class="material-symbols-outlined text-[17px]">travel_explore</span>
+                        <span>Transparansi &amp; Keamanan Penanganan</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">Cek Status Aduanmu</h2>
+                    <p class="text-xs sm:text-sm text-on-surface-variant mt-1 leading-relaxed">
+                        Masukkan kode laporan 10 karakter untuk melihat status penanganan, jam dibaca Guru BK, serta membalas pesan secara dua arah.
+                    </p>
+                </div>
             </div>
 
             <!-- Search Ticket Form -->
@@ -519,7 +681,7 @@
                 <span x-text="trackError"></span>
             </div>
 
-            <!-- Tracking Result Box (hanya status, jam baca BK, kontak BK, & pesan BK <-> Pelapor) -->
+            <!-- Tracking Result Box -->
             <div x-cloak x-show="ticketData" class="p-5 rounded-2xl bg-surface-container-low border border-slate-200 flex flex-col gap-4 animate-in fade-in duration-200">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
                     <div class="flex flex-col gap-1">
@@ -622,7 +784,7 @@
         &copy; {{ date('Y') }} {{ $schoolName }} • Portal Pengaduan Siswa Terproteksi HiOwy!
     </footer>
 
-    <!-- Alpine Logic for Reporter & Tracking (No form data saved in browser storage - FR-67) -->
+    <!-- Alpine Logic untuk Wizard Owy, Persistensi Refresh, Wajib Salin Kode, & Lacak Aduan -->
     <script>
         window.addEventListener('pageshow', (event) => {
             const nav = performance.getEntriesByType('navigation')[0];
@@ -636,52 +798,182 @@
         });
 
         function publicReporter() {
+            const draftStorageKey = 'hiowy_reporter_state_v1:' + window.location.pathname;
+            const mascotBase = @js(asset('maskot_owy'));
+            const stepMetaMap = {
+                1: {
+                    image: mascotBase + '/maskot_1.png',
+                    alt: 'Owy melambai menyapa pelapor',
+                    badge: 'Hai! Aku Owy',
+                    speech: 'Senang kamu mau bercerita hari ini. Sebelum mulai, kamu melapor sebagai siapa?'
+                },
+                2: {
+                    image: mascotBase + '/maskot_2.png',
+                    alt: 'Owy mendengarkan dengan penuh perhatian',
+                    badge: 'Owy Siap Membantu',
+                    speech: 'Tenang ya, pelan-pelan saja. Jenis kejadian apa yang sedang kamu alami atau saksikan?'
+                },
+                3: {
+                    image: mascotBase + '/maskot_9.png',
+                    alt: 'Owy membawa kaca pembesar mencari lokasi',
+                    badge: 'Catat Lokasi Kejadian',
+                    speech: 'Owy bantu catat lokasinya supaya Guru BK lebih paham situasinya. Di mana kejadian itu terjadi?'
+                },
+                4: {
+                    image: mascotBase + '/maskot_4.png',
+                    alt: 'Owy peduli dan empatik',
+                    badge: 'Keselamatanmu Utama',
+                    speech: 'Kamu berhak merasa aman. Seberapa mendesak bantuan yang kamu butuhkan saat ini?'
+                },
+                5: {
+                    image: mascotBase + '/maskot_7.png',
+                    alt: 'Owy memegang catatan tanggal dan waktu',
+                    badge: 'Waktu Kejadian',
+                    speech: 'Kira-kira kapan kejadian itu terjadi? Kalau lupa tanggal pastinya, centang saja tidak ingat ya!'
+                },
+                6: {
+                    image: mascotBase + '/maskot_3.png',
+                    alt: 'Owy tersenyum lembut',
+                    badge: 'Info Tambahan (Opsional)',
+                    speech: 'Apakah ada pihak lain atau saksi yang terlibat? Kalau ragu, bagian ini boleh kamu lewati kok.'
+                },
+                7: {
+                    image: mascotBase + '/maskot_10.png',
+                    alt: 'Owy duduk tenang mendengarkan ceritamu',
+                    badge: 'Ruang Cerita Aman',
+                    speech: 'Aku duduk mendengarkan dengan tenang. Tuliskan apa yang kamu alami atau saksikan di sini ya.'
+                },
+                8: {
+                    image: mascotBase + '/maskot_6.png',
+                    alt: 'Owy memegang perisai perlindungan',
+                    badge: 'Satu Langkah Terakhir',
+                    speech: 'Pilih apakah kamu ingin melapor secara anonim atau ingin dihubungi langsung oleh Guru BK.'
+                }
+            };
+
             let showPrivacy = false;
+            let saved = {};
             try {
                 showPrivacy = sessionStorage.getItem('hiowy_privacy_seen') !== '1';
+                const raw = sessionStorage.getItem(draftStorageKey);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        saved = parsed;
+                    }
+                }
             } catch (e) {
                 showPrivacy = true;
             }
 
+            const restoredStep = Math.min(8, Math.max(1, Number(saved.currentStep) || 1));
+
             return {
                 privacyModalOpen: showPrivacy,
-                activeTab: 'form',
+                activeTab: saved.activeTab === 'track' ? 'track' : 'form',
+                currentStep: restoredStep,
+                maxReachedStep: Math.min(8, Math.max(restoredStep, Number(saved.maxReachedStep) || 1)),
+                totalSteps: 8,
                 submitted: false,
+                ticketCopied: false,
                 submitting: false,
                 tracking: false,
                 errorMessage: '',
                 trackError: '',
                 ticketCode: '',
+                submittedCategoryLabel: '',
                 submittedLocationLabel: '',
+                submittedAnonymous: true,
 
-                // Form fields
-                category: '',
-                location: '',
-                customLocation: '',
-                involvedParties: '',
-                urgency: 'Rendah',
-                dangerConfirmed: false,
-                reporterRole: 'Siswa (Korban Langsung)',
-                incidentDate: '',
-                incidentDateUnknown: false,
-                incidentTime: 'Pagi (Jam Pelajaran Sekolah)',
-                story: '',
+                // Form fields (dipulihkan dari sessionStorage saat refresh)
+                category: typeof saved.category === 'string' ? saved.category : '',
+                location: typeof saved.location === 'string' ? saved.location : '',
+                customLocation: typeof saved.customLocation === 'string' ? saved.customLocation : '',
+                involvedParties: typeof saved.involvedParties === 'string' ? saved.involvedParties : '',
+                urgency: ['Darurat', 'Sedang', 'Rendah'].includes(saved.urgency) ? saved.urgency : 'Rendah',
+                dangerConfirmed: Boolean(saved.dangerConfirmed),
+                reporterRole: typeof saved.reporterRole === 'string' && saved.reporterRole ? saved.reporterRole : 'Siswa (Korban Langsung)',
+                incidentDate: typeof saved.incidentDate === 'string' ? saved.incidentDate : '',
+                incidentDateUnknown: Boolean(saved.incidentDateUnknown),
+                incidentTime: typeof saved.incidentTime === 'string' && saved.incidentTime ? saved.incidentTime : 'Pagi (Jam Pelajaran Sekolah)',
+                story: typeof saved.story === 'string' ? saved.story : '',
                 website: '',
-                isAnonymous: true,
-                reporterName: '',
-                reporterClass: '',
-                reporterContact: '',
+                isAnonymous: typeof saved.isAnonymous === 'boolean' ? saved.isAnonymous : true,
+                reporterName: typeof saved.reporterName === 'string' ? saved.reporterName : '',
+                reporterClass: typeof saved.reporterClass === 'string' ? saved.reporterClass : '',
+                reporterContact: typeof saved.reporterContact === 'string' ? saved.reporterContact : '',
 
-                // Tracking tab
-                searchCode: '',
+                // Tracking tab (dipulihkan saat refresh)
+                searchCode: typeof saved.searchCode === 'string' ? saved.searchCode : '',
+                hasTrackedTicket: Boolean(saved.hasTrackedTicket),
                 ticketData: null,
-                replyBody: '',
+                replyBody: typeof saved.replyBody === 'string' ? saved.replyBody : '',
                 replying: false,
                 replyError: '',
                 replySuccess: '',
 
+                get currentOwy() {
+                    return stepMetaMap[this.currentStep] || stepMetaMap[1];
+                },
+
                 init() {
-                    window.addEventListener('pagehide', () => this.wipeClientState());
+                    const persistedKeys = [
+                        'activeTab', 'currentStep', 'maxReachedStep',
+                        'category', 'location', 'customLocation', 'involvedParties',
+                        'urgency', 'dangerConfirmed', 'reporterRole',
+                        'incidentDate', 'incidentDateUnknown', 'incidentTime',
+                        'story', 'isAnonymous', 'reporterName', 'reporterClass', 'reporterContact',
+                        'searchCode', 'replyBody', 'hasTrackedTicket'
+                    ];
+                    persistedKeys.forEach((key) => {
+                        this.$watch(key, () => this.persistDraftState());
+                    });
+
+                    window.addEventListener('beforeunload', () => this.persistDraftState());
+
+                    if (this.activeTab === 'track' && this.hasTrackedTicket && this.searchCode.trim().length >= 10) {
+                        this.searchTicket();
+                    }
+                },
+
+                persistDraftState() {
+                    try {
+                        sessionStorage.setItem(draftStorageKey, JSON.stringify({
+                            activeTab: this.activeTab,
+                            currentStep: this.currentStep,
+                            maxReachedStep: this.maxReachedStep,
+                            category: this.category,
+                            location: this.location,
+                            customLocation: this.customLocation,
+                            involvedParties: this.involvedParties,
+                            urgency: this.urgency,
+                            dangerConfirmed: this.dangerConfirmed,
+                            reporterRole: this.reporterRole,
+                            incidentDate: this.incidentDate,
+                            incidentDateUnknown: this.incidentDateUnknown,
+                            incidentTime: this.incidentTime,
+                            story: this.story,
+                            isAnonymous: this.isAnonymous,
+                            reporterName: this.reporterName,
+                            reporterClass: this.reporterClass,
+                            reporterContact: this.reporterContact,
+                            searchCode: this.searchCode,
+                            replyBody: this.replyBody,
+                            hasTrackedTicket: this.hasTrackedTicket,
+                        }));
+                    } catch (e) {}
+                },
+
+                clearDraftStorage() {
+                    try {
+                        sessionStorage.removeItem(draftStorageKey);
+                    } catch (e) {}
+                },
+
+                switchTab(tab) {
+                    this.activeTab = tab;
+                    this.errorMessage = '';
+                    this.persistDraftState();
                 },
 
                 dismissPrivacyModal() {
@@ -693,6 +985,7 @@
 
                 quickExit() {
                     this.wipeClientState();
+                    this.clearDraftStorage();
                     try {
                         sessionStorage.setItem('hiowy_exited', '1');
                         window.history.replaceState(null, '', '/');
@@ -701,13 +994,90 @@
                 },
 
                 wipeClientState() {
-                    this.story = '';
+                    this.category = '';
+                    this.location = '';
+                    this.customLocation = '';
                     this.involvedParties = '';
+                    this.urgency = 'Rendah';
+                    this.dangerConfirmed = false;
+                    this.reporterRole = 'Siswa (Korban Langsung)';
+                    this.incidentDate = '';
+                    this.incidentDateUnknown = false;
+                    this.incidentTime = 'Pagi (Jam Pelajaran Sekolah)';
+                    this.story = '';
+                    this.website = '';
+                    this.isAnonymous = true;
                     this.reporterName = '';
                     this.reporterClass = '';
                     this.reporterContact = '';
                     this.replyBody = '';
-                    this.customLocation = '';
+                    this.currentStep = 1;
+                    this.maxReachedStep = 1;
+                },
+
+                validateStep(step) {
+                    this.errorMessage = '';
+                    if (step === 1 && !this.reporterRole) {
+                        this.errorMessage = 'Pilih peran pelapor terlebih dahulu.';
+                        return false;
+                    }
+                    if (step === 2 && !this.category) {
+                        this.errorMessage = 'Pilih jenis kejadian yang paling sesuai terlebih dahulu.';
+                        return false;
+                    }
+                    if (step === 3) {
+                        if (!this.location) {
+                            this.errorMessage = 'Pilih titik lokasi kejadian terlebih dahulu.';
+                            return false;
+                        }
+                        if (this.location === '__other__' && !this.customLocation.trim()) {
+                            this.errorMessage = 'Tuliskan tempat kejadian lainnya terlebih dahulu.';
+                            return false;
+                        }
+                    }
+                    if (step === 4 && this.urgency === 'Darurat' && !this.dangerConfirmed) {
+                        this.errorMessage = 'Centang kotak konfirmasi darurat terlebih dahulu sebelum melanjutkan.';
+                        return false;
+                    }
+                    if (step === 5 && !this.incidentDateUnknown && !this.incidentDate) {
+                        this.errorMessage = 'Pilih tanggal kejadian atau centang "Saya tidak ingat tanggal pastinya".';
+                        return false;
+                    }
+                    if (step === 7 && this.story.trim().length < 5) {
+                        this.errorMessage = 'Tuliskan ceritamu minimal 5 karakter agar Guru BK dapat memahami situasinya.';
+                        return false;
+                    }
+                    if (step === 8 && !this.isAnonymous && (!this.reporterName.trim() || !this.reporterClass)) {
+                        this.errorMessage = 'Jika ingin dihubungi Guru BK, Nama dan Kelas wajib diisi (WhatsApp bersifat opsional).';
+                        return false;
+                    }
+                    return true;
+                },
+
+                nextStep() {
+                    if (!this.validateStep(this.currentStep)) return;
+                    if (this.currentStep < this.totalSteps) {
+                        this.currentStep += 1;
+                        if (this.currentStep > this.maxReachedStep) {
+                            this.maxReachedStep = this.currentStep;
+                        }
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                },
+
+                prevStep() {
+                    this.errorMessage = '';
+                    if (this.currentStep > 1) {
+                        this.currentStep -= 1;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                },
+
+                jumpToStep(step) {
+                    if (step > this.maxReachedStep || step === this.currentStep) return;
+                    if (step > this.currentStep && !this.validateStep(this.currentStep)) return;
+                    this.errorMessage = '';
+                    this.currentStep = step;
                 },
 
                 resolvedLocationDisplay() {
@@ -719,22 +1089,13 @@
 
                 async submitReport() {
                     if (this.submitting) return;
-                    if (this.urgency === 'Darurat' && !this.dangerConfirmed) {
-                        this.errorMessage = 'Centang kotak konfirmasi darurat terlebih dahulu sebelum mengirim laporan Darurat.';
-                        return;
+                    for (const s of [1, 2, 3, 4, 5, 7, 8]) {
+                        if (!this.validateStep(s)) {
+                            this.currentStep = s;
+                            return;
+                        }
                     }
-                    if (!this.incidentDateUnknown && !this.incidentDate) {
-                        this.errorMessage = 'Pilih tanggal kejadian atau centang "Saya tidak ingat tanggal pastinya".';
-                        return;
-                    }
-                    if (this.location === '__other__' && !this.customLocation.trim()) {
-                        this.errorMessage = 'Tuliskan tempat kejadian lainnya terlebih dahulu.';
-                        return;
-                    }
-                    if (!this.isAnonymous && (!this.reporterName.trim() || !this.reporterClass)) {
-                        this.errorMessage = 'Jika ingin dihubungi Guru BK, Nama dan Kelas wajib diisi (WhatsApp bersifat opsional).';
-                        return;
-                    }
+
                     this.submitting = true;
                     this.errorMessage = '';
 
@@ -787,9 +1148,13 @@
 
                         if (response.ok && data.success) {
                             this.ticketCode = data.ticket_code;
+                            this.submittedCategoryLabel = this.category || 'Umum';
                             this.submittedLocationLabel = this.resolvedLocationDisplay();
+                            this.submittedAnonymous = this.isAnonymous;
+                            this.ticketCopied = false;
                             this.submitted = true;
                             this.wipeClientState();
+                            this.persistDraftState();
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         } else {
                             this.errorMessage = data.message || 'Terjadi kendala saat mengirimkan laporan. Silakan periksa formulir Anda.';
@@ -802,36 +1167,60 @@
                     }
                 },
 
-                copyTicketCode() {
-                    navigator.clipboard.writeText(this.ticketCode).then(() => {
-                        alert('Kode laporan ' + this.ticketCode + ' berhasil disalin! Simpan baik-baik dan jangan bagikan.');
-                    }).catch(() => {
-                        prompt('Salin kode laporan Anda:', this.ticketCode);
-                    });
+                async copyTicketCode() {
+                    if (!this.ticketCode) return;
+                    let copied = false;
+                    try {
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            await navigator.clipboard.writeText(this.ticketCode);
+                            copied = true;
+                        }
+                    } catch (e) {
+                        copied = false;
+                    }
+
+                    if (!copied) {
+                        try {
+                            const temp = document.createElement('textarea');
+                            temp.value = this.ticketCode;
+                            temp.setAttribute('readonly', '');
+                            temp.style.position = 'fixed';
+                            temp.style.opacity = '0';
+                            document.body.appendChild(temp);
+                            temp.select();
+                            copied = document.execCommand('copy');
+                            document.body.removeChild(temp);
+                        } catch (e) {
+                            copied = false;
+                        }
+                    }
+
+                    if (copied) {
+                        this.ticketCopied = true;
+                    } else {
+                        const manual = prompt('Salin kode laporanmu di bawah ini (Ctrl+C lalu OK):', this.ticketCode);
+                        if (manual !== null) {
+                            this.ticketCopied = true;
+                        }
+                    }
                 },
 
                 goToTrack(code) {
+                    if (!this.ticketCopied) return;
                     this.searchCode = code;
                     this.activeTab = 'track';
+                    this.submitted = false;
                     this.searchTicket();
                 },
 
                 resetForm() {
+                    if (!this.ticketCopied) return;
                     this.submitted = false;
-                    this.category = '';
-                    this.location = '';
-                    this.customLocation = '';
-                    this.involvedParties = '';
-                    this.urgency = 'Rendah';
-                    this.dangerConfirmed = false;
-                    this.incidentDate = '';
-                    this.incidentDateUnknown = false;
-                    this.story = '';
-                    this.website = '';
-                    this.isAnonymous = true;
-                    this.reporterName = '';
-                    this.reporterClass = '';
-                    this.reporterContact = '';
+                    this.ticketCopied = false;
+                    this.ticketCode = '';
+                    this.errorMessage = '';
+                    this.wipeClientState();
+                    this.persistDraftState();
                 },
 
                 async searchTicket() {
@@ -852,7 +1241,10 @@
 
                         if (response.ok && data.success) {
                             this.ticketData = data.ticket;
+                            this.hasTrackedTicket = true;
+                            this.persistDraftState();
                         } else {
+                            this.hasTrackedTicket = false;
                             this.trackError = data.message || 'Nomor tiket tidak ditemukan.';
                         }
                     } catch (error) {
@@ -888,6 +1280,7 @@
                         if (response.ok && data.success) {
                             this.replyBody = '';
                             this.replySuccess = data.message || 'Balasan terkirim ke Guru BK.';
+                            this.persistDraftState();
                             if (data.messages && this.ticketData) {
                                 this.ticketData.messages = data.messages;
                             } else {

@@ -441,4 +441,111 @@ class Batch4UatComplianceTest extends TestCase
         $this->assertNull($rPrivate->fresh()->archived_at);
         $this->assertGreaterThanOrEqual(3, AccessLog::where('action', 'unarchive_report')->count());
     }
+
+    public function test_revision_batch_timezone_categories_schedule_poster_back_and_wizard_ui(): void
+    {
+        $this->seedDefaults();
+        $bk = User::factory()->bk()->create();
+        $kesiswaan = User::factory()->kesiswaan()->create();
+        $walas = User::factory()->walas()->create();
+
+        // 1. Timezone WIB konsisten (tidak dobel +7 jam saat BK membaca laporan)
+        $this->assertSame('Asia/Jakarta', config('app.timezone'));
+        $submit = $this->postJson('/s/lapor', [
+            'category' => 'Perundungan Fisik & Pemukulan',
+            'location' => 'Ruang Kelas',
+            'story' => 'Uji akurasi jam baca BK pada tab Lacak Aduan Saya.',
+            'is_anonymous' => '1',
+        ])->assertOk();
+        $code = $submit->json('ticket_code');
+        $report = StudentReport::latest('id')->firstOrFail();
+
+        $expectedHourMin = now('Asia/Jakarta')->format('H:i');
+        $this->actingAs($bk)->get("/bk/reports/{$report->id}")->assertOk();
+        $track = $this->getJson('/s/lapor/track?ticket_code='.$code)->assertOk();
+        $this->assertStringContainsString($expectedHourMin.' WIB', (string) $track->json('ticket.bk_read_time'));
+
+        // 2. Kategori otomatis aktif & otomatis tampil ke Kesiswaan kecuali Masalah Pribadi & Teman Cerita
+        $normalCatRes = $this->actingAs($bk)->postJson('/bk/manage/categories', [
+            'label' => 'Pemerasan di Lingkungan Sekolah',
+            'permendikbud_type' => 'Kekerasan Psikis (Permendikbudristek 46/2023)',
+        ])->assertOk();
+        $this->assertTrue((bool) $normalCatRes->json('category.active'));
+        $this->assertTrue((bool) $normalCatRes->json('category.visible_to_kesiswaan'));
+
+        $privateCatRes = $this->actingAs($bk)->postJson('/bk/manage/categories', [
+            'label' => 'Teman Cerita Pribadi',
+        ])->assertOk();
+        $this->assertTrue((bool) $privateCatRes->json('category.active'));
+        $this->assertFalse((bool) $privateCatRes->json('category.visible_to_kesiswaan'));
+
+        $rNormal = StudentReport::create([
+            'ticket_hash' => TicketCodeService::hash(TicketCodeService::generateCode(10)),
+            'category' => 'Pemerasan di Lingkungan Sekolah',
+            'location' => 'Kantin Sekolah',
+            'story' => 'Laporan kategori baru langsung masuk ke Kesiswaan.',
+            'urgency' => 'Sedang',
+            'status' => 'belum_dibaca',
+            'submitted_date' => now('Asia/Jakarta')->toDateString(),
+            'submitted_daypart' => 'siang',
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+        $rCurhat = StudentReport::create([
+            'ticket_hash' => TicketCodeService::hash(TicketCodeService::generateCode(10)),
+            'category' => 'Teman Cerita Pribadi',
+            'location' => 'Ruang Kelas',
+            'story' => 'Cerita pribadi yang khusus konselor BK.',
+            'urgency' => 'Rendah',
+            'status' => 'belum_dibaca',
+            'submitted_date' => now('Asia/Jakarta')->toDateString(),
+            'submitted_daypart' => 'siang',
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+
+        $this->actingAs($kesiswaan)->get("/kesiswaan/reports/{$rNormal->id}")->assertOk();
+        $this->actingAs($kesiswaan)->get("/kesiswaan/reports/{$rCurhat->id}")->assertForbidden();
+
+        // 3. Pengaturan jam baca BK dibagi 2 rentang (hari & jam) + redirect ke #sekolah
+        $this->actingAs($bk)->post('/bk/manage/settings', [
+            'school_name' => 'SMP Telkom Purwokerto',
+            'reading_day_start' => 'Senin',
+            'reading_day_end' => 'Sabtu',
+            'reading_time_start' => '07:30',
+            'reading_time_end' => '14:30',
+        ])->assertRedirect(route('bk.manage').'#sekolah');
+        $this->assertSame('Senin–Sabtu, 07.30–14.30 WIB', SchoolSetting::get('reading_hours'));
+
+        // 4. Tombol Kembali pada halaman cetak poster tidak 403 untuk BK maupun Wali Kelas
+        $this->actingAs($bk)->get('/bk/manage/poster')
+            ->assertOk()
+            ->assertSee(route('bk.manage').'#qr', false)
+            ->assertSee('Kembali ke Kelola Sekolah');
+
+        $this->actingAs($walas)->get('/wali-kelas/poster')
+            ->assertOk()
+            ->assertSee(route('walas.dashboard'), false)
+            ->assertSee('Kembali ke Dashboard Wali Kelas')
+            ->assertDontSee('Kembali ke Kelola Sekolah');
+
+        // 5. Halaman /bk/manage & /s/lapor memuat revisi UI & bebas tulisan FR-xx
+        $manageHtml = $this->actingAs($bk)->get('/bk/manage')->assertOk();
+        $manageHtml->assertSee('favicon-owy.png')
+            ->assertSee('Poster Panduan Pelaporan Siswa')
+            ->assertSee('modal-hapus-kategori')
+            ->assertSee('reading_day_start')
+            ->assertSee('reading_time_start')
+            ->assertSee('Unggah Logo')
+            ->assertDontSee('Terlihat Tim Kesiswaan')
+            ->assertDontSee('>Urutan<', false)
+            ->assertDontSee('FR-');
+
+        $publicHtml = $this->get('/s/lapor')->assertOk();
+        $publicHtml->assertSee('favicon-owy.png')
+            ->assertSee('Langkah 1 dari 8')
+            ->assertSee('maskot_owy')
+            ->assertSee('hiowy_reporter_state_v1:')
+            ->assertSee(':disabled="!ticketCopied"', false)
+            ->assertDontSee('FR-20')
+            ->assertDontSee('FR-');
+    }
 }

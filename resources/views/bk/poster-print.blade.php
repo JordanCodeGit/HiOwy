@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Poster Panduan Pelaporan Siswa A4 Landscape — {{ $schoolName }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon-owy.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -331,11 +333,15 @@
 </head>
 <body>
 
+    @php
+        $resolvedBackUrl = $backUrl ?? (Auth::user()?->normalizedRole() === 'walas' ? route('walas.dashboard') : route('bk.manage').'#qr');
+        $resolvedBackLabel = $backLabel ?? (Auth::user()?->normalizedRole() === 'walas' ? 'Kembali ke Dashboard Wali Kelas' : 'Kembali ke Kelola Sekolah');
+    @endphp
     <div class="no-print-bar">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="{{ route('bk.manage', ['#qr']) }}" class="btn btn-outline">
+            <a href="{{ $resolvedBackUrl }}" class="btn btn-outline">
                 <span class="material-symbols-outlined">arrow_back</span>
-                Kembali ke Kelola Sekolah
+                {{ $resolvedBackLabel }}
             </a>
             <span style="font-size: 13px; color: #64748b;">Format A4 Landscape Siap Cetak (300 DPI)</span>
         </div>
@@ -377,12 +383,15 @@
             </div>
 
             <div class="right-section">
-                <div class="headline-section">
-                    <span class="headline-badge">Kanal Aman &amp; Terlindungi</span>
-                    <h2 class="headline-title">Punya Masalah di Sekolah? Kamu Tidak Sendirian.</h2>
-                    <p class="headline-desc">
-                        Laporkan segala bentuk intimidasi, perundungan, pemalakan, atau masalah pribadi secara aman. Identitasmu dijamin terlindungi oleh ruang bimbingan konseling.
-                    </p>
+                <div class="headline-section" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                    <div>
+                        <span class="headline-badge">Kanal Aman &amp; Terlindungi</span>
+                        <h2 class="headline-title">Punya Masalah di Sekolah? Kamu Tidak Sendirian.</h2>
+                        <p class="headline-desc">
+                            Laporkan segala bentuk intimidasi, perundungan, pemalakan, atau masalah pribadi secara aman bersama Owy &amp; Guru BK. Jam baca: {{ $schoolConfig['reading_hours'] ?? 'Senin–Jumat, 07.00–15.00 WIB' }}.
+                        </p>
+                    </div>
+                    <img src="{{ asset('maskot_owy/maskot_6.png') }}" alt="Maskot Owy" style="width: 82px; height: 82px; object-fit: contain; flex-shrink: 0;">
                 </div>
 
                 <div class="steps-grid">

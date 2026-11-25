@@ -81,6 +81,10 @@ class BkManageController extends Controller
             'nlp_enabled' => ['nullable', 'boolean'],
             'school_name' => ['nullable', 'string', 'max:120'],
             'reading_hours' => ['nullable', 'string', 'max:160'],
+            'reading_day_start' => ['nullable', 'string', 'in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu'],
+            'reading_day_end' => ['nullable', 'string', 'in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu'],
+            'reading_time_start' => ['nullable', 'date_format:H:i'],
+            'reading_time_end' => ['nullable', 'date_format:H:i'],
             'emergency_contact' => ['nullable', 'string', 'max:64'],
             'school_website_url' => ['nullable', 'url', 'max:255'],
             'retention_date' => ['nullable', 'date'],
@@ -110,7 +114,18 @@ class BkManageController extends Controller
             );
         }
 
-        $schoolFields = ['school_name', 'reading_hours', 'emergency_contact', 'school_website_url', 'retention_date', 'story_max_length'];
+        $schoolFields = [
+            'school_name',
+            'reading_hours',
+            'reading_day_start',
+            'reading_day_end',
+            'reading_time_start',
+            'reading_time_end',
+            'emergency_contact',
+            'school_website_url',
+            'retention_date',
+            'story_max_length',
+        ];
         $updatedSchoolFields = [];
 
         foreach ($schoolFields as $field) {
@@ -119,6 +134,14 @@ class BkManageController extends Controller
                 SchoolSetting::set($field, $val);
                 $updatedSchoolFields[] = $field;
             }
+        }
+
+        if ($request->hasAny(['reading_day_start', 'reading_day_end', 'reading_time_start', 'reading_time_end'])) {
+            $dayStart = SchoolSetting::get('reading_day_start', 'Senin') ?: 'Senin';
+            $dayEnd = SchoolSetting::get('reading_day_end', 'Jumat') ?: 'Jumat';
+            $timeStart = SchoolSetting::get('reading_time_start', '07:00') ?: '07:00';
+            $timeEnd = SchoolSetting::get('reading_time_end', '15:00') ?: '15:00';
+            SchoolSetting::set('reading_hours', SchoolConfigService::formatReadingHours($dayStart, $dayEnd, $timeStart, $timeEnd));
         }
 
         if ($request->hasFile('school_logo')) {
@@ -143,7 +166,9 @@ class BkManageController extends Controller
         }
 
         $config = SchoolConfigService::getConfig();
-        $message = 'Pengaturan sekolah dan sistem berhasil diperbarui.';
+        $message = ($updatedSchoolFields === ['school_logo'])
+            ? 'Logo sekolah berhasil diunggah.'
+            : 'Pengaturan sekolah dan sistem berhasil diperbarui.';
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
@@ -155,11 +180,11 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#sekolah'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#sekolah')->with('frontend_notice', $message);
     }
 
     /**
-     * Jalankan atau simulasikan retensi arsip akhir tahun ajaran (FR-65).
+     * Jalankan atau simulasikan retensi arsip akhir tahun ajaran.
      */
     public function runRetention(Request $request): JsonResponse|RedirectResponse
     {
@@ -181,7 +206,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#sekolah'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#sekolah')->with('frontend_notice', $message);
     }
 
     // =========================================================================
@@ -193,18 +218,17 @@ class BkManageController extends Controller
         $validated = $request->validate([
             'label' => ['required', 'string', 'max:80'],
             'permendikbud_type' => ['nullable', 'string', 'max:120'],
-            'active' => ['nullable', 'boolean'],
-            'visible_to_kesiswaan' => ['nullable', 'boolean'],
         ]);
 
+        $label = trim($validated['label']);
         $maxOrder = IncidentCategory::max('order_index') ?? 0;
 
         $category = IncidentCategory::create([
-            'label' => trim($validated['label']),
+            'label' => $label,
             'permendikbud_type' => trim((string) ($validated['permendikbud_type'] ?? '')) ?: 'Pendampingan Konseling / Lainnya',
-            'active' => $request->boolean('active', true),
+            'active' => true,
             'permanent' => false,
-            'visible_to_kesiswaan' => $request->boolean('visible_to_kesiswaan', true),
+            'visible_to_kesiswaan' => ! SchoolConfigService::isPrivateCategoryLabel($label),
             'order_index' => $maxOrder + 1,
         ]);
 
@@ -218,7 +242,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#jenis'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#jenis')->with('frontend_notice', $message);
     }
 
     public function updateCategory(Request $request, int $id): JsonResponse|RedirectResponse
@@ -228,20 +252,15 @@ class BkManageController extends Controller
         $validated = $request->validate([
             'label' => ['required', 'string', 'max:80'],
             'permendikbud_type' => ['nullable', 'string', 'max:120'],
-            'active' => ['nullable', 'boolean'],
-            'visible_to_kesiswaan' => ['nullable', 'boolean'],
         ]);
 
-        $category->label = trim($validated['label']);
+        $label = trim($validated['label']);
+        $category->label = $label;
         if ($request->has('permendikbud_type')) {
             $category->permendikbud_type = trim((string) ($validated['permendikbud_type'] ?? '')) ?: null;
         }
-        if (! $category->permanent) {
-            $category->active = $request->boolean('active', true);
-        }
-        if ($request->has('visible_to_kesiswaan')) {
-            $category->visible_to_kesiswaan = $request->boolean('visible_to_kesiswaan');
-        }
+        $category->active = true;
+        $category->visible_to_kesiswaan = ! SchoolConfigService::isPrivateCategoryLabel($label);
         $category->save();
 
         $message = "Jenis aduan '{$category->label}' berhasil diperbarui.";
@@ -254,7 +273,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#jenis'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#jenis')->with('frontend_notice', $message);
     }
 
     public function toggleCategory(int $id): JsonResponse
@@ -288,7 +307,7 @@ class BkManageController extends Controller
                 return response()->json(['success' => false, 'message' => $msg], 422);
             }
 
-            return redirect()->route('bk.manage', ['#jenis'])->with('frontend_notice', $msg);
+            return redirect()->to(route('bk.manage').'#jenis')->with('frontend_notice', $msg);
         }
 
         $label = $category->label;
@@ -303,7 +322,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#jenis'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#jenis')->with('frontend_notice', $message);
     }
 
     public function reorderCategories(Request $request): JsonResponse
@@ -351,7 +370,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#lokasi'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#lokasi')->with('frontend_notice', $message);
     }
 
     public function updateLocation(Request $request, int $id): JsonResponse|RedirectResponse
@@ -379,7 +398,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#lokasi'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#lokasi')->with('frontend_notice', $message);
     }
 
     public function toggleLocation(int $id): JsonResponse
@@ -412,7 +431,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#lokasi'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#lokasi')->with('frontend_notice', $message);
     }
 
     public function reorderLocations(Request $request): JsonResponse
@@ -499,7 +518,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#staf'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#staf')->with('frontend_notice', $message);
     }
 
     public function updateStaff(Request $request, int $id): JsonResponse|RedirectResponse
@@ -559,7 +578,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#staf'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#staf')->with('frontend_notice', $message);
     }
 
     /**
@@ -651,7 +670,7 @@ class BkManageController extends Controller
             ]);
         }
 
-        return redirect()->route('bk.manage', ['#staf'])->with('frontend_notice', $message);
+        return redirect()->to(route('bk.manage').'#staf')->with('frontend_notice', $message);
     }
 
     public function resendStaffInvite(int $id): JsonResponse
@@ -1148,6 +1167,8 @@ class BkManageController extends Controller
             'schoolConfig' => $config,
             'reportUrl' => $reportUrl,
             'qrScanUrl' => $reportUrl,
+            'backUrl' => route('bk.manage').'#qr',
+            'backLabel' => 'Kembali ke Kelola Sekolah',
         ]);
     }
 
@@ -1163,8 +1184,8 @@ class BkManageController extends Controller
             ['label' => 'Pengucilan & Diskriminasi Sosial', 'permendikbud_type' => 'Diskriminasi & Intoleransi (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 3],
             ['label' => 'Pelecehan Melalui Chat & Medsos', 'permendikbud_type' => 'Perundungan Daring (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 4],
             ['label' => 'Sentuhan atau Perilaku Tidak Pantas', 'permendikbud_type' => 'Kekerasan Seksual (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 5],
-            ['label' => 'Pemerasan & Tekanan Kelompok', 'permendikbud_type' => 'Kekerasan Psikis / Pemerasan (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => false, 'order_index' => 6],
-            ['label' => 'Masalah Pribadi & Lainnya', 'permendikbud_type' => 'Pendampingan Konseling / Lainnya', 'active' => true, 'permanent' => true, 'visible_to_kesiswaan' => false, 'order_index' => 7],
+            ['label' => 'Pemerasan & Tekanan Kelompok', 'permendikbud_type' => 'Kekerasan Psikis / Pemerasan (Permendikbudristek 46/2023)', 'active' => true, 'permanent' => false, 'visible_to_kesiswaan' => true, 'order_index' => 6],
+            ['label' => 'Masalah Pribadi & Teman Cerita', 'permendikbud_type' => 'Pendampingan Konseling / Lainnya', 'active' => true, 'permanent' => true, 'visible_to_kesiswaan' => false, 'order_index' => 7],
         ];
 
         foreach ($defaults as $cat) {

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Statistik Agregat — {{ $schoolName }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon-owy.png') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; color: #0f172a; background: #f8fafc; margin: 0; padding: 24px; }
         .no-print { max-width: 900px; margin: 0 auto 16px auto; display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px 18px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
@@ -33,7 +35,7 @@
         <h1>Laporan Statistik Agregat HiOwy — {{ $schoolName }}</h1>
         <p class="meta">Periode: {{ $selectedMonth ? ($stats['available_months'][$selectedMonth] ?? $selectedMonth) : 'Semua Bulan' }} &bull; Dicetak {{ now('Asia/Jakarta')->translatedFormat('d F Y') }}</p>
         <div class="notice">
-            <strong>Kepatuhan Privasi (FR-60 &amp; FR-61):</strong> Dokumen ini tidak memuat isi kronologi maupun identitas siswa. Kelompok berjumlah 1–4 ditampilkan sebagai &ldquo;kurang dari 5&rdquo;.
+            <strong>Kepatuhan Privasi:</strong> Dokumen ini tidak memuat isi kronologi maupun identitas siswa. Kelompok berjumlah 1–4 ditampilkan sebagai &ldquo;kurang dari 5&rdquo;.
         </div>
         <div class="kpis">
             <div class="kpi"><small>Total Laporan</small><strong>{{ $stats['total_display'] }}</strong></div>

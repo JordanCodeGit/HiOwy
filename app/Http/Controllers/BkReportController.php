@@ -155,6 +155,7 @@ class BkReportController extends Controller
             'status' => ['nullable', 'string', 'in:unread,belum_dibaca,read,dibaca,ditindaklanjuti,sedang_diproses,in_progress,selesai,resolved'],
             'urgency' => ['nullable', 'string', 'in:Darurat,Urgent,Sedang,Medium,Rendah,Easy'],
             'assigned_counselor' => ['nullable', 'string', 'max:120'],
+            'category' => ['nullable', 'string', 'max:120', Rule::exists('incident_categories', 'label')],
         ]);
 
         if (isset($validated['status'])) {
@@ -628,7 +629,7 @@ class BkReportController extends Controller
 
             foreach ($sections as $sectionTitle => $rows) {
                 fputcsv($out, []);
-                fputcsv($out, [$sectionTitle, 'Jumlah (Tersamarkan FR-60)', 'Persentase']);
+                fputcsv($out, [$sectionTitle, 'Jumlah (Tersamarkan)', 'Persentase']);
                 foreach ($rows as $row) {
                     fputcsv($out, [$row['label'], $row['display'], $row['pct'].'%']);
                 }

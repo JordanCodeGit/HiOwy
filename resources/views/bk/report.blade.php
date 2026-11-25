@@ -322,7 +322,7 @@
 </div>
 </div>
 <div class="flex flex-col gap-1.5">
-<label class="text-xs font-semibold text-slate-700" for="caseCategory">Koreksi Jenis Kejadian <span class="font-normal text-slate-400">(Visibilitas Kesiswaan)</span></label>
+<label class="text-xs font-semibold text-slate-700" for="caseCategory">Koreksi Jenis Kejadian</label>
 <div class="flex items-center gap-2">
 <div class="relative flex-1">
 <select x-model="categoryChoice" class="w-full appearance-none p-2.5 pr-8 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:bg-white cursor-pointer" id="caseCategory">
@@ -335,8 +335,9 @@
 </select>
 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">arrow_drop_down</span>
 </div>
-<button type="button" @click="updateCategory()" :disabled="loading" class="px-3 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200 transition-colors cursor-pointer shrink-0">Koreksi</button>
+<button type="button" @click="updateCategory()" :disabled="loading" class="px-3 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold border border-blue-200 transition-colors cursor-pointer shrink-0" title="Simpan koreksi jenis kejadian">Koreksi</button>
 </div>
+<span class="text-[11px] text-slate-500">Ubah jika jenis kejadian yang dipilih pelapor kurang tepat. Kategori selain Masalah Pribadi &amp; Teman Cerita otomatis diteruskan ke Tim Kesiswaan.</span>
 </div>
 <div class="flex flex-col gap-1.5">
 <div class="flex items-center justify-between gap-2">

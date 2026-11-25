@@ -6,6 +6,7 @@ use App\Models\Forward;
 use App\Models\SchoolSetting;
 use App\Models\StaffMember;
 use App\Support\AuditLogger;
+use App\Support\SchoolConfigService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -140,14 +141,18 @@ class WaliKelasPreviewController extends Controller
 
     public function downloadPoster(): View
     {
-        $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+        $config = SchoolConfigService::getConfig();
+        $schoolName = $config['school_name'];
         $className = $this->teacherClass();
         $reportUrl = url('/s/lapor');
 
         return view('bk.poster-print', [
             'schoolName' => $schoolName.($className !== '-' ? ' — Kelas '.$className : ''),
+            'schoolConfig' => $config,
             'reportUrl' => $reportUrl,
             'qrScanUrl' => $reportUrl,
+            'backUrl' => route('walas.dashboard'),
+            'backLabel' => 'Kembali ke Dashboard Wali Kelas',
         ]);
     }
 

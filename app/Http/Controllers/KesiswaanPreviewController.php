@@ -7,6 +7,7 @@ use App\Models\IncidentCategory;
 use App\Models\SchoolSetting;
 use App\Models\StudentReport;
 use App\Support\AuditLogger;
+use App\Support\SchoolConfigService;
 use App\Support\StatisticsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -23,31 +24,39 @@ use Illuminate\View\View;
 class KesiswaanPreviewController extends Controller
 {
     /**
-     * Ambil daftar nama kategori kejadian yang diizinkan untuk Kesiswaan.
+     * Ambil daftar kategori yang diblokir untuk Kesiswaan (khusus BK).
      *
      * @return array<int, string>
      */
-    private function allowedCategoryLabels(): array
+    private function excludedCategoryLabels(): array
     {
-        return IncidentCategory::where('visible_to_kesiswaan', true)
+        return IncidentCategory::where('visible_to_kesiswaan', false)
             ->pluck('label')
+            ->values()
             ->all();
     }
 
     /**
-     * Query laporan dasar yang boleh dilihat Kesiswaan.
+     * Query laporan dasar yang boleh dilihat Kesiswaan (semua kategori kecuali Masalah Pribadi & Teman Cerita).
+     */
+    private function visibleReportsModels(): Collection
+    {
+        $excluded = $this->excludedCategoryLabels();
+
+        return StudentReport::production()
+            ->orderByDesc('id')
+            ->get()
+            ->filter(fn (StudentReport $r) => ! in_array($r->category, $excluded, true)
+                && ! SchoolConfigService::isPrivateCategoryLabel((string) $r->category))
+            ->values();
+    }
+
+    /**
+     * Query laporan dasar yang boleh dilihat Kesiswaan dalam bentuk DTO aman.
      */
     private function visibleReportsCollection(): Collection
     {
-        $allowedLabels = $this->allowedCategoryLabels();
-        if (empty($allowedLabels)) {
-            return collect([]);
-        }
-
-        return StudentReport::production()
-            ->whereIn('category', $allowedLabels)
-            ->orderByDesc('id')
-            ->get()
+        return $this->visibleReportsModels()
             ->map(fn (StudentReport $r) => $this->toSafeDto($r));
     }
 
@@ -316,15 +325,12 @@ class KesiswaanPreviewController extends Controller
 
     public function statistics(Request $request): View
     {
-        $allowedLabels = $this->allowedCategoryLabels();
-        $rawModels = empty($allowedLabels)
-            ? collect([])
-            : StudentReport::production()->whereIn('category', $allowedLabels)->orderByDesc('id')->get();
+        $rawModels = $this->visibleReportsModels();
 
         $selectedMonth = trim((string) $request->query('month', '')) ?: null;
         $stats = StatisticsService::buildFromReports($rawModels, $selectedMonth, false);
 
-        $reports = $this->visibleReportsCollection();
+        $reports = $rawModels->map(fn (StudentReport $r) => $this->toSafeDto($r));
         $total = $reports->count();
         $completed = $reports->filter(fn (array $r) => $r['status'] === 'selesai' || $r['archive_reason'] === 'selesai')->count();
 
@@ -357,8 +363,7 @@ class KesiswaanPreviewController extends Controller
     public function accessLog(): View
     {
         $all = $this->visibleReportsCollection();
-        $allowedIds = StudentReport::production()
-            ->whereIn('category', $this->allowedCategoryLabels())
+        $allowedIds = $this->visibleReportsModels()
             ->pluck('id')
             ->flip();
 
@@ -430,6 +435,7 @@ class KesiswaanPreviewController extends Controller
         $types = IncidentCategory::where('visible_to_kesiswaan', true)
             ->orderBy('order_index')
             ->get()
+            ->reject(fn (IncidentCategory $cat) => SchoolConfigService::isPrivateCategoryLabel($cat->label))
             ->mapWithKeys(fn (IncidentCategory $cat) => [$this->normalizeType($cat->label) => $cat->label])
             ->all();
 

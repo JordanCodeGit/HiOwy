@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\SchoolConfigService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -109,9 +110,14 @@ class StudentReport extends Model
 
     public function isVisibleToKesiswaan(): bool
     {
-        return IncidentCategory::where('label', $this->category)
-            ->where('visible_to_kesiswaan', true)
-            ->exists();
+        $category = trim((string) $this->category);
+        if ($category === '' || SchoolConfigService::isPrivateCategoryLabel($category)) {
+            return false;
+        }
+
+        $matched = IncidentCategory::where('label', $category)->first();
+
+        return $matched ? (bool) $matched->visible_to_kesiswaan : true;
     }
 
     public function getIsArchivedAttribute(): bool
