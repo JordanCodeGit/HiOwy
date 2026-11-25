@@ -29,17 +29,19 @@
                         <span>Cetak Poster Kelas</span>
                     </a>
 
-                    <!-- Filter Tabs -->
-                    <nav aria-label="Filter Ringkasan" class="inline-flex flex-wrap p-1 bg-surface-container-low rounded-xl shadow-xs gap-1">
-                        @foreach(['unread' => ['Belum Dibaca', $unreadCount], 'read' => ['Sudah Dibaca', $readCount ?? $summaries->where('status', 'read')->count()], 'all' => ['Semua', $summaries->count()]] as $key => [$label, $count])
-                        <button type="button" @click="filter = '{{ $key }}'" :aria-pressed="filter === '{{ $key }}'" :class="{ 'bk-tab-active': filter === '{{ $key }}' }" class="tab-btn flex items-center gap-2 px-space-md py-space-xs rounded-lg text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-all cursor-pointer">
-                            <span>{{ $label }}</span>
-                            <span class="px-2 py-0.5 rounded-full bg-surface-container text-secondary text-label-sm font-label-sm">{{ $count }}</span>
-                        </button>
-                        @endforeach
-                    </nav>
+
                 </div>
             </header>
+
+            <!-- Filter Tabs -->
+            <nav aria-label="Filter Ringkasan" class="staff-metrics metric-featured summary-metrics grid grid-cols-1 sm:grid-cols-3 gap-4">
+                @foreach(['unread' => ['Belum Dibaca', $unreadCount], 'read' => ['Sudah Dibaca', $readCount ?? $summaries->where('status', 'read')->count()], 'all' => ['Semua', $summaries->count()]] as $key => [$label, $count])
+                <button type="button" @click="filter = '{{ $key }}'" :aria-pressed="filter === '{{ $key }}'" :class="{ 'bk-tab-active': filter === '{{ $key }}' }" class="summary-metric flex flex-col items-start gap-3 p-5 text-sm font-semibold transition-all">
+                    <span>{{ $label }}</span>
+                    <span class="text-3xl font-extrabold">{{ $count }}</span>
+                </button>
+                @endforeach
+            </nav>
 
             <!-- Search Bar -->
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">

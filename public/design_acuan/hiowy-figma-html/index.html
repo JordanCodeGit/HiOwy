@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HiOwy! — Indeks 19 Halaman HTML Statis (Figma Redesign)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 40px 48px 64px 48px;
+      background: #F6F8FC;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0F172A;
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+    .hero {
+      background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
+      color: #FFFFFF;
+      padding: 28px 32px;
+      border-radius: 22px;
+      margin-bottom: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .hero h1 { margin: 0 0 6px 0; font-size: 24px; font-weight: 800; }
+    .hero p { margin: 0; font-size: 13px; color: #CBD5E1; }
+    .badge { background: rgba(255,255,255,0.16); padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .group { margin-bottom: 32px; }
+    .group h2 { font-size: 15px; font-weight: 800; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 14px 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #FFFFFF;
+      border: 1px solid #E5ECF6;
+      border-radius: 16px;
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: #2563EB;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+    }
+    .card-top { display: flex; align-items: center; justify-content: space-between; }
+    .num { background: #EFF6FF; color: #1D4ED8; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 8px; }
+    .nid { font-size: 11px; font-weight: 600; color: #64748B; }
+    .card-title { font-size: 14px; font-weight: 700; color: #0F172A; line-height: 1.35; }
+    .card-file { font-size: 11.5px; color: #64748B; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>HiOwy! — 19 File HTML Statis Terpisah (Redesign Figma)</h1>
+        <p>Sumber: App-Bullying → Frame <strong>Redesign - HiOwy!</strong> (Node 229:319) • SMP Telkom Purwokerto</p>
+      </div>
+      <div class="badge">19 Static HTML Pages + Local Assets</div>
+    </div>
+    
+    <section class="group">
+      <h2>Portal Siswa &amp; Auth</h2>
+      <div class="grid">
+        <a class="card" href="01-formulir-pengaduan-siswa.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#01</span>
+            <span class="nid">Node 150:131</span>
+          </div>
+          <div class="card-title">Page Formulir Pengaduan Siswa — SMP Telkom Purwokerto</div>
+          <div class="card-file">01-formulir-pengaduan-siswa.html</div>
+        </a>
+        <a class="card" href="02-auth-masuk.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#02</span>
+            <span class="nid">Node 192:8949</span>
+          </div>
+          <div class="card-title">Page Auth - Masuk</div>
+          <div class="card-file">02-auth-masuk.html</div>
+        </a>
+        <a class="card" href="03-auth-lupa-kata-sandi.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#03</span>
+            <span class="nid">Node 194:9203</span>
+          </div>
+          <div class="card-title">Page Auth - Lupa Kata Sandi</div>
+          <div class="card-file">03-auth-lupa-kata-sandi.html</div>
+        </a>
+        <a class="card" href="04-auth-pengaturan-2fa.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#04</span>
+            <span class="nid">Node 194:9905</span>
+          </div>
+          <div class="card-title">Page Auth - Pengaturan 2FA</div>
+          <div class="card-file">04-auth-pengaturan-2fa.html</div>
+        </a></div>
+    </section>
+    <section class="group">
+      <h2>Modul Laporan</h2>
+      <div class="grid">
+        <a class="card" href="05-page1-laporan.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#05</span>
+            <span class="nid">Node 215:13227</span>
+          </div>
+          <div class="card-title">Page 1 Laporan</div>
+          <div class="card-file">05-page1-laporan.html</div>
+        </a>
+        <a class="card" href="06-page1-laporan-modal-filter-profil.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#06</span>
+            <span class="nid">Node 215:19607</span>
+          </div>
+          <div class="card-title">Page 1 Laporan - Modal Pop up dan Profil</div>
+          <div class="card-file">06-page1-laporan-modal-filter-profil.html</div>
+        </a>
+        <a class="card" href="07-page1-detail-laporan.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#07</span>
+            <span class="nid">Node 215:13992</span>
+          </div>
+          <div class="card-title">Page 1 Laporan - Buka Detail Laporan</div>
+          <div class="card-file">07-page1-detail-laporan.html</div>
+        </a>
+        <a class="card" href="08-page1-detail-laporan-modal-walas.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#08</span>
+            <span class="nid">Node 215:14281 / 14568</span>
+          </div>
+          <div class="card-title">Page 1 Laporan - Detail + Modal Teruskan Wali Kelas</div>
+          <div class="card-file">08-page1-detail-laporan-modal-walas.html</div>
+        </a></div>
+    </section>
+    <section class="group">
+      <h2>Modul Kelola</h2>
+      <div class="grid">
+        <a class="card" href="09-page2-kelola-jenis-kejadian.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#09</span>
+            <span class="nid">Node 215:14606</span>
+          </div>
+          <div class="card-title">Page 2 Kelola - Jenis Kejadian</div>
+          <div class="card-file">09-page2-kelola-jenis-kejadian.html</div>
+        </a>
+        <a class="card" href="10-page2-kelola-lokasi-kejadian.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#10</span>
+            <span class="nid">Node 215:14930</span>
+          </div>
+          <div class="card-title">Page 2 Kelola - Lokasi Kejadian</div>
+          <div class="card-file">10-page2-kelola-lokasi-kejadian.html</div>
+        </a>
+        <a class="card" href="11-page2-kelola-qr-sekolah.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#11</span>
+            <span class="nid">Node 215:15252</span>
+          </div>
+          <div class="card-title">Page 2 Kelola - QR Sekolah</div>
+          <div class="card-file">11-page2-kelola-qr-sekolah.html</div>
+        </a>
+        <a class="card" href="12-page2-kelola-modal-undang-staf.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#12</span>
+            <span class="nid">Node 215:15666</span>
+          </div>
+          <div class="card-title">Page 2 Kelola - Modal Pop up Undang Staf</div>
+          <div class="card-file">12-page2-kelola-modal-undang-staf.html</div>
+        </a>
+        <a class="card" href="13-page2-kelola-modal-tambah-kategori.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#13</span>
+            <span class="nid">Node 215:15962</span>
+          </div>
+          <div class="card-title">Page 2 Kelola - Modal Pop up Tambah Kategori</div>
+          <div class="card-file">13-page2-kelola-modal-tambah-kategori.html</div>
+        </a></div>
+    </section>
+    <section class="group">
+      <h2>Modul Halaman Pelajari</h2>
+      <div class="grid">
+        <a class="card" href="14-page3-halaman-pelajari.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#14</span>
+            <span class="nid">Node 215:15992</span>
+          </div>
+          <div class="card-title">Page 3 Halaman Pelajari</div>
+          <div class="card-file">14-page3-halaman-pelajari.html</div>
+        </a>
+        <a class="card" href="15-page3-halaman-pelajari-modal-tambah-pengumuman.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#15</span>
+            <span class="nid">Node 215:16575</span>
+          </div>
+          <div class="card-title">Page 3 Halaman Pelajari - Modal Tambah Pengumuman</div>
+          <div class="card-file">15-page3-halaman-pelajari-modal-tambah-pengumuman.html</div>
+        </a>
+        <a class="card" href="16-page3-halaman-pelajari-modal-pratinjau.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#16</span>
+            <span class="nid">Node 215:16936</span>
+          </div>
+          <div class="card-title">Page 3 Halaman Pelajari - Modal Pratinjau</div>
+          <div class="card-file">16-page3-halaman-pelajari-modal-pratinjau.html</div>
+        </a></div>
+    </section>
+    <section class="group">
+      <h2>Statistik, Arsip &amp; Log</h2>
+      <div class="grid">
+        <a class="card" href="17-page4-statistik.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#17</span>
+            <span class="nid">Node 215:16964</span>
+          </div>
+          <div class="card-title">Page 4 Statistik</div>
+          <div class="card-file">17-page4-statistik.html</div>
+        </a>
+        <a class="card" href="18-page4-arsip.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#18</span>
+            <span class="nid">Node 215:17279</span>
+          </div>
+          <div class="card-title">Page 4 Arsip</div>
+          <div class="card-file">18-page4-arsip.html</div>
+        </a>
+        <a class="card" href="19-page4-log-akses.html" target="_blank">
+          <div class="card-top">
+            <span class="num">#19</span>
+            <span class="nid">Node 215:17485</span>
+          </div>
+          <div class="card-title">Page 4 Log Akses</div>
+          <div class="card-file">19-page4-log-akses.html</div>
+        </a></div>
+    </section>
+  </div>
+</body>
+</html>

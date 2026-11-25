@@ -1,5 +1,5 @@
 <x-layouts.bk title="Statistik Kesiswaan" page="statistics" portal="kesiswaan" :report-count="$summary['unread']">
-    <main class="max-w-[1580px] mx-auto w-full p-4 lg:p-8 space-y-8">
+    <main class="w-full p-4 lg:p-8 space-y-8">
         <header class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight">Statistik &amp; Analitik</h1>
@@ -15,12 +15,12 @@
             </form>
         </header>
 
-        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        <section class="staff-metrics metric-featured metric-statistics grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
             @foreach([
                 ['Total Laporan', $stats['total_display'], 'description'],
-                ['Laporan Aktif', $stats['active_display'], 'pending_actions'],
                 ['Tingkat Penyelesaian', $stats['rate'].'% ('.$stats['completed_display'].')', 'monitoring'],
-                ['Rata-rata Waktu Dibaca', $stats['avg_read_label'], 'schedule']
+                ['Antrean Aktif', $stats['active_display'], 'pending_actions'],
+                ['Kategori Dominan', ($stats['by_category'][0]['pct'] ?? 0).'%', 'category']
             ] as [$label, $value, $icon])
             <div class="bk-hover-card rounded-2xl bg-white border border-slate-200 p-6 shadow-xs">
                 <div class="flex justify-between items-center gap-3">
@@ -28,6 +28,8 @@
                     <span class="material-symbols-outlined rounded-xl bg-blue-50 text-secondary p-2">{{ $icon }}</span>
                 </div>
                 <p class="mt-4 text-2xl font-bold">{{ $value }}</p>
+                @if ($loop->last)<p class="mt-2 text-xs text-slate-600">{{ $stats['by_category'][0]['label'] ?? 'Belum ada data' }}</p>@endif
+                @if ($label === 'Antrean Aktif')<p class="mt-2 text-xs text-slate-600">Rata-rata waktu dibaca: {{ $stats['avg_read_label'] }}</p>@endif
             </div>
             @endforeach
         </section>

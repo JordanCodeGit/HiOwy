@@ -27,18 +27,20 @@
 @if($portal !== 'walas')
 <div class="staff-mobile-school"><strong>{{ $schoolName }}</strong><span>{{ $profileRole }}</span></div>
 @endif
+@if($portal !== 'walas')
+<div class="staff-quick-search relative hidden xl:block w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input x-model="quickSearch" @keydown.enter.prevent="searchReports($el.dataset.url)" data-url="{{ route($portal.'.dashboard') }}" aria-label="Cari laporan" class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all" placeholder="Pencarian cepat..." type="text">
+</div>
+@endif
 <div class="staff-academic-year inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 text-slate-700 text-xs font-semibold border border-slate-200">
 <span class="material-symbols-outlined text-[16px] text-slate-500">school</span>
 <span>Tahun Ajaran 2024/2025 @if($portal === 'walas')<span class="hidden sm:inline">· Semester Genap</span>@endif</span>
 </div>
 </div>
 <div class="flex items-center gap-2 sm:gap-4">
-@if($portal !== 'walas')
-<div class="relative hidden xl:block w-64">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-<input x-model="quickSearch" @keydown.enter.prevent="searchReports($el.dataset.url)" data-url="{{ route($portal.'.dashboard') }}" aria-label="Cari laporan" class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all" placeholder="Pencarian cepat..." type="text">
-</div>
-@endif
+@if ($slot->isNotEmpty())<div class="hidden lg:block">{{ $slot }}</div>@endif
+
 @if($portal === 'bk')
 <div class="relative" id="notificationWrapper">
 <button @click="notificationsOpen = !notificationsOpen; profileOpen = false" :aria-expanded="notificationsOpen" aria-controls="notificationDropdown" aria-label="Notifikasi" class="relative w-9 h-9 rounded-lg flex items-center justify-center text-slate-700 bg-slate-100 hover:bg-slate-200/70 transition-colors cursor-pointer" id="notifBellBtn" type="button">

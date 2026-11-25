@@ -663,9 +663,66 @@ export function registerBk(Alpine, navigateTo) {
         },
     }));
 
+    function sortReports(order) {
+        const table = this.$root.querySelector('.bk-reports-table');
+        const body = table.tBodies[0];
+        const reportRows = [...body.querySelectorAll('tr[data-id]')];
+        const originalOrder = new Map(this.rows.map((row, index) => [String(row.id), row.index ?? index]));
+        const rank = id => order === 'default' ? originalOrder.get(String(id)) : Number(id) * (order === 'oldest' ? 1 : -1);
+        reportRows.sort((left, right) => rank(left.dataset.id) - rank(right.dataset.id));
+        Alpine.mutateDom(() => body.prepend(...reportRows));
+        if (this.kind === 'dashboard') {
+            this.rows.sort((left, right) => rank(left.id) - rank(right.id));
+            this.currentPage = 1;
+        }
+        this.selected = [];
+    }
+
+    Alpine.data('reportFilterDialog', () => ({
+        draft: {},
+        openFilters() {
+            this.draft = { ...this.reportFilterValues };
+            this.$refs.dialog.showModal();
+        },
+        clearDraft() {
+            this.draft = Object.fromEntries(Object.keys(this.reportFilterValues).map(key => [key, '']));
+        },
+        applyFilters() {
+            if (this.draft.period !== 'custom') {
+                this.draft.from = '';
+                this.draft.to = '';
+            }
+            this.setReportFilters(this.draft);
+            this.$refs.dialog.close();
+        },
+        get appliedChips() {
+            if (!this.$refs.dialog) return [];
+            return [...this.$refs.dialog.querySelectorAll('select')].flatMap(select => {
+                const key = select.getAttribute('x-model').split('.')[1];
+                const value = this.reportFilterValues[key];
+                if (!value) return [];
+                const label = [...select.options].find(option => option.value === value)?.textContent.trim();
+                const range = [this.reportFilterValues.from, this.reportFilterValues.to].filter(Boolean).join(' – ');
+                return [{ key, label: value === 'custom' && range ? range : label }];
+            });
+        },
+        get filterCount() {
+            return this.appliedChips.length;
+        },
+        removeFilter(key) {
+            const values = { ...this.reportFilterValues, [key]: '' };
+            if (key === 'period') {
+                values.from = '';
+                values.to = '';
+            }
+            this.setReportFilters(values);
+        },
+    }));
+
     Alpine.data('bkTable', kind => ({
         ...modalState(),
         kind,
+        sortReports,
         query: '',
         statusTab: 0,
         priorityFilter: '',
@@ -683,6 +740,20 @@ export function registerBk(Alpine, navigateTo) {
         dateTo: '',
         dateFilterOpen: false,
 
+        get reportFilterValues() {
+            return { type: this.categoryFilter, role: this.roleFilter, urgency: this.urgencyFilter, contact: this.contactFilter, period: this.timeFilter, from: this.dateFrom, to: this.dateTo };
+        },
+        setReportFilters(values) {
+            this.categoryFilter = values.type;
+            this.roleFilter = values.role;
+            this.urgencyFilter = values.urgency;
+            this.contactFilter = values.contact;
+            this.timeFilter = values.period;
+            this.dateFrom = values.from;
+            this.dateTo = values.to;
+            this.selected = [];
+            this.currentPage = 1;
+        },
         init() {
             this.rows = [...this.$root.querySelectorAll('[data-preview-row]')].map((row, index) => ({
                 index,
@@ -996,15 +1067,8 @@ export function registerBk(Alpine, navigateTo) {
             this.content = '';
             this.visible = true;
             this.audience = 'siswa';
-            const titleEl = document.getElementById('post-title');
-            if (titleEl) {
-                titleEl.focus();
-                titleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        },
-
-        resetAnnouncement() {
-            this.newAnnouncement();
+            this.$refs.editor.showModal();
+            document.getElementById('post-title')?.focus();
         },
 
         editItem(item) {
@@ -1016,11 +1080,8 @@ export function registerBk(Alpine, navigateTo) {
             this.content = item.content;
             this.visible = Boolean(item.is_visible);
             this.audience = item.audience;
-            const titleEl = document.getElementById('post-title');
-            if (titleEl) {
-                titleEl.focus();
-                titleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
+            this.$refs.editor.showModal();
+            document.getElementById('post-title')?.focus();
         },
 
         previewItem(item) {
@@ -1404,6 +1465,7 @@ export function registerBk(Alpine, navigateTo) {
     Alpine.data('kesiswaanTable', (archive = false) => ({
         ...modalState(),
         archive,
+        sortReports,
         query: '',
         status: 'belum_dibaca',
         priorityFilter: '',
@@ -1413,6 +1475,16 @@ export function registerBk(Alpine, navigateTo) {
         dateTo: '',
         selected: [],
         rows: [],
+        get reportFilterValues() {
+            return { ...this.filters, period: this.period, from: this.dateFrom, to: this.dateTo };
+        },
+        setReportFilters({ period, from, to, ...filters }) {
+            this.filters = filters;
+            this.period = period;
+            this.dateFrom = from;
+            this.dateTo = to;
+            this.selected = [];
+        },
         init() {
             this.rows = [...this.$root.querySelectorAll('[data-report-row]')].map(row => ({
                 ...row.dataset,

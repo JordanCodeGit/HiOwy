@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>02 · Masuk — Portal Staf Sekolah | HiOwy!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #e2e8f0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+    .auth-shell {
+      width: 1140px;
+      min-height: 704px;
+      background: #ffffff;
+      border-radius: 32px;
+      padding: 32px;
+      box-shadow: 0 25px 60px -15px rgba(67, 97, 238, 0.12), 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 48px;
+    }
+    .auth-left {
+      background: #131b2e;
+      border-radius: 26px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 20px 40px -10px rgba(67, 97, 238, 0.3);
+      color: #ffffff;
+    }
+    .orb-tr {
+      position: absolute;
+      width: 192px;
+      height: 192px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.1);
+      filter: blur(40px);
+      top: -64px;
+      right: -64px;
+      pointer-events: none;
+    }
+    .orb-bl {
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border-radius: 9999px;
+      background: rgba(49, 46, 129, 0.35);
+      filter: blur(24px);
+      bottom: 40px;
+      left: -40px;
+      pointer-events: none;
+    }
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 13px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(12px);
+      width: fit-content;
+      position: relative;
+      z-index: 2;
+    }
+    .trust-pill span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.44px;
+      color: #85f8c4;
+      line-height: 14px;
+    }
+    .left-h1 {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 40px;
+      letter-spacing: -0.9px;
+      margin: 22px 0 14px 0;
+      position: relative;
+      z-index: 2;
+    }
+    .left-h1.sm {
+      font-size: 30px;
+      line-height: 36px;
+      margin: 20px 0 8px 0;
+    }
+    .left-sub {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+      color: rgba(219, 234, 254, 0.9);
+      margin: 0;
+      position: relative;
+      z-index: 2;
+    }
+    .mascot-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      margin-top: 20px;
+    }
+    .mascot-stage img {
+      width: 246px;
+      height: 246px;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 24px rgba(15, 23, 42, 0.4));
+    }
+    .mascot-shadow {
+      width: 144px;
+      height: 16px;
+      border-radius: 9999px;
+      background: rgba(30, 27, 75, 0.45);
+      filter: blur(12px);
+      margin-top: -6px;
+    }
+    .companion-pill {
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 15px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.95);
+    }
+    .companion-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background: #34d399;
+    }
+    .auth-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px 32px;
+      position: relative;
+    }
+    .brand-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .brand-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-sq {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: #131b2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px -1px rgba(67, 97, 238, 0.3);
+    }
+    .brand-name {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #0f172a;
+    }
+    .form-title {
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 36px;
+      letter-spacing: -0.75px;
+      color: #0f172a;
+      margin: 0 0 6px 0;
+    }
+    .form-sub {
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+      color: #64748b;
+      margin: 0 0 28px 0;
+    }
+    .fld-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .fld-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .fld-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 15px 44px 15px 17px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .fld-input-wrap img {
+      position: absolute;
+      right: 14px;
+      width: 20px;
+      height: 20px;
+    }
+    .util-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 4px 0 20px 0;
+    }
+    .check-lbl {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #475569;
+    }
+    .check-box {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+    }
+    .forgot-link {
+      font-size: 12px;
+      font-weight: 600;
+      color: #131b2e;
+      text-decoration: none;
+    }
+    .btn-primary-dark {
+      width: 100%;
+      background: #131b2e;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 24px;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 10px -1px rgba(67, 97, 238, 0.25);
+      cursor: pointer;
+    }
+    .help-foot {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 12px;
+      line-height: 20px;
+      color: #45464d;
+    }
+    .help-foot a {
+      color: #006398;
+      font-weight: 600;
+      text-decoration: none;
+      margin-left: 4px;
+    }
+</style>
+</head>
+<body>
+  <main class="auth-shell">
+    <section class="auth-left">
+      <div class="orb-tr"></div>
+      <div class="orb-bl"></div>
+      <div>
+        <div class="trust-pill">
+          <img src="assets/auth-badge-shield.svg" alt="" width="14" height="14" />
+          <span>Akses Khusus Staf Sekolah</span>
+        </div>
+        <h1 class="left-h1">Ruang Aman &amp;<br/>Terlindung</h1>
+        <p class="left-sub">Sistem pelaporan dan pendampingan siswa terpadu.</p>
+      </div>
+      <div class="mascot-stage">
+        <img src="assets/maskot-owy-auth.png" alt="Maskot Owy" width="246" height="246" />
+        <div class="mascot-shadow"></div>
+        <div class="companion-pill">
+          <span class="companion-dot"></span>
+          <span>Sahabat Pendamping</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-right">
+      <div class="brand-hdr">
+        <div class="brand-logo-wrap">
+          <div class="brand-sq">
+            <img src="assets/auth-logo-shield.svg" alt="" width="20" height="20" />
+          </div>
+          <span class="brand-name">HiOwy!</span>
+        </div>
+      </div>
+
+      <h2 class="form-title">Masuk</h2>
+      <p class="form-sub">Silakan masuk ke akun konselor atau staf sekolah Anda</p>
+
+      <div class="fld-group">
+        <label class="fld-label">EMAIL ADMIN</label>
+        <div class="fld-input-wrap">
+          <span>nama@sekolah.sch.id</span>
+          <img src="assets/auth-icon-at.svg" alt="" width="20" height="20" />
+        </div>
+      </div>
+
+      <div class="fld-group">
+        <label class="fld-label">KATA SANDI</label>
+        <div class="fld-input-wrap">
+          <span>••••••••••••</span>
+          <img src="assets/auth-icon-eye-slash.svg" alt="" width="20" height="20" />
+        </div>
+      </div>
+
+      <div class="util-row">
+        <span class="check-lbl"><span class="check-box"></span> Ingat saya</span>
+        <a class="forgot-link" href="03-auth-lupa-kata-sandi.html">Lupa Kata Sandi?</a>
+      </div>
+
+      <button class="btn-primary-dark" type="button">
+        <span>Lanjutkan ke Verifikasi 2FA</span>
+        <img src="assets/auth-icon-arrow.svg" alt="" width="16" height="16" />
+      </button>
+
+      <div class="help-foot">
+        <div>Akun staf sekolah hanya dibuat melalui undangan resmi Koordinator BK / Admin Sekolah.</div>
+        <div>Kendala akses akun? <a href="#">Hubungi Bantuan IT BK</a></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

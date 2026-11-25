@@ -108,6 +108,7 @@ function enhanceTables(main) {
 }
 
 function enhanceFilters(main, Alpine) {
+    if (main.querySelector('.report-filters')) return;
     const state = main.getAttribute('x-data') || '';
     if (!/bkTable|kesiswaanTable|bkStatistics/.test(state) && document.body.dataset.staffPage !== 'access-log') return;
     const controls = [...main.querySelectorAll('select')].filter(select => !select.options[0]?.textContent.includes('/ halaman'));
@@ -179,7 +180,7 @@ function enhanceSelection(main) {
     const action = [...main.querySelectorAll('button')].find(element => element.id === 'bulkActionBtn' || (element.getAttribute('@click') || '').includes('bulk-iseng'));
     if (!action) return;
     action.classList.add('staff-desktop-only');
-    const controls = main.querySelector('.staff-mobile-filter-toolbar') || main;
+    const controls = main.querySelector('.report-filters, .staff-mobile-filter-toolbar') || main;
     const toggle = button('Pilih', () => {
         main.classList.toggle('staff-selecting');
         toggle.textContent = main.classList.contains('staff-selecting') ? 'Batal pilih' : 'Pilih';
@@ -215,18 +216,17 @@ function enhanceSummaryStrip(main, Alpine) {
     const state = Alpine.$data(main);
     const clear = button('Semua prioritas ×', () => { state.priorityFilter = ''; clear.hidden = true; }, 'staff-priority-chip staff-mobile-only');
     clear.hidden = true; strip.after(clear);
-    [...strip.children].forEach((card, index) => {
-        card.setAttribute('role', 'button'); card.tabIndex = 0;
+    strip.querySelectorAll('[data-priority]').forEach(card => {
         const apply = () => {
-            state.priorityFilter = ['', 'danger', 'overdue'][index] || '';
+            state.priorityFilter = state.priorityFilter === card.dataset.priority ? '' : card.dataset.priority;
+            if ('currentPage' in state) state.currentPage = 1;
             if ('statusTab' in state) state.statusTab = 0;
             if ('status' in state) state.status = 'belum_dibaca';
             state.selected = [];
             clear.hidden = !state.priorityFilter;
-            clear.textContent = `${index === 1 ? 'Danger flag' : 'Tanpa update >3 hari'} ×`;
+            clear.textContent = `${card.dataset.priority === 'danger' ? 'Darurat' : 'Tanpa update >3 hari'} ×`;
         };
         card.addEventListener('click', apply);
-        card.addEventListener('keydown', event => { if (['Enter', ' '].includes(event.key)) { event.preventDefault(); apply(); } });
     });
     main.querySelectorAll('button').forEach(tab => {
         if (/statusTab\s*=|status\s*=/.test(tab.getAttribute('@click') || '')) {
@@ -340,47 +340,16 @@ function enhanceProfile(main, Alpine) {
     revealAnchor();
 }
 
-function enhanceLearn(main, Alpine) {
-    if (document.body.dataset.staffPage !== 'learn') return;
-    const form = main.querySelector('#announcement-form');
-    if (!form) return;
-    const editor = form.closest('.bk-hover-card');
-    const editSheet = sheet(main, 'Pengumuman', true);
-    responsiveMove(Alpine, [editor], editSheet.content);
-    const dock = node('div', 'staff-action-dock staff-mobile-only');
-    dock.append(button('Tambah pengumuman', () => { Alpine.$data(main).newAnnouncement(); editSheet.open(); }, 'staff-primary'));
-    main.append(dock);
-    main.querySelector('#btn-focus-form')?.classList.add('staff-desktop-only');
-    const audience = main.querySelector('#audience-selector');
-    audience?.parentElement.classList.add('staff-desktop-only');
-    main.querySelectorAll('.bk-learning-card span').forEach(element => {
-        if (/\d+ Tayangan/.test(element.textContent) && !element.querySelector('span:not(.material-symbols-outlined)')) element.classList.add('staff-desktop-only');
-    });
-    main.addEventListener('click', event => {
-        const action = event.target.closest('button');
-        if (compact.matches && action && /editAnnouncement/.test(action.getAttribute('@click') || '')) editSheet.open();
-    });
-    editSheet.content.addEventListener('click', event => {
-        const action = event.target.closest('button');
-        if (action && (action.getAttribute('@click') || '').includes('saveAnnouncement') && form.checkValidity()) editSheet.dialog.close();
-    });
-    form.querySelectorAll('input[type="text"], textarea').forEach(input => {
-        if (!input.maxLength || input.maxLength < 0) input.maxLength = input.tagName === 'TEXTAREA' ? 3000 : 160;
-        const counter = node('span', 'staff-field-counter');
-        input.after(counter);
-        const update = () => { counter.textContent = `${input.value.length}/${input.maxLength}`; };
-        input.addEventListener('input', update); update();
-    });
-}
-
 function preserveListState(main, Alpine) {
     if (!/bkTable|kesiswaanTable|walasDashboard/.test(main.getAttribute('x-data') || '')) return;
-    const fields = ['query', 'status', 'statusTab', 'filters', 'dateFrom', 'dateTo', 'period', 'filter', 'priorityFilter'];
+    const fields = ['categoryFilter', 'roleFilter', 'urgencyFilter', 'contactFilter', 'timeFilter', 'query', 'status', 'statusTab', 'filters', 'dateFrom', 'dateTo', 'period', 'filter', 'priorityFilter'];
     const state = Alpine.$data(main);
     const saved = history.state?.staffList;
     if (saved?.path === location.pathname) {
         fields.forEach(key => { if (saved.values[key] !== undefined && key in state) state[key] = saved.values[key]; });
         [...main.querySelectorAll('select')].forEach((select, index) => { if (saved.selects[index] !== undefined) select.value = saved.selects[index]; });
+        const order = main.querySelector('.report-order select');
+        if (order && order.value !== 'default') state.sortReports(order.value);
         requestAnimationFrame(() => window.scrollTo(0, saved.scroll));
         main.dispatchEvent(new Event('change', { bubbles: true }));
     }
@@ -394,7 +363,8 @@ function preserveListState(main, Alpine) {
 
 function enhancePagination(main) {
     if (!['dashboard', 'archive', 'access-log'].includes(document.body.dataset.staffPage)) return;
-    const rows = [...main.querySelectorAll('[data-preview-row], [data-report-row], [data-summary-card]')];
+    const rowSelector = '[data-preview-row], [data-report-row], [data-summary-card]';
+    const rows = [...main.querySelectorAll(rowSelector)];
     if (!rows.length) return;
     let limit = history.state?.staffList?.limit || 6;
     const load = button('Muat lebih banyak', () => { limit += 6; update(); }, 'staff-load-more staff-mobile-only');
@@ -408,7 +378,7 @@ function enhancePagination(main) {
     });
     main.querySelector('[aria-label="Filter Ringkasan"]')?.classList.add('staff-list-tabs');
     const update = () => {
-        const visible = rows.filter(row => row.style.display !== 'none');
+        const visible = [...main.querySelectorAll(rowSelector)].filter(row => row.style.display !== 'none');
         rows.forEach(row => row.classList.remove('staff-extra-row'));
         if (compact.matches) visible.slice(limit).forEach(row => row.classList.add('staff-extra-row'));
         load.hidden = visible.length <= limit;
@@ -417,6 +387,7 @@ function enhancePagination(main) {
     };
     let frame;
     const queue = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
+    main.querySelector('.report-order select')?.addEventListener('change', queue);
     rows.forEach(row => new MutationObserver(queue).observe(row, { attributes: true, attributeFilter: ['style'] }));
     compact.addEventListener('change', update);
     main.querySelectorAll('select').forEach(select => {
@@ -500,7 +471,6 @@ export function setupStaffMobile(Alpine) {
     enhanceSummaryStrip(main, Alpine);
     enhanceDetail(main, Alpine);
     enhanceProfile(main, Alpine);
-    enhanceLearn(main, Alpine);
     enhancePagination(main);
     preserveListState(main, Alpine);
     formAndNetworkStates(main);

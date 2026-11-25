@@ -10,7 +10,7 @@
 <aside id="bk-sidebar" class="bk-sidebar fixed inset-y-0 left-0 z-50 flex w-64 flex-col justify-between border-r border-slate-200/80 bg-white select-none lg:z-30" :class="{ 'is-open': sidebarOpen }" :inert="!sidebarOpen && mobileViewport">
     <div class="flex min-h-0 flex-col">
         <div class="flex h-20 shrink-0 items-center justify-between border-b border-slate-100 px-6 py-5">
-            <a href="{{ route($portal.'.dashboard') }}" aria-label="HiOwy! — Dashboard {{ $portalLabel }}"><x-brand /></a>
+            <a href="{{ route($portal.'.dashboard') }}" aria-label="HiOwy! — Dashboard {{ $portalLabel }}"><span class="staff-brand"><span class="material-symbols-outlined" aria-hidden="true">shield</span><span>HiOwy!<small>Portal {{ $portal === 'bk' ? 'Guru BK' : $portalLabel }}</small></span></span></a>
             <button type="button" class="lg:hidden text-slate-500" @click="sidebarOpen = false" aria-label="Tutup navigasi"><span class="material-symbols-outlined">close</span></button>
         </div>
         <div class="overflow-y-auto px-3 py-4">

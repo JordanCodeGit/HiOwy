@@ -1,6 +1,6 @@
 <x-layouts.bk title="Detail Laporan Kesiswaan" page="report" mode="dashboard" portal="kesiswaan" :report-count="$summary['unread']">
 @php($statuses = ['belum_dibaca' => 'Belum Dibaca', 'dibaca' => 'Dibaca', 'ditindaklanjuti' => 'Ditindaklanjuti', 'selesai' => 'Selesai', 'iseng' => 'Iseng'])
-<main x-data="kesiswaanReport" class="w-full max-w-[1580px] mx-auto p-4 lg:p-8 space-y-6">
+<main x-data="kesiswaanReport" class="w-full p-4 lg:p-8 space-y-6">
     <nav class="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500"><a href="{{ route($report['archived'] ? 'kesiswaan.archive' : 'kesiswaan.dashboard') }}" class="inline-flex items-center gap-2 hover:text-secondary"><span class="material-symbols-outlined text-base">arrow_back</span>{{ $report['archived'] ? 'Arsip Laporan' : 'Semua Laporan' }}</a><span>Diterima: {{ $report['received'] }}</span></nav>
     <header class="bk-hover-card flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
         <div><div class="flex flex-wrap items-center gap-3"><h1 class="text-xl font-bold">#{{ $report['ticket'] }}</h1><x-kesiswaan.urgency :value="$report['urgency']" /><span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-secondary">{{ $statuses[$report['status']] }}</span>@if($report['archived'])<span class="rounded-full bg-slate-100 px-3 py-1 text-xs">Diarsipkan</span>@endif</div><p class="mt-2 text-xs text-slate-500">{{ $report['type_label'] }} · {{ $report['role'] }}</p></div>

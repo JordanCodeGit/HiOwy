@@ -1,61 +1,24 @@
 <x-layouts.bk title="Log Akses" page="access-log" mode="dashboard" :report-count="$unreadCount ?? 0">
 <main x-data="bkTable('access-log')" class="relative w-full min-h-screen bg-background">
 <div class="flex flex-col w-full">
-<div class="p-8 max-w-[1440px] mx-auto w-full source-space-y-6">
+<div class="p-8 w-full source-space-y-6">
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
 <div>
-<div class="flex items-center gap-2 mb-1.5">
-<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Kepatuhan Regulasi &amp; Privasi Siswa</span>
-</div>
+
 <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Log Akses &amp; Audit Keamanan</h1>
 <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Catatan audit bersifat append-only (hanya tambah, tidak dapat diubah atau dihapus).</p>
 </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-<div class="bk-hover-card bg-surface-container-lowest p-5 rounded-xl shadow-xs flex flex-col justify-between">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Entri Tercatat</span>
-<span class="material-symbols-outlined text-secondary text-xl">receipt_long</span>
+<div class="staff-metrics metric-compact grid gap-4 sm:grid-cols-3">
+    <x-bk.stat-card icon="receipt_long" label="Total Entri Tercatat" :value="$totalLogs">Append-Only Permanen</x-bk.stat-card>
+    <x-bk.stat-card icon="visibility" label="Akses &amp; Aksi Kasus" :value="$sensitiveViewsCount">Tindakan Staf Terverifikasi</x-bk.stat-card>
+    <x-bk.stat-card icon="shield_person" label="Otorisasi / Login Gagal" :value="$failedAuthCount">
+        {{ $failedAuthCount === 0 ? 'Tidak Ada Anomali' : 'Terdeteksi Percobaan Gagal' }}
+    </x-bk.stat-card>
 </div>
-<div class="mt-3">
-<span class="font-headline-md text-headline-md font-bold text-on-surface">{{ $totalLogs }}</span>
-<div class="flex items-center gap-1.5 text-on-tertiary-container mt-0.5">
-<span class="material-symbols-outlined text-sm">security_update_good</span>
-<span class="font-body-sm text-body-sm font-medium">Append-Only Permanen</span>
-</div>
-</div>
-</div>
-<div class="bk-hover-card bg-surface-container-lowest p-5 rounded-xl shadow-xs flex flex-col justify-between">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Akses &amp; Aksi Kasus</span>
-<span class="material-symbols-outlined text-secondary text-xl">visibility</span>
-</div>
-<div class="mt-3">
-<span class="font-headline-md text-headline-md font-bold text-on-surface">{{ $sensitiveViewsCount }}</span>
-<div class="flex items-center gap-1.5 text-on-surface-variant mt-0.5">
-<span class="material-symbols-outlined text-sm">badge</span>
-<span class="font-body-sm text-body-sm">Tindakan Staf Terverifikasi</span>
-</div>
-</div>
-</div>
-<div class="bk-hover-card bg-surface-container-lowest p-5 rounded-xl shadow-xs flex flex-col justify-between">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Otorisasi / Login Gagal</span>
-<span class="material-symbols-outlined text-on-surface-variant text-xl">shield_person</span>
-</div>
-<div class="mt-3">
-<span class="font-headline-md text-headline-md font-bold text-on-surface">{{ $failedAuthCount }}</span>
-<div class="flex items-center gap-1.5 text-on-tertiary-container mt-0.5">
-<span class="material-symbols-outlined text-sm">verified_user</span>
-<span class="font-body-sm text-body-sm font-medium">{{ $failedAuthCount === 0 ? 'Tidak Ada Anomali' : 'Terdeteksi Percobaan Gagal' }}</span>
-</div>
-</div>
-</div>
-</div>
-
-<div class="bg-surface-container-lowest p-4 rounded-xl shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+<section class="staff-record-list">
+<div class="p-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
 <div class="relative flex-1 max-w-md">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">search</span>
@@ -74,7 +37,7 @@
 </div>
 </div>
 
-<div class="bg-surface-container-lowest rounded-xl shadow-xs overflow-hidden flex flex-col">
+<div class="overflow-hidden flex flex-col">
 <div class="overflow-x-auto">
 <table class="w-full text-left border-collapse" id="auditTable">
 <thead>
@@ -143,6 +106,7 @@ Menampilkan <span x-text="visibleCount">{{ $logs->count() }}</span> dari {{ $tot
 </div>
 </div>
 </div>
+</section>
 </div>
 </div>
 </main>

@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './staff-mobile.css';
+@import './hiowy.css';
 
 @source '../views';
 @source '../js';
@@ -228,7 +229,7 @@
 }
 
 .bk-shell > div > header, .bk-sidebar, .bk-dashboard-theme {
-    font-family: 'Montserrat', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .bk-dashboard-theme {
@@ -275,7 +276,7 @@
 .bk-modal > :is(div, form):not(.absolute):not(.fixed) > * { flex-shrink: 0; }
 .bk-shell [id='security'] { scroll-margin-top: 6rem; }
 .bk-shell [role='status'] { z-index: 80; }
-.bk-shell .bk-tab-active { background: white; color: #0f172a; font-weight: 700; box-shadow: 0 1px 2px rgb(0 0 0 / .05); }
+.bk-shell .bk-tab-active { background: #0f172a; color: white; font-weight: 700; box-shadow: 0 1px 2px rgb(0 0 0 / .05); }
 .bk-shell .bk-audience-active { background: #000; color: #fff; }
 .bk-shell .bk-choice-active { border-color: #006398; background: #eff4ff; color: #006398; }
 .bk-shell #notificationDropdown button[aria-pressed='false'] { background: transparent; }

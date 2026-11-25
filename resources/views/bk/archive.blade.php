@@ -1,50 +1,23 @@
 <x-layouts.bk title="Arsip Laporan" page="archive" mode="dashboard" :report-count="$unreadCount ?? 0">
 <main x-data="bkTable('archive')" class="relative w-full min-h-screen bg-background">
 <div class="flex flex-col w-full">
-<div class="px-8 py-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="px-8 py-8 flex flex-col gap-6 w-full">
+<div class="flex flex-col gap-5">
 <div class="flex flex-col gap-1.5">
-<div class="inline-flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-Modul Konseling &amp; Investigasi
-</div>
+
 <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Arsip Laporan</h1>
 <p class="font-body-md text-body-md text-on-surface-variant">
 Laporan terselesaikan dan ditandai iseng. Riwayat catatan dan audit trail tetap terjaga untuk kepatuhan dokumentasi.
 </p>
 </div>
-<div class="flex items-center gap-3 self-start md:self-auto">
-<div class="bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-3">
-<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
-<span class="material-symbols-outlined text-xl">folder_managed</span>
-</div>
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Total Terarsip</span>
-<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-none mt-0.5">{{ $totalArchived }} Kasus</span>
+<div class="staff-metrics metric-compact grid gap-4 sm:grid-cols-3">
+    <x-bk.stat-card icon="inventory_2" label="Total Terarsip" :value="$totalArchived.' Kasus'">Tersimpan</x-bk.stat-card>
+    <x-bk.stat-card icon="task_alt" label="Selesai Ditangani" :value="$resolvedCount.' Kasus'">Tuntas</x-bk.stat-card>
+    <x-bk.stat-card icon="flag" label="Ditandai Iseng" :value="$isengCount.' Kasus'" />
 </div>
 </div>
-<div class="bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-3">
-<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-on-tertiary-container">
-<span class="material-symbols-outlined text-xl">verified</span>
-</div>
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Selesai Ditangani</span>
-<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-none mt-0.5">{{ $resolvedCount }} Kasus</span>
-</div>
-</div>
-<div class="bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-3">
-<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-slate-600">
-<span class="material-symbols-outlined text-xl">flag</span>
-</div>
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Ditandai Iseng</span>
-<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-none mt-0.5">{{ $isengCount }} Kasus</span>
-</div>
-</div>
-</div>
-</div>
-
-<div class="bg-surface-container-lowest p-4 rounded-xl shadow-xs flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
+<section class="staff-record-list">
+<div class="p-4 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
 <div class="relative flex-1 min-w-[240px]">
 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-lg pointer-events-none">search</span>
 <input x-model="query" @input="selected = []" aria-label="Cari data arsip" class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low rounded-xl font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/20 transition-all" id="ticketSearchInput" placeholder="Cari ID kasus (RPT-XXXX) atau kategori..." type="text">
@@ -78,7 +51,7 @@ Laporan terselesaikan dan ditandai iseng. Riwayat catatan dan audit trail tetap 
 </div>
 </div>
 
-<div class="bg-surface-container-lowest rounded-xl shadow-xs overflow-hidden flex flex-col">
+<div class="overflow-hidden flex flex-col">
 <div class="overflow-x-auto">
 <table class="w-full text-left whitespace-nowrap">
 <thead>
@@ -162,6 +135,7 @@ Menampilkan <span x-text="visibleCount">{{ $totalArchived }}</span> dari {{ $tot
 </div>
 </div>
 </div>
+</section>
 </div>
 </div>
 </main>

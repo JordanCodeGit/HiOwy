@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>05 · Page 1 Laporan — Antrean Laporan | HiOwy!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0,0" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #E2E8F0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0F172A;
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+    .artboard {
+      width: 1440px;
+      height: 920px;
+      background: #F6F8FC;
+      border: 1px solid #E5ECF6;
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+    }
+    .sidebar {
+      width: 236px;
+      background: #FFFFFF;
+      border-right: 1px solid #E5ECF6;
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .brand-row { display: flex; align-items: center; gap: 10px; padding: 0 6px; margin-bottom: 24px; }
+    .brand-sq { width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #1D4ED8 0%, #0F172A 100%); display: flex; align-items: center; justify-content: center; color: #FFFFFF; }
+    .nav-label { font-size: 10px; font-weight: 700; color: #64748B; padding: 0 10px 8px 10px; letter-spacing: 0.4px; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0F172A;
+      margin-bottom: 4px;
+      text-decoration: none;
+    }
+    .nav-item .left { display: flex; align-items: center; gap: 10px; }
+    .nav-item .material-symbols-outlined { font-size: 18px; color: #64748B; }
+    .nav-item.active { background: #0F172A; color: #FFFFFF; font-weight: 700; }
+    .nav-item.active .material-symbols-outlined { color: #FFFFFF; }
+    .nav-badge { background: #2563EB; color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+    .nav-logout {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 14px;
+      background: #F8FAFC;
+      border: 1px solid #E5ECF6;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748B;
+      text-decoration: none;
+    }
+    .workspace {
+      flex: 1;
+      min-width: 0;
+      padding: 24px 30px 28px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .topbar { display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .search-pill {
+      width: 270px;
+      height: 42px;
+      background: #FFFFFF;
+      border: 1px solid #E5ECF6;
+      border-radius: 21px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #64748B;
+    }
+    .school-yr { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 7px 14px; border-radius: 20px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .mode-sw { background: #FFFFFF; border: 1px solid #E5ECF6; border-radius: 20px; padding: 4px; display: flex; gap: 4px; }
+    .mode-opt { padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; color: #64748B; }
+    .mode-opt.active { background: #0F172A; color: #FFFFFF; font-weight: 700; }
+    .icon-circle { width: 40px; height: 40px; border-radius: 20px; background: #FFFFFF; border: 1px solid #E5ECF6; display: flex; align-items: center; justify-content: center; }
+    .profile-pill { height: 42px; background: #FFFFFF; border: 1px solid #E5ECF6; border-radius: 21px; padding: 4px 12px 4px 6px; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
+    .avatar-bk { width: 30px; height: 30px; border-radius: 16px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+    .kpi-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .kpi-card { border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .kpi-hero { background: linear-gradient(135deg, #2563EB 0%, #3730A3 100%); color: #FFFFFF; box-shadow: 0 8px 22px rgba(37, 99, 235, 0.18); }
+    .kpi-danger { background: #FFF1F2; border: 1px solid #FECDD3; color: #9F1239; }
+    .kpi-warn { background: #FFFFFF; border: 1px solid #E5ECF6; color: #0F172A; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04); }
+    .kpi-top { display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; letter-spacing: 0.4px; }
+    .kpi-ic { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+    .kpi-val-row { display: flex; align-items: center; gap: 10px; }
+    .kpi-num { font-size: 30px; font-weight: 800; line-height: 1.1; }
+    .kpi-pill { font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
+    .main-card {
+      flex: 1;
+      background: #FFFFFF;
+      border: 1px solid #E5ECF6;
+      border-radius: 22px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+    .status-tabs { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #E5ECF6; padding-bottom: 12px; }
+    .st-tab { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 700; color: #64748B; background: #F8FAFC; }
+    .st-tab.active { background: #0F172A; color: #FFFFFF; }
+    .st-cnt { padding: 1px 7px; border-radius: 8px; font-size: 11px; background: rgba(100,116,139,0.14); }
+    .st-tab.active .st-cnt { background: #2563EB; color: #FFFFFF; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 14px; background: #EFF6FF; border: 1px solid #BFDBFE; font-size: 11px; font-weight: 600; color: #1E40AF; }
+    table.q-table { width: 100%; border-collapse: collapse; }
+    table.q-table th { text-align: left; font-size: 10px; font-weight: 700; color: #64748B; padding: 10px 12px; background: #F8FAFC; }
+    table.q-table td { padding: 13px 12px; border-bottom: 1px solid #F1F5F9; font-size: 12.5px; vertical-align: middle; }
+    .badge-darurat { background: #FFF1F2; color: #9F1239; border: 1px solid #FECDD3; padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .badge-penting { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+    .btn-buka { background: #0F172A; color: #FFFFFF; padding: 6px 14px; border-radius: 10px; font-size: 11.5px; font-weight: 700; text-decoration: none; display: inline-block; }
+  </style>
+</head>
+<body>
+  <div class="artboard">
+    <aside class="sidebar">
+      <div>
+        <div class="brand-row">
+          <div class="brand-sq"><span class="material-symbols-outlined" style="font-size:19px;">shield</span></div>
+          <div>
+            <div style="font-size:18px; font-weight:800; line-height:1.2;">HiOwy!</div>
+            <div style="font-size:11px; font-weight:600; color:#64748B;">Portal Guru BK</div>
+          </div>
+        </div>
+        <div class="nav-label">NAVIGASI UTAMA</div>
+        <a class="nav-item active" href="05-page1-laporan.html"><span class="left"><span class="material-symbols-outlined">inbox</span>Laporan</span><span class="nav-badge">2</span></a>
+        <a class="nav-item" href="09-page2-kelola-jenis-kejadian.html"><span class="left"><span class="material-symbols-outlined">tune</span>Kelola</span></a>
+        <a class="nav-item" href="14-page3-halaman-pelajari.html"><span class="left"><span class="material-symbols-outlined">auto_stories</span>Halaman Pelajari</span></a>
+        <a class="nav-item" href="17-page4-statistik.html"><span class="left"><span class="material-symbols-outlined">bar_chart</span>Statistik</span></a>
+        <a class="nav-item" href="18-page4-arsip.html"><span class="left"><span class="material-symbols-outlined">archive</span>Arsip</span></a>
+        <a class="nav-item" href="19-page4-log-akses.html"><span class="left"><span class="material-symbols-outlined">history</span>Log Akses</span></a>
+      </div>
+      <a class="nav-logout" href="02-auth-masuk.html"><span class="material-symbols-outlined" style="font-size:18px;">logout</span>Keluar Akun</a>
+    </aside>
+
+    <main class="workspace">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="search-pill"><span class="material-symbols-outlined" style="font-size:18px;">search</span>Pencarian cepat...</div>
+          <div class="school-yr"><span class="material-symbols-outlined" style="font-size:16px;">school</span>Tahun Ajaran 2024/2025</div>
+        </div>
+        <div class="topbar-right">
+          <div class="mode-sw">
+            <div class="mode-opt active">Data Asli</div>
+            <div class="mode-opt">Mode Latihan</div>
+          </div>
+          <div class="icon-circle"><span class="material-symbols-outlined" style="font-size:19px;">notifications</span></div>
+          <div class="profile-pill">
+            <div class="avatar-bk">BK</div>
+            <span>Koordinator BK</span>
+            <span class="material-symbols-outlined" style="font-size:16px; color:#64748B;">expand_more</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:26px; font-weight:800; line-height:1.25;">Antrean Laporan</div>
+        <div style="font-size:13px; color:#64748B; margin-top:4px;">SMP Telkom Purwokerto — Tinjau laporan masuk secara ringkas dan terstruktur.</div>
+      </div>
+
+      <div class="kpi-grid-3">
+        <div class="kpi-card kpi-hero">
+          <div class="kpi-top"><span style="color:#DBEAFE;">BELUM DIBACA</span><div class="kpi-ic" style="background:rgba(255,255,255,0.18);"><span class="material-symbols-outlined" style="font-size:20px;">mark_email_unread</span></div></div>
+          <div class="kpi-val-row"><span class="kpi-num">2</span><span class="kpi-pill" style="background:#1E3A8A; color:#EFF6FF;">Laporan Baru</span></div>
+          <div style="font-size:11.5px; color:#BFDBFE;">Menunggu telaah awal konselor</div>
+        </div>
+        <div class="kpi-card kpi-danger">
+          <div class="kpi-top"><span>PERHATIAN UTAMA</span><div class="kpi-ic" style="background:#FFE4E6; color:#E11D48;"><span class="material-symbols-outlined" style="font-size:20px;">e911_emergency</span></div></div>
+          <div class="kpi-val-row"><span class="kpi-num">2</span><span class="kpi-pill" style="background:#FFE4E6; color:#9F1239;">Danger Flag Belum Dibaca</span></div>
+          <div style="font-size:11.5px; color:#64748B;">Indikasi ancaman fisik / bahaya</div>
+        </div>
+        <div class="kpi-card kpi-warn">
+          <div class="kpi-top"><span style="color:#64748B;">TANPA UPDATE &gt; 3 HARI</span><div class="kpi-ic" style="background:#FFFBEB; color:#D97706;"><span class="material-symbols-outlined" style="font-size:20px;">history_toggle_off</span></div></div>
+          <div class="kpi-val-row"><span class="kpi-num">1</span><span class="kpi-pill" style="background:#FFFBEB; color:#92400E;">Perlu Tindak lanjut</span></div>
+          <div style="font-size:11.5px; color:#64748B;">Penanganan belum diperbarui minggu ini</div>
+        </div>
+      </div>
+
+      <section class="main-card">
+        <div class="status-tabs">
+          <div class="st-tab active">Belum Dibaca <span class="st-cnt">7</span></div>
+          <div class="st-tab">Sedang Ditangani <span class="st-cnt">0</span></div>
+          <div class="st-tab">Selesai <span class="st-cnt">0</span></div>
+        </div>
+
+        <div class="toolbar">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:260px; height:38px; background:#F8FAFC; border:1px solid #E5ECF6; border-radius:12px; padding:0 12px; display:flex; align-items:center; gap:8px; font-size:12px; color:#64748B;">
+              <span class="material-symbols-outlined" style="font-size:16px;">search</span>Cari #RPT-0001 atau kata kunci...
+            </div>
+            <span style="font-size:12px; font-weight:600; color:#64748B;">3 laporan aktif</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="padding:8px 12px; border-radius:12px; border:1px solid #E5ECF6; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px;"><span class="material-symbols-outlined" style="font-size:16px;">filter_list</span>Filter (2)</div>
+            <div style="padding:8px 12px; border-radius:12px; border:1px solid #E5ECF6; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">Urutkan: Terbaru <span class="material-symbols-outlined" style="font-size:16px;">expand_more</span></div>
+            <div style="padding:9px 16px; border-radius:18px; background:#0F172A; color:#FFFFFF; font-size:12px; font-weight:700;">Tandai Iseng</div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="chip">Waktu: 7 Hari Terakhir ×</span>
+            <span class="chip">Urgensi: Darurat ×</span>
+            <span style="font-size:11.5px; font-weight:700; color:#2563EB; margin-left:4px;">Reset semua</span>
+          </div>
+          <div style="font-size:12px; font-weight:600; color:#64748B;">1–3 dari 13</div>
+        </div>
+
+        <table class="q-table">
+          <thead>
+            <tr>
+              <th>KODE TIKET</th>
+              <th>JENIS KEJADIAN</th>
+              <th>PELAPOR</th>
+              <th>CUPLIKAN CERITA</th>
+              <th>WAKTU</th>
+              <th>URGENSI</th>
+              <th>AKSI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div style="font-weight:800;">#RPT-0001</div><div style="font-size:11px; color:#64748B;">Anonim</div></td>
+              <td style="font-weight:700;">Ejekan &amp; Intimidasi Verbal</td>
+              <td>Siswa (Korban)</td>
+              <td style="color:#475569;">Sering diejek di kelas saat istirahat...</td>
+              <td style="color:#64748B;">21 Nov • Malam</td>
+              <td><span class="badge-darurat">Darurat</span></td>
+              <td><a class="btn-buka" href="07-page1-detail-laporan.html">Buka</a></td>
+            </tr>
+            <tr>
+              <td><div style="font-weight:800;">#RPT-0002</div><div style="font-size:11px; color:#64748B;">Anonim</div></td>
+              <td style="font-weight:700;">Sentuhan Tidak Pantas</td>
+              <td>Siswa (Korban)</td>
+              <td style="color:#475569;">Digoda di koridor dekat tangga lantai 2...</td>
+              <td style="color:#64748B;">21 Nov • Malam</td>
+              <td><span class="badge-darurat">Darurat</span></td>
+              <td><a class="btn-buka" href="07-page1-detail-laporan.html">Buka</a></td>
+            </tr>
+            <tr>
+              <td><div style="font-weight:800;">#RPT-0003</div><div style="font-size:11px; color:#64748B;">Anonim</div></td>
+              <td style="font-weight:700;">Dikucilkan atau Dijauhi</td>
+              <td>Teman / Saksi</td>
+              <td style="color:#475569;">Teman sekelas dijauhi di grup kelas...</td>
+              <td style="color:#64748B;">20 Nov • Siang</td>
+              <td><span class="badge-penting">Penting</span></td>
+              <td><a class="btn-buka" href="07-page1-detail-laporan.html">Buka</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    
+  </div>
+</body>
+</html>

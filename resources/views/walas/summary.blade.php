@@ -33,7 +33,7 @@
         }
     }
 }" class="bg-background min-h-screen"><div class="flex flex-col w-full">
-<div class="max-w-5xl mx-auto w-full px-4 lg:px-gutter-lg py-space-xl flex flex-col gap-space-lg">
+<div class="w-full px-4 lg:px-gutter-lg py-space-xl flex flex-col gap-space-lg">
 
 <div class="flex flex-wrap items-center justify-between gap-space-md">
 <a class="inline-flex items-center gap-space-xs text-on-surface-variant hover:text-on-surface transition-colors py-space-xs px-space-sm rounded-lg hover:bg-surface-container-low group" href="{{ route('walas.dashboard') }}">

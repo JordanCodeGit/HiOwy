@@ -127,7 +127,7 @@
     .bk-shell[data-staff-page='statistics'] .sm\:flex-row:has(svg) { flex-direction: column; }
     .bk-shell[data-staff-page='manage'] #tab-navigation { overflow-x: auto; flex-wrap: nowrap; }
     .bk-shell[data-staff-page='dashboard'] main > section.grid { display: flex; overflow-x: auto; scroll-snap-type: x proximity; gap: .75rem; padding-bottom: .5rem; }
-    .bk-shell[data-staff-page='dashboard'] main > section.grid > div { flex: 0 0 76%; scroll-snap-align: start; padding: 1rem; }
+    .bk-shell[data-staff-page='dashboard'] main > section.report-metrics > button { flex: 0 0 76%; scroll-snap-align: start; padding: 1rem; }
     .bk-shell[data-staff-portal='walas'] #summary-search, .bk-shell[data-staff-portal='walas'] .relative:has(> #summary-search) { display: none; }
     .bk-shell[data-staff-portal='walas'][data-staff-page='summary'] .font-body-lg { font-size: 17px; line-height: 1.85; }
     .bk-shell [role='status'].fixed { max-width: calc(100% - 2rem); left: 1rem; right: 1rem; top: calc(72px + env(safe-area-inset-top)); }
@@ -135,7 +135,7 @@
 
 @media (min-width: 768px) and (max-width: 1023px) {
     .staff-card-table tbody { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .bk-shell[data-staff-page='dashboard'] main > section.grid > div { flex-basis: calc((100% - 1.5rem) / 3); }
+    .bk-shell[data-staff-page='dashboard'] main > section.report-metrics > button { flex-basis: calc((100% - 1.5rem) / 3); }
 }
 @media (max-width: 639px) {
     .bk-content main :is(.p-6, .p-5) { padding: 1rem; }

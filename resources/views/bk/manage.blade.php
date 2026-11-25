@@ -17,7 +17,7 @@
 <div class="flex flex-col gap-space-md mb-8">
 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
 <div class="flex flex-col">
-<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Jenis, Lokasi, Staff, QR</h1>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Kelola Sekolah</h1>
 <p class="font-body-md text-body-md text-on-surface-variant mt-1">
           Konfigurasi jenis aduan, titik lokasi kejadian sekolah, tautan QR, mode latihan, dan klasifikasi NLP.
         </p>
@@ -226,7 +226,7 @@
      TAB 3: QR SEKOLAH & POSTER PANDUAN PELAPORAN SISWA
      ========================================================================= --}}
 <section x-cloak x-show="tab === 'qr'" x-transition.opacity class="flex flex-col gap-6" id="panel-qr">
-<div class="bg-surface-container-lowest rounded-2xl shadow-xs border border-surface-container/60 overflow-hidden flex flex-col lg:flex-row">
+<div class="school-qr-layout flex flex-col gap-5 lg:flex-row">
 <div class="w-full lg:w-[360px] xl:w-[390px] shrink-0 p-7 flex flex-col justify-between items-center text-center border-b lg:border-b-0 lg:border-r border-surface-container/60 bg-surface-container-lowest">
 <div class="w-full flex flex-col items-center">
 <div class="w-full h-1.5 rounded-full bg-secondary mb-5">
@@ -596,7 +596,7 @@ Meringkas laporan yang sudah diarsipkan atau berstatus selesai menjadi statistik
      MODAL: TAMBAH / UBAH KATEGORI ADUAN
      ========================================================================= --}}
 <template x-teleport="body">
-<div @keydown.escape.window="closeModal()" role="dialog" aria-modal="true" tabindex="-1" @click.self="closeModal()" @keydown.tab="trapFocus($event)" x-cloak x-show="modal === 'modal-kategori'" x-transition.opacity class="bk-modal fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto transition-opacity duration-200" id="modal-kategori">
+<div @keydown.escape.window="closeModal()" role="dialog" aria-modal="true" tabindex="-1" @click.self="closeModal()" @keydown.tab="trapFocus($event)" x-cloak x-show="modal === 'modal-kategori'" x-transition.opacity class="bk-modal fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto transition-opacity duration-200" id="modal-kategori" aria-labelledby="modal-kategori-title">
 <div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full shadow-2xl flex flex-col border border-surface-container my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200">
 <div class="px-6 py-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/40">
 <div class="flex gap-3 items-center">
@@ -604,7 +604,7 @@ Meringkas laporan yang sudah diarsipkan atau berstatus selesai menjadi statistik
 <span class="material-symbols-outlined text-[22px]" id="modal-kategori-icon" x-text="editing ? 'edit' : 'add_circle'">add_circle</span>
 </div>
 <div class="flex flex-col">
-<h3 x-text="editing ? 'Ubah Kategori' : 'Tambah Kategori Baru'" class="font-headline-sm text-headline-sm font-bold text-on-surface" id="modal-kategori-title">Tambah Kategori Baru</h3>
+<h3 x-text="editing ? 'Ubah Jenis Kejadian' : 'Tambah Jenis Kejadian'" class="font-headline-sm text-headline-sm font-bold text-on-surface" id="modal-kategori-title">Tambah Jenis Kejadian</h3>
 <p class="font-body-sm text-body-sm text-on-surface-variant" id="modal-kategori-subtitle">Konfigurasikan label jenis aduan yang akan muncul di alur pelaporan siswa.</p>
 </div>
 </div>
@@ -770,7 +770,7 @@ Meringkas laporan yang sudah diarsipkan atau berstatus selesai menjadi statistik
 </label>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">badge</span>
-<input x-model="staffName" class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="edit-staf-nama" placeholder="Nama lengkap berserta gelar" type="text">
+<input x-model="staffName" class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="edit-staf-nama" placeholder="Nama lengkap beserta gelar" type="text">
 </div>
 </div>
 <div class="flex flex-col gap-1.5">
@@ -924,7 +924,7 @@ Meringkas laporan yang sudah diarsipkan atau berstatus selesai menjadi statistik
      MODAL: UNDANG STAF BARU
      ========================================================================= --}}
 <template x-teleport="body">
-<div @keydown.escape.window="closeModal()" role="dialog" aria-modal="true" tabindex="-1" @click.self="closeModal()" @keydown.tab="trapFocus($event)" x-cloak x-show="modal === 'modal-undang-staf'" x-transition.opacity class="bk-modal fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" id="modal-undang-staf">
+<div @keydown.escape.window="closeModal()" role="dialog" aria-modal="true" tabindex="-1" @click.self="closeModal()" @keydown.tab="trapFocus($event)" x-cloak x-show="modal === 'modal-undang-staf'" x-transition.opacity class="bk-modal fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" id="modal-undang-staf" aria-label="Undang staf unit sekolah">
 <div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full shadow-2xl flex flex-col border border-surface-container my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200">
 <div class="px-6 py-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/40">
 <div class="flex gap-3 items-center">
@@ -946,7 +946,7 @@ Meringkas laporan yang sudah diarsipkan atau berstatus selesai menjadi statistik
 </label>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">badge</span>
-<input x-model="staffName" class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="invite-nama-input" placeholder="Nama lengkap berserta gelar" type="text">
+<input x-model="staffName" class="w-full pl-10 pr-4 py-2.5 bg-surface-container-low text-on-surface rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-secondary border border-outline-variant/40 transition-all placeholder:text-outline" id="invite-nama-input" placeholder="Nama lengkap beserta gelar" type="text">
 </div>
 </div>
 <div class="flex flex-col gap-1.5">

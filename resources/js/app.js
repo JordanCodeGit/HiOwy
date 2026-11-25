@@ -61,6 +61,23 @@ const previewMessages = {
     school: 'Pengaturan sekolah belum terintegrasi. Data tidak disimpan. Anda dapat melanjutkan ke pratinjau Dashboard BK.',
 };
 
+Alpine.data('staffInvitation', () => ({
+    openInvitation() {
+        const input = this.$refs.invitation;
+        const url = new URL(input.value);
+        const staffId = url.pathname.split('/').pop();
+        const expectedPath = this.$el.dataset.invitationPath.replace('STAFF_ID', staffId);
+
+        if (url.origin === location.origin && /^\d+$/.test(staffId) && url.pathname === expectedPath && url.searchParams.has('signature')) {
+            location.assign(url.href);
+            return;
+        }
+
+        input.setCustomValidity('Gunakan tautan undangan staf lengkap dari email sekolah ini.');
+        input.reportValidity();
+    },
+}));
+
 Alpine.data('authPage', () => ({
     selectedRole: 'bk',
 

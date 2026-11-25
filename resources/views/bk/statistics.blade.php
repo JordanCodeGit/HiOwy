@@ -5,14 +5,11 @@
     $topCategoryPct = $topCatItem['pct'] ?? 0;
 @endphp
 <main class="relative w-full min-h-screen bg-background">
-<div class="flex flex-col w-full px-8 py-8 gap-8 max-w-7xl mx-auto">
+<div class="flex flex-col w-full px-8 py-8 gap-8">
 <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
 <div class="flex flex-col gap-1">
-<div class="inline-flex items-center gap-2 mb-1">
-<span class="w-2 h-2 rounded-full bg-secondary"></span>
-<span class="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Dashboard Konseling Terpadu</span>
-</div>
-<h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Statistik &amp; Analitik Bulanan</h1>
+
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Statistik &amp; Analitik Kasus</h1>
 <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
 Data agregat {{ $schoolConfig['school_name'] ?? 'SMP Telkom Purwokerto' }} tanpa isi cerita maupun identitas. Kelompok berjumlah 1–4 otomatis disamarkan sebagai &ldquo;kurang dari 5&rdquo; demi privasi pelapor.
 </p>
@@ -37,7 +34,7 @@ Data agregat {{ $schoolConfig['school_name'] ?? 'SMP Telkom Purwokerto' }} tanpa
 </div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+<div class="staff-metrics metric-featured metric-statistics grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 <div class="p-5 bg-surface-container-lowest rounded-xl shadow-xs flex flex-col justify-between">
 <div class="flex items-center justify-between">
 <span class="font-label-md text-label-md text-on-surface-variant font-semibold">Total Laporan Masuk</span>
@@ -78,20 +75,20 @@ Data agregat {{ $schoolConfig['school_name'] ?? 'SMP Telkom Purwokerto' }} tanpa
 <span class="font-display-lg text-display-lg text-on-surface font-bold tracking-tight capitalize">{{ $stats['active_display'] }}</span>
 <span class="font-label-sm text-label-sm text-secondary bg-surface-container-high px-2 py-0.5 rounded-full font-semibold">{{ $stats['unread_display'] }} Belum Dibaca</span>
 </div>
-<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Kategori dominan: {{ $topCategory }} ({{ $topCategoryPct }}%)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Rata-rata waktu dibaca: {{ $stats['avg_read_label'] }}</span>
 </div>
 
 <div class="p-5 bg-surface-container-lowest rounded-xl shadow-xs flex flex-col justify-between">
 <div class="flex items-center justify-between">
-<span class="font-label-md text-label-md text-on-surface-variant font-semibold">Rata-rata Waktu Dibaca</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold">Kategori Dominan</span>
 <div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
-<span class="material-symbols-outlined text-xl">schedule</span>
+<span class="material-symbols-outlined text-xl">category</span>
 </div>
 </div>
 <div class="mt-4 flex items-baseline gap-2">
-<span class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{{ $stats['avg_read_label'] }}</span>
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">{{ $topCategoryPct }}%</span>
 </div>
-<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">Estimasi jeda pelaporan hingga dibaca tim BK</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1">{{ $topCategory }}</span>
 </div>
 </div>
 

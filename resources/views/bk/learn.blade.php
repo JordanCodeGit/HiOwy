@@ -1,7 +1,7 @@
 <x-layouts.bk title="Halaman Pelajari" page="learn" mode="">
 <main x-data="bkLearn" class="relative w-full min-h-screen bg-background">
 <div class="flex flex-col w-full">
-<div class="px-8 py-8 flex flex-col gap-8 max-w-7xl mx-auto w-full">
+<div class="px-8 py-8 flex flex-col gap-8 w-full">
 
 <!-- Floating Toast Notification -->
 <div x-show="showToast" x-cloak x-transition.opacity class="fixed top-20 right-8 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 text-xs font-semibold">
@@ -12,10 +12,7 @@
 <!-- Header Page -->
 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div class="flex flex-col gap-1">
-        <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider">Modul Kurikulum BK</span>
-        </div>
-        <h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Manajemen Halaman Pelajari</h1>
+        <h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Halaman Pelajari</h1>
         <p class="font-body-md text-body-md text-on-surface-variant">Kelola materi edukasi pencegahan dan pengumuman resmi BK untuk portal siswa.</p>
     </div>
     <div class="flex flex-wrap items-center gap-3">
@@ -73,7 +70,7 @@
 @endif
 
 <!-- Stats Row: Total Pembaca Siswa & Artikel Terbit -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+<div class="staff-metrics metric-featured grid grid-cols-1 sm:grid-cols-2 gap-5">
     <!-- Card 1: Total Pembaca Siswa -->
     <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-xs border border-surface-container/60 flex items-center justify-between">
         <div class="flex flex-col gap-1.5">
@@ -105,25 +102,14 @@
     </div>
 </div>
 
-<!-- Main 2-Column Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<div>
 
-    <!-- LEFT COLUMN: Form Pengumuman & Materi (5 cols) -->
-    <div class="lg:col-span-5 flex flex-col gap-4 sticky top-24">
-        <div class="bk-hover-card rounded-2xl bg-surface-container-lowest shadow-xs p-6 flex flex-col gap-6">
-            <div class="flex items-center justify-between pb-4 border-b border-surface-container">
-                <div class="flex items-center gap-3">
-                    <span class="w-2.5 h-6 rounded-full bg-secondary inline-block"></span>
-                    <div class="flex flex-col">
-                        <h2 class="font-title-lg text-title-lg text-on-surface font-bold">Form Materi &amp; Edukasi</h2>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span x-text="isEditing ? 'Mode Ubah: ' + editingCode : 'Draft Baru'" :class="isEditing ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-surface-container-low text-on-surface-variant border-surface-container'" class="px-2.5 py-1 rounded-full font-label-sm text-label-sm flex items-center gap-1 font-semibold border"></span>
-                    <button type="button" x-show="isEditing" x-cloak @click="resetAnnouncement()" class="text-xs text-slate-500 hover:text-slate-800 underline cursor-pointer">Batal</button>
-                </div>
-            </div>
-
+    <dialog x-ref="editor" class="announcement-dialog" aria-labelledby="announcement-heading" @click.self="$el.close()">
+        <div class="p-6">
+            <header class="mb-5 flex items-center justify-between gap-3">
+                <h2 id="announcement-heading" class="text-xl font-bold" x-text="isEditing ? 'Ubah pengumuman' : 'Tambah pengumuman'"></h2>
+                <button type="button" class="dialog-close" @click="$refs.editor.close()" aria-label="Tutup pengumuman"><span class="material-symbols-outlined">close</span></button>
+            </header>
             <form method="POST" :action="isEditing ? updateUrl : '{{ route('bk.learn.store') }}'" class="flex flex-col gap-5" id="announcement-form">
                 @csrf
                 <template x-if="isEditing">
@@ -207,16 +193,16 @@
                         <span class="material-symbols-outlined text-lg" x-text="isEditing ? 'edit_note' : 'save'">save</span>
                         <span x-text="isEditing ? 'Perbarui Pengumuman' : 'Simpan Pengumuman'">Simpan Pengumuman</span>
                     </button>
-                    <button class="px-5 py-3 rounded-xl bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high font-label-lg text-label-lg transition-all cursor-pointer" type="button" @click="resetAnnouncement()">
+                    <button class="px-5 py-3 rounded-xl bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high font-label-lg text-label-lg transition-all cursor-pointer" type="button" @click="$refs.editor.close()">
                         Batal
                     </button>
                 </div>
             </form>
         </div>
-    </div>
+    </dialog>
 
     <!-- RIGHT COLUMN: Arsip Materi Diterbitkan (7 cols) -->
-    <div class="lg:col-span-7 flex flex-col gap-6">
+    <div class="learning-library flex min-w-0 flex-col gap-6">
         <!-- Controls & Filters -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
             <div class="flex items-center gap-2">
@@ -342,7 +328,7 @@
                 <div class="p-10 text-center bg-surface-container-lowest rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-5xl text-slate-300">auto_stories</span>
                     <h4 class="text-sm font-bold text-slate-800">Belum Ada Pengumuman Diterbitkan</h4>
-                    <p class="text-xs text-slate-500 max-w-sm">Tulis informasi pencegahan atau edukasi ramah siswa pertama Anda melalui formulir di sebelah kiri.</p>
+                    <p class="text-xs text-slate-500 max-w-sm">Tulis informasi pencegahan atau edukasi ramah siswa pertama Anda melalui tombol Tambah Pengumuman.</p>
                 </div>
             @endforelse
         </div>

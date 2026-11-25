@@ -92,29 +92,14 @@
 @endif
 </div>
 </div>
-<div class="bk-hover-card bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
-<div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px] text-blue-600">linear_scale</span>
-<span class="text-xs font-bold uppercase tracking-wider text-slate-700">Alur &amp; Progres Penanganan Kasus</span>
-</div>
-<span class="text-xs text-slate-500 font-medium">Posisi Saat Ini: 
-@if($caseStatusNormalized === 'selesai')
-<strong class="text-emerald-600">Selesai / Teratasi</strong>
-@elseif($caseStatusNormalized === 'ditindaklanjuti')
-<strong class="text-amber-600">Tindak Lanjut Koordinasi</strong>
-@else
-<strong class="text-blue-600">Dibaca &amp; Diproses BK</strong>
-@endif
-</span>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<section aria-label="Alur dan progres penanganan kasus">
+<div class="case-progress grid grid-cols-1 md:grid-cols-4 gap-4">
 <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/60">
 <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-xs">
 <span class="material-symbols-outlined text-[18px]">check</span>
 </div>
 <div class="min-w-0">
-<p class="text-xs font-bold text-slate-900 truncate">1. Laporan Masuk</p>
+<p class="text-xs font-bold text-slate-900 truncate"><small class="case-step-label">Langkah 1</small>Laporan Masuk</p>
 <p class="text-[11px] text-slate-500">{{ $report->formatted_time }}</p>
 </div>
 </div>
@@ -123,7 +108,7 @@
 <span class="material-symbols-outlined text-[18px]">visibility</span>
 </div>
 <div class="min-w-0">
-<p class="text-xs font-bold {{ in_array($caseStatusNormalized, ['dibaca', 'ditindaklanjuti', 'selesai']) ? 'text-blue-700' : 'text-slate-600' }} truncate">2. Dibaca &amp; Aktif</p>
+<p class="text-xs font-bold {{ in_array($caseStatusNormalized, ['dibaca', 'ditindaklanjuti', 'selesai']) ? 'text-blue-700' : 'text-slate-600' }} truncate"><small class="case-step-label">Langkah 2</small>Dibaca &amp; Aktif</p>
 <p class="text-[11px] text-slate-500">{{ $report->status_updated_date ? $report->status_updated_date->translatedFormat('d M Y') : '-' }}</p>
 </div>
 </div>
@@ -132,7 +117,7 @@
 <span class="material-symbols-outlined text-[18px]">pending</span>
 </div>
 <div class="min-w-0">
-<p class="text-xs font-semibold {{ in_array($caseStatusNormalized, ['ditindaklanjuti', 'selesai']) ? 'text-amber-800 font-bold' : 'text-slate-700' }} truncate">3. Tindak Lanjut</p>
+<p class="text-xs font-semibold {{ in_array($caseStatusNormalized, ['ditindaklanjuti', 'selesai']) ? 'text-amber-800 font-bold' : 'text-slate-700' }} truncate"><small class="case-step-label">Langkah 3</small>Tindak Lanjut</p>
 <p class="text-[11px] text-slate-400">Proses koordinasi</p>
 </div>
 </div>
@@ -141,12 +126,12 @@
 <span class="material-symbols-outlined text-[18px]">task_alt</span>
 </div>
 <div class="min-w-0">
-<p class="text-xs font-semibold {{ $caseStatusNormalized === 'selesai' ? 'text-emerald-800 font-bold' : 'text-slate-600' }} truncate">4. Selesai / Arsip</p>
+<p class="text-xs font-semibold {{ $caseStatusNormalized === 'selesai' ? 'text-emerald-800 font-bold' : 'text-slate-600' }} truncate"><small class="case-step-label">Langkah 4</small>Selesai / Arsip</p>
 <p class="text-[11px] text-slate-400">{{ $caseStatusNormalized === 'selesai' ? 'Tuntas' : 'Menunggu hasil' }}</p>
 </div>
 </div>
 </div>
-</div>
+</section>
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 <div class="lg:col-span-7 flex flex-col gap-6">
 <section class="bk-hover-card bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col gap-5">
@@ -498,7 +483,7 @@
 </div>
 </div>
 <template x-teleport="body">
-<div role="dialog" aria-modal="true" tabindex="-1" @keydown.tab="trapFocus($event)" @keydown.escape.window="closeModal()" x-cloak x-show="modal === 'isengModal'" x-transition.opacity class="bk-modal bk-dashboard-theme fixed inset-0 z-50 " id="isengModal">
+<div role="dialog" aria-modal="true" tabindex="-1" @keydown.tab="trapFocus($event)" @keydown.escape.window="closeModal()" x-cloak x-show="modal === 'isengModal'" x-transition.opacity class="bk-modal bk-dashboard-theme fixed inset-0 z-50" id="isengModal">
 <div @click="closeModal()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity" id="modalBackdrop"></div>
 <div class="fixed inset-0 z-10 overflow-y-auto flex items-center justify-center p-4">
 <div class="relative bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 source-space-y-4">

@@ -1,71 +1,21 @@
 <x-layouts.bk title="Dashboard BK" page="dashboard" mode="dashboard" :report-count="$unreadCount ?? 0">
+<x-slot:toolbar>
+    <nav class="staff-mode-switch" aria-label="Mode antrean laporan">
+        <a href="{{ route('bk.dashboard') }}" @if (empty($isTrainingView)) aria-current="page" @endif>Data Asli</a>
+        <a href="{{ route('bk.dashboard', ['mode' => 'latihan']) }}" @if (!empty($isTrainingView)) aria-current="page" @endif>Mode Latihan</a>
+    </nav>
+</x-slot:toolbar>
 <main x-data="bkTable('dashboard')" @bk-search.window="query = $event.detail.query; statusTab = 0; selected = []; currentPage = 1" class="bk-reports-page p-8 w-full source-space-y-6">
-<div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border {{ !empty($isTrainingView) ? 'border-amber-300 bg-amber-50/80' : 'border-slate-200 bg-white' }} px-4 py-3 shadow-xs">
-<div class="flex items-center gap-2.5 text-xs">
-<span class="material-symbols-outlined text-[18px] {{ !empty($isTrainingView) ? 'text-amber-700' : 'text-blue-600' }}">{{ !empty($isTrainingView) ? 'science' : 'verified_user' }}</span>
-@if(!empty($isTrainingView))
-<span class="font-bold text-amber-900">Mode Latihan (Simulasi):</span>
-<span class="text-amber-800">Menampilkan laporan simulasi saja. Tidak tercampur ke data asli maupun mengirim email darurat.</span>
-@else
-<span class="font-semibold text-slate-800">Antrean Laporan Resmi Sekolah</span>
-@if(!empty($trainingSettingActive))
-<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold text-[11px]">Form Publik sedang Mode Latihan</span>
+<header class="staff-page-intro">
+    <h1>Antrean Laporan</h1>
+    <p>Tinjau laporan masuk dan tentukan tindak lanjut pendampingan siswa.</p>
+</header>
+@if (!empty($isTrainingView) || !empty($trainingSettingActive))
+    <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        {{ !empty($isTrainingView) ? 'Mode Latihan (Simulasi): hanya laporan simulasi yang ditampilkan.' : 'Form Publik sedang Mode Latihan' }}
+    </p>
 @endif
-@endif
-</div>
-<div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg text-xs">
-<a href="{{ route('bk.dashboard') }}" class="px-3 py-1.5 rounded-md font-semibold transition-colors {{ empty($isTrainingView) ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">Data Asli</a>
-<a href="{{ route('bk.dashboard', ['mode' => 'latihan']) }}" class="px-3 py-1.5 rounded-md font-semibold transition-colors {{ !empty($isTrainingView) ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">Mode Latihan</a>
-</div>
-</div>
-<section class="grid grid-cols-1 md:grid-cols-3 gap-5">
-<div class="bk-hover-card bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between cursor-pointer transition-all hover:border-blue-300" @click="statusTab = 0; priorityFilter = ''; currentPage = 1; selected = []">
-<div>
-<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Belum Dibaca</span>
-<div class="flex items-baseline gap-2 mt-1">
-<span class="text-3xl font-bold text-slate-900 tracking-tight">{{ $unreadCount }}</span>
-<span class="text-xs text-slate-500 font-medium">laporan baru</span>
-</div>
-<p class="text-[11px] text-slate-400 mt-1">Menunggu penelaahan awal konselor</p>
-</div>
-<div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-<span class="material-symbols-outlined text-[24px]">mark_email_unread</span>
-</div>
-</div>
-<div class="relative overflow-hidden bg-rose-50/70 rounded-xl p-5 border-2 border-rose-400 shadow-xs shadow-rose-200/50 flex items-center justify-between cursor-pointer transition-all hover:border-rose-500" @click="statusTab = 0; priorityFilter = (priorityFilter === 'danger' ? '' : 'danger'); currentPage = 1; selected = []">
-<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-rose-200/40 rounded-full blur-xl pointer-events-none">
-</div>
-<div>
-<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-xs">
-<span class="w-1.5 h-1.5 rounded-full bg-white animate-ping">
-</span>
-              Perhatian Utama
-            </div>
-<div class="text-xs font-semibold text-rose-900 mt-1.5">Danger Flag Belum Dibaca</div>
-<div class="flex items-baseline gap-2 mt-0.5">
-<span class="text-3xl font-bold text-rose-600 tracking-tight">{{ $urgentUnreadCount }}</span>
-<span class="text-xs font-semibold text-rose-700">laporan darurat</span>
-</div>
-<p class="text-[11px] text-rose-700/90 font-medium mt-0.5">Indikasi bahaya fisik / intimidasi intens</p>
-</div>
-<div class="w-12 h-12 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-md shadow-rose-500/30">
-<span class="material-symbols-outlined text-[26px] fill-1">e911_emergency</span>
-</div>
-</div>
-<div class="bk-hover-card bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between cursor-pointer transition-all hover:border-amber-300" @click="statusTab = 0; priorityFilter = (priorityFilter === 'overdue' ? '' : 'overdue'); currentPage = 1; selected = []">
-<div>
-<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Tanpa Update &gt; 3 Hari</span>
-<div class="flex items-baseline gap-2 mt-1">
-<span class="text-3xl font-bold text-slate-900 tracking-tight">{{ $staleCount }}</span>
-<span class="text-xs text-amber-700 font-medium">perlu tindak lanjut</span>
-</div>
-<p class="text-[11px] text-slate-400 mt-1">Penanganan belum diperbarui minggu ini</p>
-</div>
-<div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-<span class="material-symbols-outlined text-[24px]">history_toggle_off</span>
-</div>
-</div>
-</section>
+<x-bk.report-metrics :unread="$unreadCount" :urgent="$urgentUnreadCount" :overdue="$staleCount" />
 <section class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
 <div class="px-6 pt-5 pb-3 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
 <div class="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg">
@@ -97,72 +47,60 @@
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
 <input x-model="query" @input="currentPage = 1; selected = []" aria-label="Cari data tabel" class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200/60 rounded-lg text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all" placeholder="Cari ID kasus (cth: RPT-0001) atau kata kunci..." type="text">
 </div>
-<div class="relative inline-flex items-center rounded-lg border border-slate-200/60 bg-white transition-all group">
-<span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">category</span>
-<select x-model="categoryFilter" @change="currentPage = 1; selected = []" class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; outline: none; box-shadow: none;">
-<option value="">Jenis: Semua</option>
-@if(isset($categories) && $categories->isNotEmpty())
-@foreach($categories as $cat)
-<option value="{{ strtolower($cat->label) }}">{{ $cat->label }}</option>
-@endforeach
-@else
-<option value="fisik">Fisik</option>
-<option value="verbal">Ejekan &amp; Verbal</option>
-<option value="dikucilkan">Dikucilkan</option>
-<option value="cyber">Cyberbullying</option>
-<option value="pelecehan">Pelecehan</option>
-<option value="lainnya">Lainnya</option>
-@endif
-</select>
-<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
+<x-bk.report-filters>
+    <label>Jenis kejadian
+        <select x-model="draft.type">
+            <option value="">Jenis: Semua</option>
+            @if(isset($categories) && $categories->isNotEmpty())
+            @foreach($categories as $cat)
+            <option value="{{ strtolower($cat->label) }}">{{ $cat->label }}</option>
+            @endforeach
+            @else
+            <option value="fisik">Fisik</option>
+            <option value="verbal">Ejekan &amp; Verbal</option>
+            <option value="dikucilkan">Dikucilkan</option>
+            <option value="cyber">Cyberbullying</option>
+            <option value="pelecehan">Pelecehan</option>
+            <option value="lainnya">Lainnya</option>
+            @endif
+        </select>
+    </label>
+    <label>Peran pelapor
+        <select x-model="draft.role">
+            <option value="">Peran: Semua</option>
+            <option value="siswa">Korban Langsung</option>
+            <option value="saksi">Saksi Kejadian</option>
+            <option value="teman">Teman Korban</option>
+            <option value="ortu">Orang Tua / Wali</option>
+            <option value="guru">Warga Sekolah / Guru</option>
+        </select>
+    </label>
+    <label>Urgensi
+        <select x-model="draft.urgency">
+            <option value="">Urgensi: Semua</option>
+            <option value="urgent">Darurat / Urgent</option>
+            <option value="medium">Sedang / Medium</option>
+            <option value="easy">Rendah / Konseling</option>
+        </select>
+    </label>
+    <label>Ingin dihubungi
+        <select x-model="draft.contact">
+            <option value="">Kontak: Semua</option>
+            <option value="ya">Ingin Dihubungi (Ya)</option>
+            <option value="tidak">Tidak Ingin Dihubungi</option>
+        </select>
+    </label>
+    <label class="filter-period">Rentang waktu
+        <select x-model="draft.period">
+            <option value="">Waktu: Semua</option>
+            <option value="7">7 Hari Terakhir</option>
+            <option value="30">30 Hari Terakhir</option>
+            <option value="custom">Kustom</option>
+        </select>
+    </label>
+</x-bk.report-filters>
+<x-bk.report-sort />
 </div>
-<div class="relative inline-flex items-center rounded-lg border border-slate-200/60 bg-white transition-all group">
-<span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">badge</span>
-<select x-model="roleFilter" @change="currentPage = 1; selected = []" class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; outline: none; box-shadow: none;">
-<option value="">Peran: Semua</option>
-<option value="siswa">Korban Langsung</option>
-<option value="saksi">Saksi Kejadian</option>
-<option value="teman">Teman Korban</option>
-<option value="ortu">Orang Tua / Wali</option>
-<option value="guru">Warga Sekolah / Guru</option>
-</select>
-<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
-</div>
-<div class="relative inline-flex items-center rounded-lg border border-slate-200/60 bg-white transition-all group">
-<span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">flag</span>
-<select x-model="urgencyFilter" @change="currentPage = 1; selected = []" class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; outline: none; box-shadow: none;">
-<option value="">Urgensi: Semua</option>
-<option value="urgent">Darurat / Urgent</option>
-<option value="medium">Sedang / Medium</option>
-<option value="easy">Rendah / Konseling</option>
-</select>
-<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
-</div>
-<div class="relative inline-flex items-center rounded-lg border border-slate-200 bg-white transition-all group">
-<span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">contact_phone</span>
-<select x-model="contactFilter" @change="currentPage = 1; selected = []" class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer border-0" style="border-width: 0; outline: none; box-shadow: none;">
-<option value="">Kontak: Semua</option>
-<option value="ya">Ingin Dihubungi (Ya)</option>
-<option value="tidak">Tidak Ingin Dihubungi</option>
-</select>
-<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
-</div>
-<div class="relative inline-flex items-center rounded-lg border bg-white transition-all group border-slate-200">
-<span class="material-symbols-outlined pl-2.5 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">calendar_today</span>
-<select x-model="timeFilter" @change="currentPage = 1; selected = []; if (timeFilter === 'custom') dateFilterOpen = true" class="appearance-none pl-2 pr-8 py-2 bg-transparent text-xs text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 rounded-lg cursor-pointer border-0" style="border-width: 0; outline: none; box-shadow: none;">
-<option value="">Waktu: Semua</option>
-<option value="7">7 Hari Terakhir</option>
-<option value="30">30 Hari Terakhir</option>
-<option value="custom">Kustom</option>
-</select>
-<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[16px] pointer-events-none group-hover:text-slate-600 transition-colors">expand_more</span>
-</div>
-<button type="button" @click="resetFilters()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-600 transition-colors cursor-pointer" title="Reset semua filter">
-<span class="material-symbols-outlined text-[16px]">restart_alt</span>
-<span>Reset Filter</span>
-</button>
-</div>
-<x-bk.date-filter />
 <div class="bk-reports-scroll overflow-x-auto" tabindex="0" role="region" aria-label="Tabel laporan, geser horizontal bila diperlukan">
 <table class="bk-reports-table w-full text-left border-collapse">
 <thead>
@@ -171,13 +109,11 @@
 <input @change="selectVisible($event.target.checked)" :checked="allSelected" :indeterminate.prop="selected.length > 0 && !allSelected" aria-label="Pilih semua laporan yang terlihat" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" id="selectAll" type="checkbox">
 </th>
 <th class="py-3 px-3">Kode Tiket</th>
-<th class="py-3 px-3">Urgensi</th>
 <th class="py-3 px-3">Jenis Kejadian</th>
 <th class="py-3 px-3">Peran Pelapor</th>
-<th class="py-3 px-3 min-w-[280px]">Cuplikan Cerita</th>
+<th class="py-3 px-3 ">Cuplikan Cerita</th>
 <th class="py-3 px-3 whitespace-nowrap">Waktu</th>
-<th class="py-3 px-3">Ingin Dihubungi</th>
-<th class="py-3 px-3">Ditangani Oleh</th>
+<th class="py-3 px-3">Urgensi</th>
 <th class="py-3 px-4 text-right">Aksi</th>
 </tr>
 </thead>
@@ -227,7 +163,7 @@
 <input x-model="selected" value="{{ $report->id }}" aria-label="Pilih laporan" class="row-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" type="checkbox">
 </td>
 <td class="py-3 px-3">
-<div class="flex items-center gap-2 font-bold text-slate-900 tracking-tight">
+<div class="flex items-center gap-2 font-bold text-slate-900 tracking-tight whitespace-nowrap">
 @if($isUnread)
 <span class="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-blue-100" title="Belum dibaca"></span>
 @elseif($statusType === 'in_progress')
@@ -238,23 +174,18 @@
 <span>#{{ $report->case_label }}</span>
 </div>
 </td>
-<td class="py-3 px-3 whitespace-nowrap">
-<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold border {{ $urgencyClass }}">
-<span class="material-symbols-outlined text-[15px] fill-1 {{ str_contains($urgencyClass, 'rose') ? 'text-rose-600' : (str_contains($urgencyClass, 'amber') ? 'text-amber-600' : 'text-emerald-600') }}">{{ $urgencyIcon }}</span>
-<span>{{ $urgencyText }}</span>
-</span>
-</td>
-<td class="py-3 px-3 font-medium text-slate-800 whitespace-nowrap">
+<td class="py-3 px-3 font-medium text-slate-800">
 <div>{{ $report->category }}</div>
 @if($report->ml_status === 'selesai')
 <span class="mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $report->ml_label === 1 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600' }}">{{ $report->ml_badge_label }}</span>
 @endif
 </td>
-<td class="py-3 px-3 text-slate-600 whitespace-nowrap">
+<td class="py-3 px-3 text-slate-600">
 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">
 <span class="material-symbols-outlined text-[13px] text-slate-500">{{ $roleIcon }}</span>
 {{ $report->reporter_role ?: 'Siswa' }}
 </span>
+<small class="report-cell-meta">Ingin dihubungi: {{ $report->wants_contact ? 'Ya (WhatsApp)' : 'Tidak' }}</small>
 </td>
 <td class="py-3 px-3 text-slate-600">
 <p class="bk-report-snippet line-clamp-1 max-w-[320px]" title="{{ $report->story }}">
@@ -263,34 +194,17 @@
 </td>
 <td class="py-3 px-3 text-slate-600 whitespace-nowrap font-medium">
 {{ $report->formatted_time }}
+<small class="report-cell-meta">{{ $report->assigned_counselor ? 'Ditangani '.$report->assigned_counselor : 'Belum ditugaskan' }}</small>
 </td>
 <td class="py-3 px-3 whitespace-nowrap">
-@if($report->wants_contact)
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-<span class="material-symbols-outlined text-[13px]">chat</span>
-Ya (WhatsApp)
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold border {{ $urgencyClass }}">
+<span class="material-symbols-outlined text-[15px] fill-1 {{ str_contains($urgencyClass, 'rose') ? 'text-rose-600' : (str_contains($urgencyClass, 'amber') ? 'text-amber-600' : 'text-emerald-600') }}">{{ $urgencyIcon }}</span>
+<span>{{ $urgencyText }}</span>
 </span>
-@else
-<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500">
-Tidak
-</span>
-@endif
-</td>
-<td class="py-3 px-3 whitespace-nowrap">
-@if($report->assigned_counselor)
-<div class="flex items-center gap-1.5">
-<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center justify-center">
-{{ strtoupper(substr($report->assigned_counselor, 0, 1) . (str_contains($report->assigned_counselor, ' ') ? substr(strstr($report->assigned_counselor, ' '), 1, 1) : '')) }}
-</span>
-<span class="font-medium text-slate-800">{{ Str::limit($report->assigned_counselor, 18) }}</span>
-</div>
-@else
-<span class="text-slate-400 italic text-[11px]">Belum Ditugaskan</span>
-@endif
 </td>
 <td class="py-3 px-4 text-right whitespace-nowrap">
-<a class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all shadow-2xs" href="{{ route('bk.reports.show', $report->id) }}">
-<span>Buka Laporan</span>
+<a aria-label="Buka laporan {{ $report->case_label }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all shadow-2xs" href="{{ route('bk.reports.show', $report->id) }}">
+<span>Buka</span>
 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
 </a>
 </td>
@@ -298,7 +212,7 @@ Tidak
 @empty
 @endforelse
 <tr x-cloak x-show="filteredCount === 0">
-<td colspan="10" class="p-8 text-center text-sm text-slate-500">Tidak ada laporan yang cocok dengan pilihan filter ini.</td>
+<td colspan="8" class="p-8 text-center text-sm text-slate-500">Tidak ada laporan yang cocok dengan pilihan filter ini.</td>
 </tr>
 </tbody>
 </table>

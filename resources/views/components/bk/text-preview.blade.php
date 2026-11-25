@@ -3,6 +3,7 @@
     <div class="my-auto flex w-full max-w-xl flex-col gap-5 rounded-2xl bg-white p-6 sm:p-8 shadow-2xl border border-slate-100" @click.outside="closeModal()">
         <div class="flex items-start justify-between gap-4 pb-3 border-b border-slate-100">
             <div class="flex flex-col gap-1 min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wide text-blue-700">Pratinjau materi siswa</p>
                 <div class="flex items-center gap-2">
                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 uppercase tracking-wider" x-text="previewAudience || 'Portal Siswa'"></span>
                     <span class="text-xs text-slate-400 font-mono" x-text="previewCode"></span>
