@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page 1 Laporan - Buka Detail Laporan - Anonim | HiOwy!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --canvas: #F6F8FC;
+      --surface: #FFFFFF;
+      --soft: #F8FAFC;
+      --border: #E5ECF6;
+      --ink: #0F172A;
+      --muted: #64748B;
+      --blue: #2563EB;
+      --blue-dark: #1E40AF;
+      --blue-soft: #EFF6FF;
+      --blue-border: #BFDBFE;
+      --emerald: #059669;
+      --emerald-soft: #ECFDF5;
+      --emerald-dark: #065F46;
+      --emerald-border: #A7F3D0;
+      --rose-soft: #FFF1F2;
+      --rose-dark: #9F1239;
+      --rose-border: #FECDD3;
+      --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+
+    * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #E2E8F0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--ink);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px;
+    }
+
+    .hiowy-artboard {
+      width: 1440px;
+      min-height: 1300px;
+      background: var(--canvas);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 236px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .sidebar-top {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .brand-wordmark {
+      padding: 2px 8px;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      line-height: 1.1;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .brand-wordmark span { color: var(--blue); }
+
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-label {
+      padding: 0 10px 6px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.15s ease;
+    }
+    .nav-item:hover { background: var(--soft); }
+    .nav-item.active {
+      background: var(--ink);
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #34D399;
+      color: #064E3B;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .logout-btn:hover { background: #F1F5F9; color: var(--ink); }
+
+    /* Workspace */
+    .workspace {
+      flex: 1;
+      min-width: 0;
+      padding: 24px 30px 30px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Topbar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .year-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      height: 40px;
+      padding: 0 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-circle {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .notif-dot {
+      position: absolute;
+      top: 9px;
+      right: 10px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #E11D48;
+      border: 1.5px solid #FFFFFF;
+    }
+
+    .profile-pill {
+      height: 42px;
+      padding: 4px 13px 4px 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .profile-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .profile-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* Case Header */
+    .case-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .case-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .breadcrumb {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .breadcrumb:hover { color: var(--ink); }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .case-id {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 11px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+    .pill-rose { background: var(--rose-soft); color: var(--rose-dark); }
+    .pill-blue { background: var(--blue-soft); color: var(--blue-dark); }
+    .pill-emerald { background: var(--emerald-soft); color: var(--emerald-dark); }
+    .pill-wait {
+      background: #FFFFFF;
+      color: #94A3B8;
+      border: 1px solid #E2E8F0;
+      font-weight: 600;
+    }
+
+    .case-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      border-radius: 14px;
+      padding: 11px 18px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-white {
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+    .btn-white:hover { background: var(--soft); border-color: #CBD5E1; }
+
+    .btn-dark {
+      background: var(--ink);
+      color: #FFFFFF;
+      border: 1px solid var(--ink);
+    }
+    .btn-dark:hover { background: #1E293B; }
+
+    /* Stepper Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .stepper-card {
+      padding: 20px 26px;
+    }
+
+    .stepper-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+
+    .step-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .step-track {
+      height: 46px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 12px;
+    }
+    .step-col:last-child .step-track { padding-right: 0; }
+
+    .step-node {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-node.done { background: var(--emerald); }
+    .step-node.wait { background: #FFFFFF; border: 1.5px solid #CBD5E1; }
+
+    .step-active-ring {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      padding: 3px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-active-ring .step-node {
+      width: 36px;
+      height: 36px;
+      background: var(--blue);
+    }
+
+    .step-line {
+      flex: 1;
+      height: 3px;
+      border-radius: 999px;
+      background: #E2E8F0;
+      overflow: hidden;
+    }
+    .step-line.done { background: var(--emerald); }
+    .step-line-half {
+      width: 48%;
+      height: 100%;
+      background: var(--blue);
+      border-radius: 999px;
+    }
+
+    .step-meta {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .step-meta.active { color: var(--blue); }
+
+    .step-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .step-title.wait { color: var(--muted); }
+
+    /* Bento Grid */
+    .bento-grid {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .left-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .right-col {
+      width: 380px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .section-card {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* Info Grids */
+    .meta-row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .meta-row-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .meta-box {
+      background: var(--soft);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .meta-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .meta-val {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* Anonim Reporter Notice Box */
+    .anon-card {
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .anon-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #E2E8F0;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .anon-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .anon-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .anon-desc {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .desc-box {
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .desc-text {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+
+    /* Komunikasi Asinkron Aman */
+    .chat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bubble {
+      border-radius: 16px;
+      padding: 13px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .bubble-pelapor {
+      max-width: 560px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      color: var(--ink);
+    }
+    .bubble-pelapor-short {
+      max-width: 535px;
+    }
+    .bubble-bk {
+      max-width: 640px;
+      background: var(--blue);
+      color: #FFFFFF;
+    }
+
+    .bubble-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .bubble-sender {
+      font-size: 11.5px;
+      font-weight: 800;
+    }
+    .bubble-bk .bubble-sender { color: #DBEAFE; }
+
+    .bubble-time {
+      font-size: 10.5px;
+      color: var(--muted);
+    }
+    .bubble-bk .bubble-time { color: #BFDBFE; }
+
+    .bubble-body {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .bubble-receipt {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+    .bubble-bk .bubble-receipt { color: #DBEAFE; }
+
+    .composer-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .composer-textarea {
+      width: 100%;
+      min-height: 44px;
+      border: none;
+      outline: none;
+      resize: vertical;
+      font-family: inherit;
+      font-size: 12.5px;
+      color: var(--ink);
+      background: transparent;
+    }
+    .composer-textarea::placeholder { color: var(--muted); }
+
+    .composer-foot {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-send {
+      background: var(--ink);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 18px;
+      padding: 9px 18px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-send:hover { background: #1E293B; }
+
+    /* Right Panel Form Controls */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .select-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .select-input {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 36px 11px 14px;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink);
+      outline: none;
+      cursor: pointer;
+    }
+    .select-input.blue-border {
+      border-color: var(--blue-border);
+    }
+    .select-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .select-chevron {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--muted);
+    }
+
+    .koreksi-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .koreksi-row .select-wrap { flex: 1; }
+
+    .btn-koreksi {
+      padding: 11px 16px;
+      border-radius: 12px;
+      background: var(--blue-soft);
+      border: 1px solid var(--blue-border);
+      color: var(--blue-dark);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+    .btn-koreksi:hover { background: #DBEAFE; }
+
+    .urgency-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .urg-btn {
+      padding: 10px 8px;
+      border-radius: 12px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .urg-btn.active-darurat {
+      background: var(--rose-soft);
+      border-color: var(--rose-border);
+      color: var(--rose-dark);
+    }
+    .urg-btn.active-sedang {
+      background: #FFFBEB;
+      border-color: #FDE68A;
+      color: #B45309;
+    }
+    .urg-btn.active-rendah {
+      background: var(--emerald-soft);
+      border-color: var(--emerald-border);
+      color: var(--emerald-dark);
+    }
+
+    .btn-full {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+    }
+
+    .note-textarea {
+      width: 100%;
+      min-height: 78px;
+      padding: 12px 14px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 12px;
+      color: var(--ink);
+      resize: vertical;
+      outline: none;
+    }
+    .note-textarea::placeholder { color: var(--muted); }
+    .note-textarea:focus { border-color: var(--blue); }
+
+    .btn-soft {
+      align-self: flex-start;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 9px 16px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-soft:hover { background: #F1F5F9; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--ink);
+      color: #FFFFFF;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.22);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 99;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="hiowy-artboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <a href="index.html" class="brand-wordmark">HiOwy<span>!</span></a>
+
+        <nav class="nav-group">
+          <div class="nav-label">NAVIGASI UTAMA</div>
+
+          <a href="05-page1-laporan.html" class="nav-item active">
+            <span class="nav-left">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                <path d="M4 4h16v16H4z M4 14h5l2 3h2l2-3h5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Laporan
+            </span>
+            <span class="nav-badge">2</span>
+          </a>
+
+          <a href="09-page2-kelola-jenis-kejadian.html" class="nav-item">
+            <span class="nav-left">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                <path d="M4 6h16 M8 6v0 M4 12h16 M16 12v0 M4 18h16 M10 18v0" stroke="#64748B" stroke-width="1.8" stroke-linecap="round"/>
+                <circle cx="9" cy="6" r="2" fill="#FFFFFF" stroke="#64748B" stroke-width="1.8"/>
+                <circle cx="15" cy="12" r="2" fill="#FFFFFF" stroke="#64748B" stroke-width="1.8"/>
+                <circle cx="11" cy="18" r="2" fill="#FFFFFF" stroke="#64748B" stroke-width="1.8"/>
+              </svg>
+              Kelola
+            </span>
+          </a>
+
+          <a href="14-page3-halaman-pelajari.html" class="nav-item">
+            <span class="nav-left">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                <path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H10a2 2 0 0 1 2 2v14.5a1.5 1.5 0 0 0-1.5-1.5H4.5A2.5 2.5 0 0 0 2 20.5V5.5Z M22 5.5A2.5 2.5 0 0 0 19.5 3H14a2 2 0 0 0-2 2v14.5a1.5 1.5 0 0 1 1.5-1.5h6a2.5 2.5 0 0 1 2.5 2.5V5.5Z" stroke="#64748B" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Halaman Pelajari
+            </span>
+          </a>
+
+          <a href="17-page4-statistik.html" class="nav-item">
+            <span class="nav-left">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                <path d="M6 20V14 M12 20V8 M18 20V4" stroke="#64748B" stroke-width="1.9" stroke-linecap="round"/>
+              </svg>
+              Statistik
+            </span>
+          </a>
+
+          <a href="18-page4-arsip.html" class="nav-item">
+            <span class="nav-left">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                <path d="M21 8v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8 M2 4h20v4H2z M10 12h4" stroke="#64748B" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Arsip
+            </span>
+          </a>
+
+          <a href="19-page4-log-akses.html" class="nav-item">
+            <span class="nav-left">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                <path d="M3 12a9 9 0 1 0 3-6.7L3 8 M3 3v5h5 M12 7v5l3 2" stroke="#64748B" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Log Akses
+            </span>
+          </a>
+        </nav>
+      </div>
+
+      <a href="02-auth-masuk.html" class="logout-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M19 12H5 M12 19l-7-7 7-7" stroke="#64748B" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Keluar Akun
+      </a>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="year-pill">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M22 10L12 5 2 10l10 5 10-5Z M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" stroke="#0F172A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Tahun Ajaran 2024/2025
+        </div>
+
+        <div class="topbar-right">
+          <button class="icon-circle" type="button" aria-label="Notifikasi" onclick="showToast('2 laporan baru membutuhkan tindak lanjut BK')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0" stroke="#0F172A" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="notif-dot"></span>
+          </button>
+
+          <div class="profile-pill" onclick="showToast('Masuk sebagai Koordinator BK SMP Telkom Purwokerto')">
+            <div class="profile-avatar">BK</div>
+            <span class="profile-name">Koordinator BK</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M6 9l6 6 6-6" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      </header>
+
+      <!-- Case Header -->
+      <section class="case-header">
+        <div class="case-title-wrap">
+          <a href="05-page1-laporan.html" class="breadcrumb">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <path d="M19 12H5 M12 19l-7-7 7-7" stroke="#64748B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Semua Laporan / Detail Kasus #RPT-0003
+          </a>
+          <div class="title-row">
+            <h1 class="case-id">#RPT-0003</h1>
+            <span id="badgeUrgensi" class="pill pill-rose">Darurat</span>
+            <span id="badgeStatus" class="pill pill-blue">Dibaca &amp; Aktif</span>
+          </div>
+        </div>
+
+        <div class="case-actions">
+          <a href="08-page1-detail-laporan-modal-walas.html" class="btn btn-white">Laporkan ke Wali Kelas</a>
+          <button type="button" class="btn btn-dark" onclick="showToast('Kasus #RPT-0003 siap dipindahkan ke Arsip')">Arsipkan Kasus</button>
+        </div>
+      </section>
+
+      <!-- 4-Step Progress Stepper -->
+      <section class="card stepper-card">
+        <div class="stepper-grid">
+          <div class="step-col">
+            <div class="step-track">
+              <div class="step-node done">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 6h16v12H4z M4 7l8 6 8-6" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="step-line done"></div>
+            </div>
+            <div class="step-meta">STEP 1 • 21 Nov 2026 • 19:10</div>
+            <div class="step-title">Laporan Masuk</div>
+            <div><span class="pill pill-emerald">Selesai</span></div>
+          </div>
+
+          <div class="step-col">
+            <div class="step-track">
+              <div class="step-active-ring">
+                <div class="step-node">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="step-line"><div class="step-line-half"></div></div>
+            </div>
+            <div class="step-meta active">STEP 2 • 21 Nov 2026 • 19:25</div>
+            <div class="step-title">Dibaca &amp; Aktif</div>
+            <div><span class="pill pill-blue">Sedang Diproses</span></div>
+          </div>
+
+          <div class="step-col">
+            <div class="step-track">
+              <div class="step-node wait">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z" stroke="#94A3B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="step-line"></div>
+            </div>
+            <div class="step-meta">STEP 3 • Menunggu proses</div>
+            <div class="step-title wait">Tindak Lanjut</div>
+            <div><span class="pill pill-wait">Menunggu</span></div>
+          </div>
+
+          <div class="step-col">
+            <div class="step-track">
+              <div class="step-node wait">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 8v13H3V8 M1 3h22v5H1z M10 12h4" stroke="#94A3B8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <div class="step-meta">STEP 4 • Menunggu hasil</div>
+            <div class="step-title wait">Selesai / Arsip</div>
+            <div><span class="pill pill-wait">Menunggu</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Detail Bento Grid -->
+      <section class="bento-grid">
+        <!-- Left Column -->
+        <div class="left-col">
+          <!-- Card 1: Informasi Insiden & Identitas Pelapor (Anonim) -->
+          <article class="card section-card">
+            <div class="card-header">
+              <h2 class="card-title">Informasi Insiden &amp; Identitas Pelapor</h2>
+              <span class="pill pill-blue">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 11h14v10H5z M8 11V7a4 4 0 0 1 8 0v4" stroke="#1E40AF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Terkunci Konselor
+              </span>
+            </div>
+
+            <div class="meta-row-3">
+              <div class="meta-box">
+                <span class="meta-label">JENIS KEJADIAN</span>
+                <span id="valJenis" class="meta-val">Sentuhan Tidak Pantas</span>
+              </div>
+              <div class="meta-box">
+                <span class="meta-label">LOKASI</span>
+                <span class="meta-val">Ruang Kelas</span>
+              </div>
+              <div class="meta-box">
+                <span class="meta-label">WAKTU KEJADIAN</span>
+                <span class="meta-val">Hari ini saat istirahat</span>
+              </div>
+            </div>
+
+            <div class="meta-row-2">
+              <div class="meta-box">
+                <span class="meta-label">PERAN PELAPOR</span>
+                <span class="meta-val">Siswa (Korban Langsung)</span>
+              </div>
+              <div class="meta-box">
+                <span class="meta-label">PIHAK TERLIBAT / SAKSI</span>
+                <span class="meta-val">Kakak kelas (Kelas 9)</span>
+              </div>
+            </div>
+
+            <!-- Identitas Pelapor Anonim -->
+            <div class="anon-card">
+              <div class="anon-icon-box" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" stroke="#475569" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="anon-info">
+                <span class="anon-title">Pelapor Memilih Anonim</span>
+                <p class="anon-desc">Identitas dirahasiakan oleh sistem demi perlindungan dan kenyamanan pelapor. Gunakan Komunikasi Asinkron Aman di bawah ini.</p>
+              </div>
+            </div>
+
+            <div class="desc-box">
+              <span class="meta-label">DESKRIPSI PERISTIWA</span>
+              <p class="desc-text">Saat jam istirahat, ada kakak kelas yang menggoda dan menyentuh secara tidak pantas di dekat tangga lantai 2.</p>
+            </div>
+          </article>
+
+          <!-- Card 2: Komunikasi Asinkron Aman -->
+          <article class="card section-card">
+            <div class="card-header">
+              <h2 class="card-title">Komunikasi Asinkron Aman</h2>
+              <span class="pill pill-emerald">Token Terenkripsi</span>
+            </div>
+
+            <div id="chatList" class="chat-list">
+              <div class="bubble bubble-pelapor">
+                <div class="bubble-hdr">
+                  <span class="bubble-sender">Pelapor (Siswa • Korban)</span>
+                  <span class="bubble-time">21 Nov 2026, 19:10</span>
+                </div>
+                <p class="bubble-body">Saya takut kalau mereka tahu saya melapor. Saat istirahat tadi mereka masih menunggu di dekat tangga.</p>
+                <div class="bubble-receipt">
+                  Dibaca BK 19:25 WIB
+                  <svg width="14" height="10" viewBox="0 0 22 12" fill="none">
+                    <path d="M1.5 6.5L5.5 10.5L13 2M8.5 6.5L12.5 10.5L20 2" stroke="#2563EB" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="bubble bubble-bk">
+                <div class="bubble-hdr">
+                  <span class="bubble-sender">Koordinator BK SMP Telkom</span>
+                  <span class="bubble-time">21 Nov 2026, 19:28</span>
+                </div>
+                <p class="bubble-body">Halo Raka, terima kasih sudah berani bercerita. Identitasmu aman bersama Ibu. Besok jam istirahat pertama kamu nyaman bertemu di ruang BK?</p>
+                <div class="bubble-receipt">
+                  Dibaca Pelapor 19:30 WIB
+                  <svg width="14" height="10" viewBox="0 0 22 12" fill="none">
+                    <path d="M1.5 6.5L5.5 10.5L13 2M8.5 6.5L12.5 10.5L20 2" stroke="#93C5FD" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="bubble bubble-pelapor bubble-pelapor-short">
+                <div class="bubble-hdr">
+                  <span class="bubble-sender">Pelapor (Siswa)</span>
+                  <span class="bubble-time">21 Nov 2026, 19:31</span>
+                </div>
+                <p class="bubble-body">Baik Bu, terima kasih banyak. Saya bersedia bertemu besok di jam istirahat pertama.</p>
+                <div class="bubble-receipt">
+                  Dibaca BK 19:32 WIB
+                  <svg width="14" height="10" viewBox="0 0 22 12" fill="none">
+                    <path d="M1.5 6.5L5.5 10.5L13 2M8.5 6.5L12.5 10.5L20 2" stroke="#2563EB" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="composer-box">
+              <textarea id="replyInput" class="composer-textarea" placeholder="Tulis respons yang menenangkan untuk siswa (dibaca via kode tiket)..."></textarea>
+              <div class="composer-foot">
+                <button type="button" class="btn-send" onclick="sendReply()">Kirim Balasan</button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Right Column -->
+        <aside class="right-col">
+          <!-- Card 1: Status & Penugasan -->
+          <section class="card section-card">
+            <h2 class="card-title">Status &amp; Penugasan</h2>
+
+            <div class="field">
+              <label class="field-label" for="selStatus">Status Kasus</label>
+              <div class="select-wrap">
+                <select id="selStatus" class="select-input">
+                  <option>Laporan Masuk</option>
+                  <option selected>Dibaca (Aktif)</option>
+                  <option>Tindak Lanjut</option>
+                  <option>Selesai / Arsip</option>
+                </select>
+                <svg class="select-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="selKoreksi">Koreksi Jenis Kejadian</label>
+              <div class="koreksi-row">
+                <div class="select-wrap">
+                  <select id="selKoreksi" class="select-input blue-border">
+                    <option selected>Sentuhan Tidak Pantas</option>
+                    <option>Perundungan Fisik</option>
+                    <option>Perundungan Verbal</option>
+                    <option>Perundungan Siber</option>
+                    <option>Pemalakan / Ancaman</option>
+                    <option>Masalah Pribadi</option>
+                  </select>
+                  <svg class="select-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none">
+                    <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <button type="button" class="btn-koreksi" onclick="applyKoreksi()">Koreksi</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="selKonselor">Konselor Penanggung Jawab</label>
+              <div class="select-wrap">
+                <select id="selKonselor" class="select-input">
+                  <option selected>Koordinator BK SMP Telkom</option>
+                  <option>Ibu Rina Kusuma, S.Pd</option>
+                  <option>Bapak Hendra Wijaya, M.Psi</option>
+                </select>
+                <svg class="select-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="field">
+              <span class="field-label">Tingkat Urgensi</span>
+              <div class="urgency-grid">
+                <button type="button" class="urg-btn" data-urg="Rendah" onclick="setUrgency('Rendah', this)">Rendah</button>
+                <button type="button" class="urg-btn" data-urg="Sedang" onclick="setUrgency('Sedang', this)">Sedang</button>
+                <button type="button" class="urg-btn active-darurat" data-urg="Darurat" onclick="setUrgency('Darurat', this)">Darurat</button>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-dark btn-full" onclick="updateCase()">Perbarui Kasus</button>
+          </section>
+
+          <!-- Card 2: Catatan Rahasia BK -->
+          <section class="card section-card">
+            <h2 class="card-title">Catatan Rahasia BK (Internal)</h2>
+            <textarea id="noteInput" class="note-textarea" placeholder="Tambah catatan rahasia antar-konselor..."></textarea>
+            <button type="button" class="btn-soft" onclick="saveNote()">Simpan Catatan</button>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let currentUrgency = 'Darurat';
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    function applyKoreksi() {
+      const val = document.getElementById('selKoreksi').value;
+      document.getElementById('valJenis').textContent = val;
+      showToast('Jenis kejadian diperbarui menjadi "' + val + '"');
+    }
+
+    function setUrgency(level, btn) {
+      currentUrgency = level;
+      document.querySelectorAll('.urg-btn').forEach(b => {
+        b.classList.remove('active-darurat', 'active-sedang', 'active-rendah');
+      });
+      if (level === 'Darurat') btn.classList.add('active-darurat');
+      if (level === 'Sedang') btn.classList.add('active-sedang');
+      if (level === 'Rendah') btn.classList.add('active-rendah');
+
+      const badge = document.getElementById('badgeUrgensi');
+      badge.textContent = level;
+      badge.className = 'pill ' + (level === 'Darurat' ? 'pill-rose' : level === 'Sedang' ? 'pill-blue' : 'pill-emerald');
+    }
+
+    function updateCase() {
+      const st = document.getElementById('selStatus').value;
+      document.getElementById('badgeStatus').textContent = st === 'Dibaca (Aktif)' ? 'Dibaca & Aktif' : st;
+      showToast('Status & penugasan kasus #RPT-0003 berhasil diperbarui');
+    }
+
+    function sendReply() {
+      const input = document.getElementById('replyInput');
+      const txt = input.value.trim();
+      if (!txt) return showToast('Tulis balasan terlebih dahulu');
+
+      const list = document.getElementById('chatList');
+      const div = document.createElement('div');
+      div.className = 'bubble bubble-bk';
+      div.innerHTML =
+        '<div class="bubble-hdr"><span class="bubble-sender">Koordinator BK SMP Telkom</span><span class="bubble-time">Baru saja</span></div>' +
+        '<p class="bubble-body"></p>' +
+        '<div class="bubble-receipt">Terkirim &amp; Terenkripsi <svg width="14" height="10" viewBox="0 0 22 12" fill="none"><path d="M1.5 6.5L5.5 10.5L13 2M8.5 6.5L12.5 10.5L20 2" stroke="#93C5FD" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+      div.querySelector('.bubble-body').textContent = txt;
+      list.appendChild(div);
+      input.value = '';
+      showToast('Balasan terenkripsi dikirim ke pelapor anonim');
+    }
+
+    function saveNote() {
+      const input = document.getElementById('noteInput');
+      if (!input.value.trim()) return showToast('Tulis catatan internal terlebih dahulu');
+      input.value = '';
+      showToast('Catatan rahasia BK tersimpan');
+    }
+  </script>
+</body>
+</html>

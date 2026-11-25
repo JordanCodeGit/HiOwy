@@ -1,7 +1,7 @@
 <x-layouts.bk title="Profil & Keamanan Wali Kelas" page="profile" portal="walas" :report-count="$unreadCount" :notifications="$notifications">
-<main x-data="bkProfile" class="bg-background min-h-screen"><div class="flex flex-col w-full">
+<main x-data="bkProfile" class="account-settings bg-background min-h-screen"><div class="flex flex-col w-full">
 
-<div class="p-4 lg:p-margin-lg max-w-7xl w-full mx-auto flex flex-col gap-space-xl">
+<div class="p-4 lg:p-margin-lg w-full mx-auto flex flex-col gap-space-xl">
 
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-lg">
 <div class="flex flex-col gap-space-xs">
@@ -50,12 +50,12 @@
     </div>
 @endif
 
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<div class="account-grid grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
 
 <div class="lg:col-span-5 flex flex-col gap-space-lg">
 <div class="bg-surface-container-lowest rounded-xl shadow-xs p-space-xl flex flex-col gap-space-lg">
 
-<div class="flex items-center gap-space-md pb-space-md bg-surface-container-low/50 p-space-md rounded-xl">
+<div class="account-banner flex items-center gap-space-md pb-space-md bg-surface-container-low/50 p-space-md rounded-xl">
 <div class="relative">
 <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary font-headline-md text-headline-md font-bold shadow-xs ring-2 ring-surface-container-lowest select-none">
 {{ collect(explode(' ', trim(Auth::user()?->name ?: 'WK')))->filter()->map(fn($w) => strtoupper(substr($w, 0, 1)))->take(2)->implode('') }}

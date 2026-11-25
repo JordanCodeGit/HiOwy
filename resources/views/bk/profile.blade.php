@@ -1,7 +1,7 @@
 <x-layouts.bk title="Profil & Keamanan" page="profile" mode="">
-<main x-data="bkProfile" class="relative bg-surface min-h-screen">
+<main x-data="bkProfile" class="account-settings relative bg-surface min-h-screen">
 <div class="flex flex-col w-full">
-<div class="px-8 pt-8 pb-4 max-w-7xl w-full mx-auto">
+<div class="px-8 pt-8 pb-4 w-full mx-auto">
 <div class="flex items-center gap-2 mb-3">
 <span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Portal Staf Konseling</span>
 <span class="text-outline-variant">•</span>
@@ -20,8 +20,8 @@
 </div>
 </div>
 </div>
-<div class="px-8 pb-16 max-w-7xl w-full mx-auto">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<div class="px-8 pb-16 w-full mx-auto">
+<div class="account-grid grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 <div class="lg:col-span-5 flex flex-col gap-6">
 <div class="bg-surface-container-lowest rounded-xl p-6 shadow-xs flex flex-col gap-6 relative overflow-hidden">
 <div class="flex items-center justify-between">
@@ -35,7 +35,7 @@
             </span>
 </div>
 
-<div class="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low">
+<div class="account-banner flex items-center gap-4 p-4 rounded-xl bg-surface-container-low">
 <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary font-headline-md text-headline-md font-bold tracking-tight shadow-xs select-none overflow-hidden shrink-0">
     @if($user->avatar && file_exists(public_path($user->avatar)))
         <img src="{{ asset($user->avatar) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
