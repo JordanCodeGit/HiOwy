@@ -1,0 +1,6 @@
+fastapi>=0.115
+uvicorn>=0.30
+joblib>=1.4
+scikit-learn>=1.6
+imbalanced-learn>=0.13
+PySastrawi>=1.2

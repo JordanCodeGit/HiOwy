@@ -360,11 +360,14 @@
 <div class="text-[11px] flex items-center justify-between text-slate-500 px-0.5" id="urgencyStatusNote">
 <span>Level terpilih: <strong x-text="urgency" class="text-rose-700 font-semibold" id="urgencyLabelText">{{ $urgencyLabel }}</strong></span>
 </div>
-<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 text-xs">
-<span class="font-semibold text-slate-600">Klasifikasi NLP Internal:</span>
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1 text-xs">
+<div class="flex items-center justify-between gap-2">
+<span class="font-semibold text-slate-600">Prediksi NLP Otomatis:</span>
 <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $report->ml_label === 1 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-200/70 text-slate-700' }}">
 {{ $report->ml_badge_label }}@if($report->ml_status === 'selesai' && $report->ml_confidence !== null) ({{ round($report->ml_confidence * 100) }}%)@endif
 </span>
+</div>
+<span class="text-[11px] text-slate-500">Urgensi awal diprediksi otomatis dari cerita laporan oleh model Linear SVM dan tetap dapat disesuaikan Guru BK.</span>
 </div>
 <button class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors shadow-xs text-xs mt-1 cursor-pointer" type="button" @click="updateCase()" :disabled="loading">
 <span x-show="!loading">Perbarui Kasus</span>

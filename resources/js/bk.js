@@ -153,8 +153,6 @@ export function registerBk(Alpine, navigateTo) {
         staffStatus: 'pending',
         qrQuery: '',
         staffQuery: '',
-        trainingMode: Boolean(initialData.trainingMode),
-        nlpEnabled: Boolean(initialData.nlpEnabled),
         readingDayStart: initialData.readingDayStart || 'Senin',
         readingDayEnd: initialData.readingDayEnd || 'Jumat',
         readingTimeStart: initialData.readingTimeStart || '07:00',
@@ -572,38 +570,6 @@ export function registerBk(Alpine, navigateTo) {
                 this.showNotice('Terjadi Kesalahan', 'Gagal menghubungi server.');
             } finally {
                 this.saving = false;
-            }
-        },
-
-        async toggleSetting(key, value) {
-            const prev = this[key === 'training_mode' ? 'trainingMode' : 'nlpEnabled'];
-            if (key === 'training_mode') this.trainingMode = Boolean(value);
-            if (key === 'nlp_enabled') this.nlpEnabled = Boolean(value);
-            try {
-                const res = await fetch('/bk/manage/settings', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': this.csrfToken,
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({ [key]: Boolean(value) }),
-                });
-                const data = await res.json();
-                if (data.success) {
-                    this.trainingMode = Boolean(data.training_mode);
-                    this.nlpEnabled = Boolean(data.nlp_enabled);
-                    this.showNotice('Tersimpan', data.message);
-                } else {
-                    if (key === 'training_mode') this.trainingMode = prev;
-                    if (key === 'nlp_enabled') this.nlpEnabled = prev;
-                    this.showNotice('Gagal', data.message || 'Gagal memperbarui pengaturan.');
-                }
-            } catch (err) {
-                console.error(err);
-                if (key === 'training_mode') this.trainingMode = prev;
-                if (key === 'nlp_enabled') this.nlpEnabled = prev;
-                this.showNotice('Error', 'Gagal menghubungi server.');
             }
         },
 

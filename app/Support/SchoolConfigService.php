@@ -63,8 +63,8 @@ class SchoolConfigService
             'school_website_url' => $websiteUrl,
             'retention_date' => trim($get('retention_date', '')),
             'story_max_length' => $storyMax,
-            'training_mode' => $get('training_mode', '0') === '1',
-            'nlp_enabled' => $get('nlp_enabled', '0') === '1',
+            'training_mode' => false,
+            'nlp_enabled' => true,
         ];
     }
 

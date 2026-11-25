@@ -77,8 +77,6 @@ class BkManageController extends Controller
     public function updateSettings(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
-            'training_mode' => ['nullable', 'boolean'],
-            'nlp_enabled' => ['nullable', 'boolean'],
             'school_name' => ['nullable', 'string', 'max:120'],
             'reading_hours' => ['nullable', 'string', 'max:160'],
             'reading_day_start' => ['nullable', 'string', 'in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu'],
@@ -91,28 +89,6 @@ class BkManageController extends Controller
             'story_max_length' => ['nullable', 'integer', 'min:200', 'max:10000'],
             'school_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
         ]);
-
-        if (array_key_exists('training_mode', $validated)) {
-            $trainingValue = $validated['training_mode'] ? '1' : '0';
-            SchoolSetting::set('training_mode', $trainingValue);
-            AuditLogger::log(
-                Auth::user(),
-                'toggle_training_mode',
-                null,
-                $trainingValue === '1' ? 'Mode latihan diaktifkan' : 'Mode latihan dinonaktifkan'
-            );
-        }
-
-        if (array_key_exists('nlp_enabled', $validated)) {
-            $nlpValue = $validated['nlp_enabled'] ? '1' : '0';
-            SchoolSetting::set('nlp_enabled', $nlpValue);
-            AuditLogger::log(
-                Auth::user(),
-                'toggle_nlp_mode',
-                null,
-                $nlpValue === '1' ? 'Modul NLP diaktifkan' : 'Modul NLP dinonaktifkan'
-            );
-        }
 
         $schoolFields = [
             'school_name',
@@ -907,7 +883,27 @@ class BkManageController extends Controller
             RateLimiter::hit($deviceRateKey, 86400);
         }
 
-        // Immediate emergency alert email without story or reporter identity to all BK counselors (FR-51)
+        // Model NLP auto-aktif untuk memprediksi tingkat urgensi setiap laporan resmi
+        if (! $isTraining) {
+            $mlDriver = strtolower((string) config('services.ml.driver', 'local'));
+            if ($mlDriver === 'http') {
+                try {
+                    ClassifyStudentReportJob::dispatch($report);
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            } else {
+                $job = new ClassifyStudentReportJob($report);
+                try {
+                    $job->handle();
+                    $report->refresh();
+                } catch (\Throwable $e) {
+                    $job->failed($e);
+                }
+            }
+        }
+
+        // Immediate emergency alert email without story or reporter identity to all BK counselors
         $isDarurat = in_array(strtolower(trim((string) $report->urgency)), ['darurat', 'urgent'], true);
         if (! $isTraining && $isDarurat) {
             $schoolName = SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
@@ -918,15 +914,6 @@ class BkManageController extends Controller
                 } catch (\Throwable $e) {
                     report($e);
                 }
-            }
-        }
-
-        // Async ML classification job only when NLP module is enabled and not in training mode (FR-42, FR-48)
-        if (! $isTraining && SchoolSetting::get('nlp_enabled', '0') === '1') {
-            try {
-                ClassifyStudentReportJob::dispatch($report);
-            } catch (\Throwable $e) {
-                report($e);
             }
         }
 

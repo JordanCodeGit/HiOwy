@@ -1,18 +1,12 @@
 <x-layouts.bk title="Dashboard BK" page="dashboard" mode="dashboard" :report-count="$unreadCount ?? 0">
-<x-slot:toolbar>
-    <nav class="staff-mode-switch" aria-label="Mode antrean laporan">
-        <a href="{{ route('bk.dashboard') }}" @if (empty($isTrainingView)) aria-current="page" @endif>Data Asli</a>
-        <a href="{{ route('bk.dashboard', ['mode' => 'latihan']) }}" @if (!empty($isTrainingView)) aria-current="page" @endif>Mode Latihan</a>
-    </nav>
-</x-slot:toolbar>
 <main x-data="bkTable('dashboard')" @bk-search.window="query = $event.detail.query; statusTab = 0; selected = []; currentPage = 1" class="bk-reports-page p-8 w-full source-space-y-6">
 <header class="staff-page-intro">
     <h1>Antrean Laporan</h1>
     <p>Tinjau laporan masuk dan tentukan tindak lanjut pendampingan siswa.</p>
 </header>
-@if (!empty($isTrainingView) || !empty($trainingSettingActive))
+@if (!empty($isTrainingView))
     <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        {{ !empty($isTrainingView) ? 'Mode Latihan (Simulasi): hanya laporan simulasi yang ditampilkan.' : 'Form Publik sedang Mode Latihan' }}
+        Mode Latihan (Simulasi): hanya laporan simulasi yang ditampilkan.
     </p>
 @endif
 <x-bk.report-metrics :unread="$unreadCount" :urgent="$urgentUnreadCount" :overdue="$staleCount" />
@@ -177,7 +171,7 @@
 <td class="py-3 px-3 font-medium text-slate-800">
 <div>{{ $report->category }}</div>
 @if($report->ml_status === 'selesai')
-<span class="mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $report->ml_label === 1 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600' }}">{{ $report->ml_badge_label }}</span>
+<span class="mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $report->ml_label === 1 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600' }}">{{ $report->ml_badge_label }}@if($report->ml_confidence !== null) · {{ round($report->ml_confidence * 100) }}%@endif</span>
 @endif
 </td>
 <td class="py-3 px-3 text-slate-600">
