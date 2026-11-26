@@ -42,8 +42,10 @@ return [
     ],
 
     'ml' => [
+        'driver' => env('ML_DRIVER', 'local'),
         'url' => env('ML_SERVICE_URL', 'http://127.0.0.1:8001'),
         'token' => env('ML_SERVICE_TOKEN'),
+        'weights_path' => env('ML_WEIGHTS_PATH', base_path('ml_model/model_weights.json')),
     ],
 
 ];

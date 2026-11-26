@@ -2,14 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Jobs\ClassifyStudentReportJob;
 use App\Mail\EmergencyReportAlertMail;
 use App\Models\AccessLog;
 use App\Models\IncidentCategory;
 use App\Models\IncidentLocation;
-use App\Models\SchoolSetting;
 use App\Models\StudentReport;
 use App\Models\User;
+use App\Support\BullyingNlpClassifier;
 use App\Support\TicketCodeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -277,20 +276,20 @@ class Batch3M5M6Test extends TestCase
         $bk = User::factory()->bk()->create(['email' => 'bk-train@sekolah.sch.id']);
         $kesiswaan = User::factory()->kesiswaan()->create();
 
-        // Aktifkan training_mode & nlp_enabled lewat panel Kelola BK
-        $this->actingAs($bk)->postJson('/bk/manage/settings', [
-            'training_mode' => true,
-            'nlp_enabled' => true,
-        ])->assertOk()->assertJson([
-            'training_mode' => true,
-            'nlp_enabled' => true,
-        ]);
+        // Toggle on/off Mode Latihan & Modul NLP sudah dihapus dari halaman Kelola & Dashboard BK
+        $this->actingAs($bk)->get('/bk/manage')
+            ->assertOk()
+            ->assertDontSee('Mode Latihan')
+            ->assertDontSee('Modul NLP AI')
+            ->assertDontSee("toggleSetting('training_mode'", false)
+            ->assertDontSee("toggleSetting('nlp_enabled'", false);
 
-        $this->assertSame('1', SchoolSetting::get('training_mode'));
-        $this->assertTrue(AccessLog::where('action', 'toggle_training_mode')->exists());
+        $this->actingAs($bk)->get('/bk')
+            ->assertOk()
+            ->assertDontSee('Mode Latihan');
 
-        // Kirim aduan saat Mode Latihan aktif (bahkan urgensi Darurat)
-        $this->postJson('/s/lapor', [
+        // Rute khusus /latihan tetap mengisolasi simulasi tanpa email darurat & tanpa NLP
+        $this->postJson('/latihan', [
             'category' => 'Bullying Fisik',
             'location' => 'Koridor Kelas',
             'urgency' => 'Darurat',
@@ -302,6 +301,7 @@ class Batch3M5M6Test extends TestCase
 
         $report = StudentReport::firstOrFail();
         $this->assertTrue($report->is_training);
+        $this->assertSame('belum_diklasifikasi', $report->ml_status);
 
         // Tidak muncul pada dashboard asli BK maupun Kesiswaan
         $this->actingAs($bk)->get('/bk')->assertOk()->assertDontSee('#'.$report->case_label)->assertDontSee('Simulasi pelatihan guru');
@@ -313,57 +313,103 @@ class Batch3M5M6Test extends TestCase
         $this->actingAs($bk)->get('/bk?mode=latihan')->assertOk()->assertSee('#'.$report->case_label);
     }
 
-    public function test_ml_job_only_dispatched_when_nlp_enabled_and_preserves_darurat_on_success_or_failure(): void
+    public function test_nlp_is_auto_active_predicts_urgency_preserves_darurat_and_supports_http_fallback(): void
     {
+        Mail::fake();
         $this->seedCategoryAndLocation();
+        $bk = User::factory()->bk()->create(['email' => 'bk-nlp@sekolah.sch.id']);
 
-        // Default: NLP nonaktif -> job tidak dijalankan
-        $this->assertSame('0', SchoolSetting::get('nlp_enabled', '0'));
+        // 1. Model NLP Linear SVM auto-aktif langsung saat submit /s/lapor tanpa perlu toggle on/off
+        // Cerita berat (meski pelapor memilih 'Rendah') -> diprediksi Dampak Berat (>= 80%) & naik ke 'Darurat'
+        $severeStory = 'kak aku mau cerita, udah beberapa hari ini tiap mau berangkat sekolah perutku rasanya mules terus. soalnya ada anak kelas 9 yg suka nungguin aku di tangga belakang buat minta uang. pernah aku nolak terus didorong sampe jatuh. sekarang kalo denger suara mereka aja tanganku suka gemeter. kemarin pas ulangan aku susah konsen karena kepikiran mereka bakal nungguin lagi pas pulang';
+        $this->postJson('/s/lapor', [
+            'category' => 'Bullying Fisik',
+            'location' => 'Koridor Kelas',
+            'urgency' => 'Rendah',
+            'story' => $severeStory,
+        ])->assertOk();
 
-        Queue::fake();
+        $severeReport = StudentReport::latest('id')->firstOrFail();
+        $this->assertSame('selesai', $severeReport->ml_status);
+        $this->assertSame(1, $severeReport->ml_label);
+        $this->assertSame('linear-svm-bullying-v2-hybrid', $severeReport->ml_model_version);
+        $this->assertGreaterThanOrEqual(0.95, (float) $severeReport->ml_confidence);
+        $this->assertSame('Darurat', $severeReport->urgency);
+        Mail::assertQueued(EmergencyReportAlertMail::class, fn (EmergencyReportAlertMail $m) => $m->hasTo($bk->email));
+
+        // 1b. Kasus krisis kalimat pendek/OOV (kekerasan seksual berat, KSBE/sextortion, luka fisik, self-harm, ancaman mematikan, senjata) -> WAJIB Darurat
+        $crisisCases = [
+            'Aku diperkosa dipukuli setiap hari sampai aku hamil',
+            'aku kemarin dipukulin sampe berdarah',
+            'aku mau bunuh diri tidak kuat lagi',
+            'aku diancam pakai pisau dan dipalak tiap hari',
+            'aku dicekik dan ditendang sampai memar di toilet',
+            'kelamin saya dipegang paksa dan difoto tanpa baju',
+            'Permisi ibu, saya mau curhat kemarin waktu saya jadi cheerleader saya melihat ada satu cowok inisial Jordan yang dari kemarin memotret area sensitif saya. Kemudian, diupload di status ig untuk bahan teman temannya. Saya trauma dengan hal tersebut dan saya ingin balas dendam dengan cara memotong nadinya Jordan.',
+            'Saya membuka HP anak saya dan menemukan salah satu temannya melakukan ancaman melalui Whatsapp. Untuk melakukan foto tidak senonoh. Ancaman tersebut diikuti dengan teror, sampai anak saya trauma dan tidak ingin berangkat ke sekolah.',
+        ];
+        foreach ($crisisCases as $crisisText) {
+            $crisisRes = BullyingNlpClassifier::classify($crisisText);
+            $this->assertSame(1, $crisisRes['label'], "Gagal label berat untuk: {$crisisText}");
+            $this->assertSame('Darurat', $crisisRes['predicted_urgency'], "Gagal Darurat untuk: {$crisisText}");
+        }
+
+        // 1c. Pengiriman laporan kekerasan seksual berat melalui /s/lapor otomatis menjadi Darurat
+        $this->postJson('/s/lapor', [
+            'category' => 'Bullying Fisik',
+            'location' => 'Koridor Kelas',
+            'urgency' => 'Rendah',
+            'story' => 'Aku diperkosa dipukuli setiap hari sampai aku hamil',
+        ])->assertOk();
+        $sexualCrisisReport = StudentReport::latest('id')->firstOrFail();
+        $this->assertSame('Darurat', $sexualCrisisReport->urgency);
+        $this->assertSame(1, $sexualCrisisReport->ml_label);
+
+        // 1d. Kasus kekerasan tunggal/pemalakan/verbal berat sampai menangis -> Sedang; kalimat penyangkalan/ringan -> tetap Rendah
+        $moderateRes = BullyingNlpClassifier::classify('tadi uang jajanku dipalak kakak kelas di kantin');
+        $this->assertSame('Sedang', $moderateRes['predicted_urgency']);
+
+        $severeVerbalRes = BullyingNlpClassifier::classify('Kemarin saya melihat Jordan ngejekin denny dan saya mendengar Jordan mengejek "DASAR MISKIN, BUSUNG LAPAR, GONORE, SIFILIS, HIV, GILA KAMU. RUMAH KARDUS, FAKIR, BODOH, GAGAR OTAK". Denny sampai menangis');
+        $this->assertSame(1, $severeVerbalRes['label']);
+        $this->assertSame('Sedang', $severeVerbalRes['predicted_urgency']);
+
+        $negatedMildRes = BullyingNlpClassifier::classify('aku tidak dipukul sih, tadi cuma diejek sepatuku jelek tapi yaudah biasa aja');
+        $this->assertSame('Rendah', $negatedMildRes['predicted_urgency']);
+
+        // 2. Cerita ringan -> diprediksi Dampak Ringan & urgensi 'Rendah'
+        $mildStory = 'Dicuekin waktu pertama kali kenalan, tapi masih bisa main dan belajar biasa.';
         $this->postJson('/s/lapor', [
             'category' => 'Bullying Fisik',
             'location' => 'Koridor Kelas',
             'urgency' => 'Sedang',
-            'story' => 'Laporan saat modul NLP belum diaktifkan.',
+            'story' => $mildStory,
         ])->assertOk();
 
-        Queue::assertNothingPushed();
+        $mildReport = StudentReport::latest('id')->firstOrFail();
+        $this->assertSame('selesai', $mildReport->ml_status);
+        $this->assertSame(0, $mildReport->ml_label);
+        $this->assertSame('Rendah', $mildReport->urgency);
 
-        // Aktifkan NLP -> job ML didispatch ke antrean
-        SchoolSetting::set('nlp_enabled', '1');
+        // 3. Cerita yang sejak awal ditandai 'Darurat' oleh pelapor TIDAK BOLEH diturunkan meski NLP memprediksi Dampak Ringan
         $this->postJson('/s/lapor', [
             'category' => 'Bullying Fisik',
             'location' => 'Koridor Kelas',
             'urgency' => 'Darurat',
-            'story' => 'Saya terus didorong hingga terjatuh di koridor.',
+            'story' => 'Dicuekin waktu pertama kali kenalan namun saya merasa sangat terancam.',
         ])->assertOk();
 
-        Queue::assertPushed(ClassifyStudentReportJob::class);
-
         $daruratReport = StudentReport::latest('id')->firstOrFail();
-        $this->assertSame('belum_diklasifikasi', $daruratReport->ml_status);
-
-        // Sukses ML dengan label=0 (ringan) TIDAK BOLEH menurunkan urgensi Darurat (FR-46)
-        Http::fake([
-            '*/v1/classify' => Http::response([
-                'label' => 0,
-                'confidence' => 0.875,
-                'model_version' => 'indobert-v1.0',
-            ], 200),
-        ]);
-
-        (new ClassifyStudentReportJob($daruratReport))->handle();
-        $daruratReport->refresh();
-
-        $this->assertSame(0, $daruratReport->ml_label);
-        $this->assertSame(0.875, (float) $daruratReport->ml_confidence);
-        $this->assertSame('indobert-v1.0', $daruratReport->ml_model_version);
         $this->assertSame('selesai', $daruratReport->ml_status);
         $this->assertSame('Darurat', $daruratReport->urgency);
 
-        // Kegagalan layanan ML: laporan tetap "belum_diklasifikasi" dan /s/lapor tidak error 500
-        Queue::swap(app('queue'));
+        // 4. Verifikasi mapping probabilitas ke 3 tingkat urgensi (Darurat / Sedang / Rendah)
+        $this->assertSame('Darurat', BullyingNlpClassifier::mapProbabilityToUrgency(0.85));
+        $this->assertSame('Sedang', BullyingNlpClassifier::mapProbabilityToUrgency(0.62));
+        $this->assertSame('Rendah', BullyingNlpClassifier::mapProbabilityToUrgency(0.25));
+        $this->assertSame('Darurat', BullyingNlpClassifier::resolveUrgency(0.10, 'Darurat'));
+
+        // 5. Mode HTTP opsional: kegagalan layanan HTTP tidak menyebabkan /s/lapor error 500
+        config(['services.ml.driver' => 'http']);
         Http::fake([
             '*/v1/classify' => Http::response(['detail' => 'Service Unavailable'], 500),
         ]);
@@ -372,11 +418,11 @@ class Batch3M5M6Test extends TestCase
             'category' => 'Bullying Fisik',
             'location' => 'Koridor Kelas',
             'urgency' => 'Sedang',
-            'story' => 'Laporan tetap tersimpan aman walau layanan ML sedang gagal.',
+            'story' => 'Laporan tetap tersimpan aman walau layanan ML HTTP sedang gagal.',
         ])->assertOk()->assertJson(['success' => true]);
 
         $fallbackReport = StudentReport::latest('id')->firstOrFail();
         $this->assertSame('belum_diklasifikasi', $fallbackReport->ml_status);
-        $this->assertNull($fallbackReport->ml_label);
+        $this->assertSame('Sedang', $fallbackReport->urgency);
     }
 }

@@ -5,8 +5,6 @@
     staffMembers: @js($staffMembers),
     reportUrl: @js($reportUrl),
     qrScanUrl: @js($qrScanUrl),
-    trainingMode: @js($trainingMode ?? false),
-    nlpEnabled: @js($nlpEnabled ?? false),
     readingDayStart: @js(old('reading_day_start', $schoolConfig['reading_day_start'] ?? 'Senin')),
     readingDayEnd: @js(old('reading_day_end', $schoolConfig['reading_day_end'] ?? 'Jumat')),
     readingTimeStart: @js(old('reading_time_start', $schoolConfig['reading_time_start'] ?? '07:00')),
@@ -19,7 +17,7 @@
 <div class="flex flex-col">
 <h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Kelola Sekolah</h1>
 <p class="font-body-md text-body-md text-on-surface-variant mt-1">
-          Konfigurasi jenis aduan, titik lokasi kejadian sekolah, tautan QR, mode latihan, dan klasifikasi NLP.
+          Konfigurasi jenis aduan, titik lokasi kejadian sekolah, tautan QR, staf, dan kebijakan sekolah.
         </p>
 </div>
 <div class="flex flex-wrap items-center gap-3 self-start lg:self-center">
@@ -30,20 +28,6 @@
 <span class="font-title-md text-title-md text-on-surface font-semibold">{{ $schoolName }}</span>
 </div>
 </div>
-<label class="flex items-center gap-2.5 bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-xs cursor-pointer border border-outline-variant/30">
-<input type="checkbox" :checked="trainingMode" @change="toggleSetting('training_mode', $event.target.checked)" class="rounded text-amber-600 focus:ring-amber-500">
-<div class="flex flex-col">
-<span class="text-xs font-bold text-on-surface">Mode Latihan</span>
-<span class="text-[10px] text-on-surface-variant" x-text="trainingMode ? 'Aktif (Simulasi)' : 'Nonaktif'"></span>
-</div>
-</label>
-<label class="flex items-center gap-2.5 bg-surface-container-lowest px-4 py-2.5 rounded-xl shadow-xs cursor-pointer border border-outline-variant/30">
-<input type="checkbox" :checked="nlpEnabled" @change="toggleSetting('nlp_enabled', $event.target.checked)" class="rounded text-secondary focus:ring-secondary">
-<div class="flex flex-col">
-<span class="text-xs font-bold text-on-surface">Modul NLP AI</span>
-<span class="text-[10px] text-on-surface-variant" x-text="nlpEnabled ? 'Aktif' : 'Nonaktif (Default)'"></span>
-</div>
-</label>
 </div>
 </div>
 <div role="tablist" aria-label="Kelola sekolah" class="flex items-center gap-2 p-1.5 bg-surface-container-low rounded-xl w-fit max-w-full overflow-x-auto mt-2">

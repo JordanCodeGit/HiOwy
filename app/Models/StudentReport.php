@@ -102,7 +102,7 @@ class StudentReport extends Model
     public function getMlBadgeLabelAttribute(): string
     {
         if ($this->ml_status === 'selesai' && $this->ml_label !== null) {
-            return $this->ml_label === 1 ? 'Indikasi Berat (ML)' : 'Indikasi Ringan (ML)';
+            return $this->ml_label === 1 ? 'NLP: Dampak Berat' : 'NLP: Dampak Ringan';
         }
 
         return 'Belum Diklasifikasi';
