@@ -25,6 +25,8 @@
 </head>
 <body class="student-portal bg-surface text-on-surface min-h-screen flex flex-col justify-between antialiased" x-data="publicReporter()">
 
+    @include('public.portal-siswa-mobile')
+
     <!-- Top Navigation Header -->
     <header class="w-full bg-surface-container-lowest border-b border-surface-container/80 py-3.5 px-4 sm:px-6 sticky top-0 z-30 shadow-xs backdrop-blur-md bg-white/95">
         <div class="max-w-4xl mx-auto flex items-center justify-between gap-2.5">
@@ -88,19 +90,36 @@
             </div>
             <div class="p-6 space-y-3.5 text-xs text-slate-700 leading-relaxed">
                 <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
-                    <strong class="text-emerald-900 block mb-1">Data yang Disimpan Sistem (Terenkripsi):</strong>
-                    <span>Jenis kejadian, lokasi, peran pelapor, tanggal &amp; bagian waktu (pagi/siang/sore/malam), isi ceritamu, serta nama/kelas/kontak <em>hanya jika kamu memilih ingin dihubungi Guru BK</em>.</span>
+                    <strong class="text-emerald-900">Data yang disimpan</strong>
+                    <ul class="mt-1 list-disc pl-4">
+                        <li>Jenis, tempat, tanggal, dan bagian hari kejadian.</li>
+                        <li>Peranmu dan ceritamu. Isi cerita dienkripsi.</li>
+                        <li>Nama, kelas, dan kontak hanya jika kamu ingin dihubungi BK.</li>
+                    </ul>
                 </div>
                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                    <strong class="text-slate-900 block mb-1">Data yang TIDAK Disimpan:</strong>
-                    <span>Sistem tidak menyimpan alamat IP, jenis perangkat, maupun jam &amp; menit pengiriman laporanmu.</span>
+                    <strong class="text-slate-900">Data yang tidak disimpan</strong>
+                    <ul class="mt-1 list-disc pl-4">
+                        <li>Alamat IP dan jenis perangkatmu.</li>
+                        <li>Jam dan menit saat kamu mengirim laporan.</li>
+                    </ul>
                 </div>
                 <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-950">
-                    <strong class="block mb-1">Perhatian Penting tentang Isi Cerita:</strong>
-                    <span>Meskipun sistem mendukung pelaporan anonim, <strong>isi ceritamu sendiri dapat mengungkap identitasmu</strong> apabila menyebutkan nama atau detail kejadian spesifik. HiOwy melindungi datamu sesuai kode etik konselor, bukan janji tanpa risiko sama sekali.</span>
+                    <strong>Jika ingin tetap anonim</strong>
+                    <ul class="mt-1 list-disc pl-4">
+                        <li>Hindari nama dan ciri khas. Ingat, isi ceritamu sendiri dapat mengungkap identitasmu.</li>
+                    </ul>
                 </div>
-                <div class="pt-1 flex items-center justify-between gap-3">
-                    <span class="text-[11px] text-slate-500">Jam baca BK: {{ $schoolConfig['reading_hours'] }}</span>
+                <div class="flex flex-wrap items-end justify-between gap-3 pt-1">
+                    <div class="text-xs leading-relaxed text-slate-600">
+                        <strong class="block text-[11px] tracking-wide text-slate-800">JAM AKTIF BK:</strong>
+                        @php
+                            $scheduleLines = preg_split('/[\s,]+(?=\d{1,2}[:.]\d{2})/u', $schoolConfig['reading_hours'], 2);
+                        @endphp
+                        @foreach ($scheduleLines as $line)
+                            <span class="block">{{ $line }}</span>
+                        @endforeach
+                    </div>
                     <button type="button" @click="dismissPrivacyModal()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs cursor-pointer shrink-0">
                         Saya Mengerti, Lanjut
                     </button>
@@ -285,7 +304,7 @@
                             <h2 class="text-lg sm:text-xl font-bold text-on-surface">Kamu melapor sebagai siapa?</h2>
                             <p class="text-xs text-on-surface-variant mt-1">Pilih peran yang paling sesuai dengan kondisimu saat ini.</p>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="student-role-grid grid grid-cols-1 sm:grid-cols-2 gap-3">
                             @php
                                 $roles = [
                                     ['value' => 'Siswa (Korban Langsung)', 'title' => 'Korban Langsung', 'desc' => 'Aku mengalami langsung kejadian ini', 'icon' => 'person'],
@@ -295,7 +314,7 @@
                                 ];
                             @endphp
                             @foreach($roles as $role)
-                            <button type="button" @click="reporterRole = @js($role['value']); errorMessage = ''"
+                            <button type="button" :aria-pressed="reporterRole === @js($role['value'])" @click="reporterRole = @js($role['value']); errorMessage = ''"
                                 :class="reporterRole === @js($role['value']) ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200 text-blue-950' : 'bg-surface-container-low/60 border-surface-container hover:bg-surface-container-low text-slate-700'"
                                 class="p-4 rounded-2xl border text-left transition-all flex items-start gap-3 cursor-pointer">
                                 <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" :class="reporterRole === @js($role['value']) ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-slate-200'">
@@ -461,28 +480,28 @@
                     <!-- LANGKAH 6: PIHAK TERLIBAT / SAKSI (OPSIONAL) -->
                     <div x-cloak x-show="currentStep === 6" x-transition.opacity class="flex flex-col gap-4">
                         <div>
-                            <div class="flex items-center gap-2">
-                                <h2 class="text-lg sm:text-xl font-bold text-on-surface">Siapa pihak yang terlibat atau saksi?</h2>
-                                <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase">Opsional</span>
-                            </div>
+                                <h2 id="involvedParties-heading" class="text-lg sm:text-xl font-bold text-on-surface">Siapa pihak yang terlibat atau saksi?</h2>
                             <p class="text-xs text-on-surface-variant mt-1">Kamu boleh menuliskan ciri, peran, atau langsung tekan <strong>Lanjut</strong> bila ragu atau ingin mengosongkan.</p>
                         </div>
-                        <input type="text" x-model="involvedParties" maxlength="255" placeholder="Misal: Kakak kelas, teman sekelas, atau biarkan kosong..." class="w-full px-4 py-3.5 bg-surface-container-low text-on-surface rounded-2xl text-sm border border-outline-variant/40 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                        <div class="flex min-w-0 flex-col gap-1.5 px-0.5">
+                            <span id="involvedParties-meta" class="self-end px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase">Opsional</span>
+                            <input type="text" x-model="involvedParties" maxlength="255" placeholder="Misal: Kakak kelas, teman sekelas, atau biarkan kosong..." aria-labelledby="involvedParties-heading" aria-describedby="involvedParties-meta" class="box-border min-w-0 w-full px-4 py-3.5 bg-surface-container-low text-on-surface rounded-2xl text-sm border border-outline-variant/40 focus:bg-white focus:inset-ring-2 focus:inset-ring-blue-500 focus:outline-none transition-all">
+                        </div>
                     </div>
 
                     <!-- LANGKAH 7: CERITAKAN APA YANG TERJADI -->
                     <div x-cloak x-show="currentStep === 7" x-transition.opacity class="flex flex-col gap-3.5">
-                        <div class="flex items-start justify-between gap-2">
                             <div>
-                                <h2 class="text-lg sm:text-xl font-bold text-on-surface">Ceritakan apa yang terjadi <span class="text-red-500">*</span></h2>
+                                <h2 id="story-heading" class="text-lg sm:text-xl font-bold text-on-surface">Ceritakan apa yang terjadi <span class="text-red-500">*</span></h2>
                                 <p class="text-xs text-on-surface-variant mt-1">Tulis dengan tenang sesuai bahasamu sendiri. Owy &amp; Guru BK siap mendengarkan.</p>
                             </div>
-                            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 shrink-0" x-text="story.length + ' / {{ $storyMaxLength }}'"></span>
-                        </div>
                         <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-100 text-[11px] text-blue-900 leading-relaxed">
                             <strong>Pertanyaan pemandu:</strong> Apa yang terjadi? Sejak kapan berlangsung? Dan dukungan apa yang kamu harapkan dari Guru BK?
                         </div>
-                        <textarea x-model="story" maxlength="{{ $storyMaxLength }}" rows="6" placeholder="Tuliskan ceritamu di sini dengan tenang. Jika memilih melapor anonim, hindari menulis nama atau ciri yang langsung mengarah ke dirimu..." class="w-full p-4 bg-surface-container-low text-on-surface rounded-2xl text-sm border border-outline-variant/40 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none leading-relaxed transition-all"></textarea>
+                        <div class="flex min-w-0 flex-col gap-1.5 px-0.5">
+                            <span id="story-meta" class="self-end text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 shrink-0" x-text="story.length + ' / {{ $storyMaxLength }}'"></span>
+                            <textarea x-model="story" maxlength="{{ $storyMaxLength }}" rows="6" placeholder="Tuliskan ceritamu di sini dengan tenang. Jika memilih melapor anonim, hindari menulis nama atau ciri yang langsung mengarah ke dirimu..." aria-labelledby="story-heading" aria-describedby="story-meta" class="box-border min-w-0 w-full p-4 bg-surface-container-low text-on-surface rounded-2xl text-sm border border-outline-variant/40 focus:bg-white focus:inset-ring-2 focus:inset-ring-blue-500 focus:outline-none leading-relaxed transition-all"></textarea>
+                        </div>
                     </div>
 
                     <!-- LANGKAH 8: ANONIM VS INGIN DIHUBUNGI + KONFIRMASI KIRIM -->
@@ -592,7 +611,7 @@
                     </div>
 
                     <!-- Wizard Footer Navigation -->
-                    <div class="pt-4 border-t border-surface-container flex items-center justify-between gap-3">
+                    <div class="student-step-actions pt-4 border-t border-surface-container flex items-center justify-between gap-3">
                         <button type="button" x-show="currentStep > 1" @click="prevStep()" class="px-4 py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold text-xs sm:text-sm transition-all flex items-center gap-1.5 cursor-pointer">
                             <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                             <span>Kembali</span>

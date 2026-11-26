@@ -297,3 +297,49 @@ body:has(.report-filter-dialog[open], .announcement-dialog[open]) { overflow: hi
     .bk-content .case-workspace section, .bk-content .account-grid > div > .bg-surface-container-lowest { padding:22px; }
 }
 @media(max-width:640px) { .report-stepper { grid-template-columns:1fr 1fr; padding:16px; } }
+
+.student-mobile-shell { display:none; }
+@media (max-width:767px), (max-height:500px) and (pointer:coarse) and (orientation:landscape) {
+    .student-portal { --m-ink:#102e4a; --m-muted:#63788d; --m-accent:#5f87b4; --m-border:#dce7f2; background:#f7fafd; color:var(--m-ink); min-height:100dvh; }
+    .student-portal > header, .student-portal .student-tabs, .student-portal .student-info, .student-wizard-header > :not(.student-companion), .student-companion :is(span,p) { display:none; }
+    .student-mobile-shell, .student-portal .student-main { width:min(100%,38rem); margin-inline:auto; padding-inline:clamp(12px,5vw,24px); }
+    .student-mobile-shell { display:block; padding-top:env(safe-area-inset-top); }
+    .m-header,.m-subbar,.m-prog-labels { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .m-header { min-height:58px; }
+    .m-hdr-left,.m-util-icons,.m-tabs,.m-exit-btn { display:flex; align-items:center; gap:6px; }
+    .m-brand { font-size:17px; font-weight:800; }
+    .m-exit-btn { color:var(--m-muted); font-size:13px; font-weight:600; }
+    .m-subbar { flex-wrap:wrap; padding-bottom:10px; }
+    .m-tabs { padding:3px; border-radius:999px; background:#e8f0f8; gap:2px; }
+    .m-tab { padding:8px 12px; border-radius:999px; font-size:12px; font-weight:700; color:var(--m-muted); }
+    .m-tab[aria-pressed=true] { background:white; color:var(--m-ink); box-shadow:0 2px 6px #102e4a14; }
+    .m-util-btn { width:34px; height:34px; border-radius:50%; border:1px solid var(--m-border); background:white; display:grid; place-items:center; color:var(--m-accent); }
+    .m-util-btn span,.m-exit-btn span { font-size:18px; }
+    .m-progress { padding:6px 0; }
+    .m-prog-labels { font-size:12px; color:var(--m-muted); font-weight:700; }
+    .m-dashes { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:6px; }
+    .m-dashes button { height:24px; display:grid; align-items:center; }
+    .m-dashes button::before { content:''; height:5px; border-radius:9px; background:#d6e2ee; }
+    .m-dashes .filled::before { background:var(--m-accent); }
+    .student-portal .student-main { min-width:0; padding-block:0 max(18px,env(safe-area-inset-bottom)); gap:10px; }
+    .student-main [x-show="!submitted"] { border:0; background:transparent; box-shadow:none; border-radius:0; }
+    .student-main .student-wizard-header { padding:4px; background:none; }
+    .student-main .student-companion img { width:118px; height:126px; }
+    .student-wizard-body { padding:8px 0; gap:16px; }
+    .student-wizard-body h2 { color:var(--m-ink); font-size:clamp(20px,6vw,25px); line-height:1.24; font-weight:800; }
+    .student-wizard-body h2 + p { color:var(--m-muted); font-size:13.5px; }
+    .student-role-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .student-role-grid button { min-width:0; min-height:58px; border-radius:14px; padding:12px; background:white; border:1px solid var(--m-border); flex-direction:row; align-items:center; justify-content:flex-start; gap:9px; }
+    .student-role-grid button > div:first-child { width:18px; height:18px; border:1.5px solid #cad7e5; border-radius:50%; }
+    .student-role-grid button > div:first-child span,.student-role-grid button > div:last-child span:last-child { display:none; }
+    .student-role-grid button > div:last-child { line-height:1.35; }
+    .student-role-grid button[aria-pressed=true] { background:#ecf4fb; border-color:var(--m-accent); box-shadow:none; }
+    .student-role-grid button[aria-pressed=true] > div:first-child { background:var(--m-accent); box-shadow:inset 0 0 0 4px white; }
+    .student-step-actions { flex-wrap:wrap; }
+    .student-step-actions > div { flex-basis:100%; }
+    .student-step-actions button { flex:1; justify-content:center; min-height:46px; }
+    .student-step-actions button.ml-auto:not(:disabled) { background:var(--m-accent); }
+    .student-main :is(input,textarea,select) { min-width:0; max-width:100%; }
+    .student-portal [role=dialog] > div { max-height:90dvh; overflow-y:auto; }
+    .student-main [x-show="ticketData"] { overflow-wrap:anywhere; }
+}
