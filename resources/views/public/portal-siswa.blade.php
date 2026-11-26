@@ -646,27 +646,17 @@
         <!-- TAB 2: LACAK ADUAN SAYA                                                   -->
         <!-- ========================================================================= -->
         <div x-show="activeTab === 'track'" x-transition.opacity class="bg-surface-container-lowest rounded-3xl border border-surface-container p-6 sm:p-8 flex flex-col gap-6 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center p-2 shrink-0">
-                    <img src="{{ asset('maskot_owy/maskot_9.png') }}" alt="Owy membantu melacak aduan" class="w-full h-full object-contain owy-float">
-                </div>
-                <div>
-                    <div class="flex items-center gap-1.5 text-blue-600 font-semibold text-xs uppercase tracking-wider mb-1">
-                        <span class="material-symbols-outlined text-[17px]">travel_explore</span>
-                        <span>Transparansi &amp; Keamanan Penanganan</span>
-                    </div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">Cek Status Aduanmu</h2>
-                    <p class="text-xs sm:text-sm text-on-surface-variant mt-1 leading-relaxed">
-                        Masukkan kode laporan 10 karakter untuk melihat status penanganan, jam dibaca Guru BK, serta membalas pesan secara dua arah.
-                    </p>
-                </div>
-            </div>
+            <header class="flex flex-col items-center gap-2 text-center">
+                <img src="{{ asset('maskot_owy/maskot_9.png') }}" alt="Owy membantu melacak aduan" class="owy-float h-32 w-32 object-contain sm:h-40 sm:w-40">
+                <h2 class="text-xl font-extrabold tracking-tight text-on-surface sm:text-2xl">CEK STATUS ADUANMU</h2>
+                <p class="max-w-sm text-sm leading-relaxed text-on-surface-variant">Masukkan kode laporan 10 karakter untuk melihat status pengaduan. Contoh: <span class="whitespace-nowrap font-semibold">J4K8G7NFCK</span></p>
+            </header>
 
             <!-- Search Ticket Form -->
             <form @submit.prevent="searchTicket()" class="flex flex-col sm:flex-row gap-2.5">
                 <div class="relative flex-1">
                     <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">tag</span>
-                    <input type="text" x-model="searchCode" required maxlength="16" placeholder="Masukkan 10 karakter kode laporan (cth: 7K9M4P2WXR)" class="w-full pl-10 pr-4 py-3 bg-surface-container-low text-slate-800 rounded-xl text-xs sm:text-sm border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase font-mono tracking-wider">
+                    <input type="text" x-model="searchCode" @input="ticketData = null; hasTrackedTicket = false; trackError = ''" required maxlength="16" aria-label="Kode laporan" placeholder="Kode laporan 10 karakter" class="w-full pl-10 pr-4 py-3 bg-surface-container-low text-slate-800 rounded-xl text-xs sm:text-sm border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase font-mono tracking-wider">
                 </div>
                 <button type="submit" :disabled="tracking" class="py-3 px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-2xs">
                     <template x-if="tracking">
@@ -678,6 +668,27 @@
                     <span>Lacak Tiket</span>
                 </button>
             </form>
+
+            <ol x-cloak x-show="ticketData" class="ticket-timeline" aria-label="Progres laporan">
+                @foreach (['Masuk', 'Dibaca BK', 'Tindak lanjut', 'Selesai'] as $label)
+                    <li :class="{ 'is-past': ticketStep > {{ $loop->iteration }}, 'is-current': ticketStep === {{ $loop->iteration }} }"
+                        :aria-current="ticketStep === {{ $loop->iteration }} ? 'step' : null">
+                        <span class="ticket-node" aria-hidden="true" x-text="ticketStep > {{ $loop->iteration }} ? '✓' : '{{ $loop->iteration }}'"></span>
+                        <span @if ($loop->last) x-text="ticketData?.archived ? 'Diarsipkan' : 'Selesai'" @endif>{{ $label }}</span>
+                    </li>
+                @endforeach
+            </ol>
+
+            <!-- Kontak Darurat & Jam Layanan di Lacak Aduan -->
+            <div class="p-3 rounded-xl bg-white border border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                <span class="text-slate-600"><strong>Jam Baca BK:</strong> {{ $schoolConfig['reading_hours'] }}</span>
+                <template x-if="ticketData?.emergency_contact">
+                    <a :href="ticketData.emergency_wa_url || ticketData.emergency_tel_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 font-bold hover:bg-rose-100">
+                        <span class="material-symbols-outlined text-[14px]">call</span>
+                        <span x-text="'Kontak Darurat BK: ' + ticketData.emergency_contact"></span>
+                    </a>
+                </template>
+            </div>
 
             <!-- Tracking Error Notice -->
             <div x-cloak x-show="trackError" class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2.5">
@@ -718,17 +729,6 @@
                               }"></span>
                         <span x-text="ticketData?.status_label"></span>
                     </span>
-                </div>
-
-                <!-- Kontak Darurat & Jam Layanan di Lacak Aduan -->
-                <div class="p-3 rounded-xl bg-white border border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                    <span class="text-slate-600"><strong>Jam Baca BK:</strong> <span x-text="ticketData?.reading_hours"></span></span>
-                    <template x-if="ticketData?.emergency_contact">
-                        <a :href="ticketData.emergency_wa_url || ticketData.emergency_tel_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 font-bold hover:bg-rose-100">
-                            <span class="material-symbols-outlined text-[14px]">call</span>
-                            <span x-text="'Kontak Darurat BK: ' + ticketData.emergency_contact"></span>
-                        </a>
-                    </template>
                 </div>
 
                 <div class="flex flex-col gap-2.5">
@@ -911,6 +911,10 @@
                 searchCode: typeof saved.searchCode === 'string' ? saved.searchCode : '',
                 hasTrackedTicket: Boolean(saved.hasTrackedTicket),
                 ticketData: null,
+                get ticketStep() {
+                    if (this.ticketData?.archived) return 4;
+                    return ['belum_dibaca', 'dibaca', 'ditindaklanjuti', 'selesai'].indexOf(this.ticketData?.status) + 1;
+                },
                 replyBody: typeof saved.replyBody === 'string' ? saved.replyBody : '',
                 replying: false,
                 replyError: '',
@@ -1229,12 +1233,13 @@
 
                 async searchTicket() {
                     if (!this.searchCode || this.tracking) return;
+                    const requestedCode = this.searchCode;
                     this.tracking = true;
                     this.trackError = '';
                     this.ticketData = null;
 
                     try {
-                        const url = '{{ route('public.report.track') }}?ticket_code=' + encodeURIComponent(this.searchCode);
+                        const url = '{{ route('public.report.track') }}?ticket_code=' + encodeURIComponent(requestedCode);
                         const response = await fetch(url, {
                             headers: {
                                 'Accept': 'application/json',
@@ -1242,6 +1247,8 @@
                         });
 
                         const data = await response.json();
+
+                        if (requestedCode !== this.searchCode) return;
 
                         if (response.ok && data.success) {
                             this.ticketData = data.ticket;
