@@ -236,9 +236,9 @@ class Batch3M5M6Test extends TestCase
         $this->assertSame(6, StudentReport::count());
     }
 
-    public function test_password_min_10_chars_login_lockout_after_5_failures_and_30min_session(): void
+    public function test_password_min_10_chars_login_lockout_after_5_failures_and_60min_session(): void
     {
-        $this->assertSame(30, (int) config('session.lifetime'));
+        $this->assertSame(60, (int) config('session.lifetime'));
 
         $bk = User::factory()->bk()->create([
             'email' => 'bk-lock@sekolah.sch.id',

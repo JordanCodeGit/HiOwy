@@ -274,7 +274,7 @@
 <div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
 <span>IP {{ request()->ip() }}</span>
 <span>•</span>
-<span>Batas idle otomatis 30 menit</span>
+<span>Batas idle otomatis 1 jam</span>
 </div>
 </div>
 </div>
