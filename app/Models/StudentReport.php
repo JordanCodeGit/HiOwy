@@ -13,6 +13,7 @@ class StudentReport extends Model
 
     protected $fillable = [
         'ticket_hash',
+        'ticket_password_hash',
         'category',
         'location',
         'involved_parties',
@@ -44,6 +45,7 @@ class StudentReport extends Model
 
     protected $hidden = [
         'ticket_hash',
+        'ticket_password_hash',
         'ml_label',
         'ml_confidence',
         'ml_model_version',

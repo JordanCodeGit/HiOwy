@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Forward;
 use App\Models\SchoolSetting;
 use App\Models\StaffMember;
+use App\Support\AcademicYearService;
 use App\Support\AuditLogger;
 use App\Support\SchoolConfigService;
 use Illuminate\Http\JsonResponse;
@@ -62,9 +63,11 @@ class WaliKelasPreviewController extends Controller
 
     private function userSummaries(): Collection
     {
-        return Forward::with('fromUser')
-            ->where('to_user_id', Auth::id())
-            ->whereHas('report', fn ($q) => $q->where('is_training', false))
+        return AcademicYearService::applyToForwards(
+            Forward::with('fromUser')
+                ->where('to_user_id', Auth::id())
+                ->whereHas('report', fn ($q) => $q->where('is_training', false))
+        )
             ->orderByDesc('id')
             ->get()
             ->map(fn (Forward $f) => $this->toSummaryArray($f));
@@ -100,7 +103,11 @@ class WaliKelasPreviewController extends Controller
             $forward->read_at ? 'Dibaca' : 'Belum dibaca'
         );
 
-        $unreadCount = Forward::where('to_user_id', Auth::id())->whereNull('read_at')->count();
+        $unreadCount = AcademicYearService::applyToForwards(
+            Forward::where('to_user_id', Auth::id())
+                ->whereNull('read_at')
+                ->whereHas('report', fn ($q) => $q->where('is_training', false))
+        )->count();
         $isRead = $forward->read_at !== null;
 
         $message = $isRead
@@ -122,9 +129,11 @@ class WaliKelasPreviewController extends Controller
 
     public function markAllRead(Request $request): JsonResponse|RedirectResponse
     {
-        Forward::where('to_user_id', Auth::id())
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+        AcademicYearService::applyToForwards(
+            Forward::where('to_user_id', Auth::id())
+                ->whereNull('read_at')
+                ->whereHas('report', fn ($q) => $q->where('is_training', false))
+        )->update(['read_at' => now()]);
 
         $message = 'Seluruh ringkasan telah ditandai dibaca.';
 

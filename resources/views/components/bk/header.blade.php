@@ -11,8 +11,13 @@
         : null;
     $walasTitle = $walasStaff && !empty($walasStaff->class_name) ? 'Wali Kelas ' . $walasStaff->class_name : 'Wali Kelas';
     $schoolName = \App\Models\SchoolSetting::get('school_name', 'SMP Telkom Purwokerto');
+    $selectedAcademicYear = \App\Support\AcademicYearService::selected();
+    $currentAcademicYear = \App\Support\AcademicYearService::current();
+    $academicYearLabel = \App\Support\AcademicYearService::label($selectedAcademicYear);
+    $academicYearOptions = \App\Support\AcademicYearService::options();
+    $currentSemesterLabel = \App\Support\AcademicYearService::semesterLabel();
     $notifCount = $portal === 'bk'
-        ? rescue(fn() => \App\Models\StudentReport::active()->production()->where('status', 'belum_dibaca')->count(), 0, false)
+        ? rescue(fn() => \App\Support\AcademicYearService::applyToReports(\App\Models\StudentReport::active()->production()->where('status', 'belum_dibaca'))->count(), 0, false)
         : (int) $reportCount;
 
     $profileRole = $user ? match($user->normalizedRole()) {
@@ -33,9 +38,42 @@
 <input x-model="quickSearch" @keydown.enter.prevent="searchReports($el.dataset.url)" data-url="{{ route($portal.'.dashboard') }}" aria-label="Cari laporan" class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all" placeholder="Pencarian cepat..." type="text">
 </div>
 @endif
-<div class="staff-academic-year inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 text-slate-700 text-xs font-semibold border border-slate-200">
-<span class="material-symbols-outlined text-[16px] text-slate-500">school</span>
-<span>Tahun Ajaran 2024/2025 @if($portal === 'walas')<span class="hidden sm:inline">· Semester Genap</span>@endif</span>
+<div class="relative hidden lg:block" x-data="{ academicYearOpen: false }" @keydown.escape.window="academicYearOpen = false" id="academicYearWrapper">
+<button type="button" @click="academicYearOpen = !academicYearOpen; notificationsOpen = false; profileOpen = false" :aria-expanded="academicYearOpen" aria-haspopup="listbox" aria-controls="academicYearDropdown" id="academicYearBtn" class="staff-academic-year inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/90 hover:bg-blue-100/80 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400/50">
+<span class="material-symbols-outlined text-[16px]">school</span>
+<span>{{ $academicYearLabel }}@if($portal === 'walas' && $selectedAcademicYear !== \App\Support\AcademicYearService::ALL)<span class="hidden sm:inline"> · {{ $currentSemesterLabel }}</span>@endif</span>
+<span class="material-symbols-outlined text-[16px] transition-transform duration-150" :class="academicYearOpen ? 'rotate-180' : ''">expand_more</span>
+</button>
+<div id="academicYearDropdown" role="listbox" aria-label="Pilih Tahun Ajaran" x-cloak x-show="academicYearOpen" @click.outside="academicYearOpen = false" x-transition.opacity class="absolute left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200/80 z-50 overflow-hidden origin-top-left">
+<div class="px-4 py-3 border-b border-slate-100 bg-slate-50/70">
+<p class="text-xs font-bold text-slate-900">Pilih Tahun Ajaran</p>
+<p class="text-[11px] text-slate-500 mt-0.5">Menyaring data laporan, arsip &amp; statistik</p>
+</div>
+<div class="p-1.5 max-h-72 overflow-y-auto flex flex-col gap-0.5">
+@foreach($academicYearOptions as $yearValue => $yearText)
+@php
+    $isSelectedYear = $selectedAcademicYear === $yearValue;
+    $isCurrentYear = $yearValue === $currentAcademicYear;
+@endphp
+<form method="POST" action="{{ route('staff.academic-year') }}" class="m-0 p-0">
+@csrf
+<input type="hidden" name="academic_year" value="{{ $yearValue }}">
+<button type="submit" role="option" aria-selected="{{ $isSelectedYear ? 'true' : 'false' }}" class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer text-left {{ $isSelectedYear ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900' }}">
+<span class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-[16px] shrink-0 {{ $isSelectedYear ? 'text-blue-600' : 'text-slate-400' }}">{{ $yearValue === \App\Support\AcademicYearService::ALL ? 'calendar_view_month' : 'calendar_today' }}</span>
+<span class="truncate">{{ $yearText }}</span>
+@if($isCurrentYear)
+<span class="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-bold shrink-0">Aktif</span>
+@endif
+</span>
+@if($isSelectedYear)
+<span class="material-symbols-outlined text-[17px] text-blue-600 shrink-0">check_circle</span>
+@endif
+</button>
+</form>
+@endforeach
+</div>
+</div>
 </div>
 </div>
 <div class="flex items-center gap-2 sm:gap-4">
@@ -153,6 +191,20 @@
 <span class="text-[10px] text-slate-400 font-medium">Aktif</span>
 </a>
 @endif
+</div>
+<div class="lg:hidden border-t border-slate-100 px-3 py-2.5 bg-slate-50/40">
+<form method="POST" action="{{ route('staff.academic-year') }}" class="flex flex-col gap-1.5 m-0 p-0">
+@csrf
+<label for="mobileAcademicYearSelect" class="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-blue-600">school</span>
+<span>Tahun Ajaran</span>
+</label>
+<select id="mobileAcademicYearSelect" name="academic_year" onchange="this.form.submit()" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+@foreach($academicYearOptions as $yearValue => $yearText)
+<option value="{{ $yearValue }}" {{ $selectedAcademicYear === $yearValue ? 'selected' : '' }}>{{ $yearText }}</option>
+@endforeach
+</select>
+</form>
 </div>
 @if($portal === 'kesiswaan')
 <div class="border-t border-slate-100 p-2"><a href="{{ route('public.learn', ['code' => 'smakita']) }}" class="flex items-center gap-3 rounded-xl px-3 py-3 text-xs font-semibold text-slate-700 hover:bg-blue-50"><span class="material-symbols-outlined text-lg">auto_stories</span>Pelajari · Portal Publik</a></div>

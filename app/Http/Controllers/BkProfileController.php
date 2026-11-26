@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SchoolSetting;
+use App\Support\AcademicYearService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -87,12 +88,40 @@ class BkProfileController extends Controller
             'semester' => ['required', 'string', 'in:ganjil,genap'],
         ]);
 
+        $tahunAjaran = trim((string) $request->input('tahun_ajaran'));
+        if (! AcademicYearService::isValid($tahunAjaran)) {
+            return back()->withErrors([
+                'tahun_ajaran' => 'Format tahun ajaran tidak valid.',
+            ]);
+        }
+
         session([
-            'academic_year' => $request->input('tahun_ajaran'),
+            'academic_year' => $tahunAjaran,
             'academic_semester' => $request->input('semester'),
         ]);
 
         return back()->with('success_period', 'Tahun ajaran & periode berjalan berhasil disimpan.');
+    }
+
+    /**
+     * Ganti filter tahun ajaran aktif dari dropdown header (BK, Kesiswaan, dan Wali Kelas).
+     */
+    public function switchAcademicYear(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'academic_year' => ['required', 'string', 'max:20'],
+        ]);
+
+        $selected = trim($validated['academic_year']);
+        if (! AcademicYearService::isValid($selected)) {
+            return back()->withErrors([
+                'academic_year' => 'Pilihan tahun ajaran tidak valid.',
+            ]);
+        }
+
+        session(['academic_year' => $selected]);
+
+        return back()->with('status', 'Tampilan dialihkan ke '.AcademicYearService::label($selected).'.');
     }
 
     /**

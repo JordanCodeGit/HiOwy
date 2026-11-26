@@ -89,7 +89,7 @@
 <div class="flex flex-col min-w-0">
 <span class="font-label-sm text-label-sm text-on-surface-variant">Target Pendampingan</span>
 <span class="font-title-md text-title-md text-on-surface">Kelas {{ $className ?? '7B' }}</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">Semester Genap 2024/2025</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">{{ \App\Support\AcademicYearService::semesterLabel() }} · {{ \App\Support\AcademicYearService::label() }}</span>
 </div>
 </div>
 <div class="flex items-center gap-space-sm p-space-sm rounded-xl bg-surface-container-low">

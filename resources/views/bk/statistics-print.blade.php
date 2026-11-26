@@ -33,7 +33,7 @@
     </div>
     <div class="sheet">
         <h1>Laporan Statistik Agregat HiOwy — {{ $schoolName }}</h1>
-        <p class="meta">Periode: {{ $selectedMonth ? ($stats['available_months'][$selectedMonth] ?? $selectedMonth) : 'Semua Bulan' }} &bull; Dicetak {{ now('Asia/Jakarta')->translatedFormat('d F Y') }}</p>
+        <p class="meta">{{ $academicYearLabel ?? \App\Support\AcademicYearService::label() }} &bull; Periode: {{ $selectedMonth ? ($stats['available_months'][$selectedMonth] ?? $selectedMonth) : 'Semua Bulan' }} &bull; Dicetak {{ now('Asia/Jakarta')->translatedFormat('d F Y') }}</p>
         <div class="notice">
             <strong>Kepatuhan Privasi:</strong> Dokumen ini tidak memuat isi kronologi maupun identitas siswa. Kelompok berjumlah 1–4 ditampilkan sebagai &ldquo;kurang dari 5&rdquo;.
         </div>

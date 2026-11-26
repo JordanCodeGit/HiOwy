@@ -792,6 +792,7 @@ class BkManageController extends Controller
             'urgency' => ['nullable', 'string', 'max:32'],
             'reporter_role' => ['nullable', 'string', 'max:64'],
             'incident_time' => ['nullable', 'string', 'max:120'],
+            'custom_incident_time' => ['nullable', 'string', 'max:120'],
             'incident_date' => ['nullable', 'date', 'before_or_equal:today'],
             'incident_date_unknown' => ['nullable'],
             'is_anonymous' => ['nullable'],
@@ -824,6 +825,22 @@ class BkManageController extends Controller
             $resolvedLocation = 'Lainnya: '.$customLocation;
         } else {
             $resolvedLocation = $rawLocation;
+        }
+
+        $rawIncidentTime = trim((string) $request->input('incident_time', 'Tidak ingat pasti'));
+        $customIncidentTime = trim((string) $request->input('custom_incident_time', ''));
+        if (in_array(strtolower($rawIncidentTime), ['__other__', 'lainnya'], true)) {
+            if ($customIncidentTime === '') {
+                $err = 'Tuliskan perkiraan waktu kejadian jika memilih opsi Lainnya.';
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $err], 422);
+                }
+
+                return back()->withInput()->withErrors(['incident_time' => $err]);
+            }
+            $resolvedIncidentTime = 'Lainnya: '.$customIncidentTime;
+        } else {
+            $resolvedIncidentTime = $rawIncidentTime !== '' ? $rawIncidentTime : 'Tidak ingat pasti';
         }
 
         $dateUnknown = filter_var($request->input('incident_date_unknown', false), FILTER_VALIDATE_BOOLEAN);
@@ -864,7 +881,7 @@ class BkManageController extends Controller
             'involved_parties' => $request->input('involved_parties'),
             'urgency' => $request->input('urgency', 'Sedang'),
             'reporter_role' => $request->input('reporter_role', 'Siswa (Korban Langsung)'),
-            'incident_time' => $request->input('incident_time', 'Tidak ingat pasti'),
+            'incident_time' => $resolvedIncidentTime,
             'incident_date' => $incidentDate,
             'story' => $request->input('story'),
             'is_anonymous' => $isAnonymous,
@@ -947,6 +964,72 @@ class BkManageController extends Controller
     }
 
     /**
+     * Atur password private (satu kali) untuk kode tiket yang baru dibuat siswa.
+     */
+    public function setTicketPassword(Request $request): JsonResponse
+    {
+        $rateKey = 'track-report:'.sha1((string) $request->ip());
+
+        if (RateLimiter::tooManyAttempts($rateKey, 5)) {
+            $minutes = max(1, (int) ceil(RateLimiter::availableIn($rateKey) / 60));
+
+            return response()->json([
+                'success' => false,
+                'message' => "Terlalu banyak percobaan kode laporan salah. Silakan coba lagi dalam {$minutes} menit.",
+            ], 429);
+        }
+
+        $validated = $request->validate([
+            'ticket_code' => ['required', 'string', 'max:64'],
+            'ticket_password' => ['required', 'string', 'min:4', 'max:64', 'confirmed'],
+        ], [
+            'ticket_code.required' => 'Kode laporan wajib disertakan.',
+            'ticket_password.required' => 'Password tiket wajib diisi.',
+            'ticket_password.min' => 'Password tiket minimal 4 karakter.',
+            'ticket_password.max' => 'Password tiket maksimal 64 karakter.',
+            'ticket_password.confirmed' => 'Konfirmasi password tiket tidak cocok.',
+        ]);
+
+        $normalized = TicketCodeService::normalize($validated['ticket_code']);
+        if (strlen($normalized) !== 10) {
+            RateLimiter::hit($rateKey, 900);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode laporan tidak valid.',
+            ], 404);
+        }
+
+        $report = StudentReport::where('ticket_hash', TicketCodeService::hash($normalized))->first();
+
+        if (! $report) {
+            RateLimiter::hit($rateKey, 900);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode laporan tidak ditemukan.',
+            ], 404);
+        }
+
+        if ($report->ticket_password_hash !== null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password untuk kode laporan ini sudah diatur sebelumnya dan tidak dapat diubah.',
+            ], 409);
+        }
+
+        $report->ticket_password_hash = Hash::make($validated['ticket_password']);
+        $report->save();
+
+        RateLimiter::clear($rateKey);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password tiket berhasil disimpan. Kode laporanmu kini bersifat private.',
+        ]);
+    }
+
+    /**
      * Cek status tindak lanjut aduan siswa berdasarkan kode laporan 10 karakter (rate limit 5 gagal / 15 menit).
      */
     public function trackReport(Request $request): JsonResponse
@@ -984,6 +1067,21 @@ class BkManageController extends Controller
                 'success' => false,
                 'message' => 'Kode laporan tidak ditemukan. Periksa kembali kode laporanmu.',
             ], 404);
+        }
+
+        if ($report->ticket_password_hash !== null) {
+            $providedPassword = (string) $request->input('ticket_password', '');
+            if ($providedPassword === '' || ! Hash::check($providedPassword, $report->ticket_password_hash)) {
+                RateLimiter::hit($rateKey, 900);
+
+                return response()->json([
+                    'success' => false,
+                    'password_required' => true,
+                    'message' => $providedPassword === ''
+                        ? 'Tiket ini bersifat private. Masukkan password tiket yang telah kamu buat.'
+                        : 'Password tiket tidak sesuai. Periksa kembali password yang kamu buat.',
+                ], 401);
+            }
         }
 
         RateLimiter::clear($rateKey);
@@ -1054,6 +1152,7 @@ class BkManageController extends Controller
 
         $validated = $request->validate([
             'ticket_code' => ['required', 'string', 'max:64'],
+            'ticket_password' => ['nullable', 'string', 'max:64'],
             'body' => ['required', 'string', 'min:2', 'max:2000'],
         ], [
             'body.required' => 'Tulis pesan balasan terlebih dahulu.',
@@ -1079,6 +1178,19 @@ class BkManageController extends Controller
                 'success' => false,
                 'message' => 'Kode laporan tidak ditemukan.',
             ], 404);
+        }
+
+        if ($report->ticket_password_hash !== null) {
+            $providedPassword = (string) ($validated['ticket_password'] ?? '');
+            if ($providedPassword === '' || ! Hash::check($providedPassword, $report->ticket_password_hash)) {
+                RateLimiter::hit($rateKey, 900);
+
+                return response()->json([
+                    'success' => false,
+                    'password_required' => true,
+                    'message' => 'Password tiket tidak valid untuk mengirim balasan.',
+                ], 401);
+            }
         }
 
         RateLimiter::clear($rateKey);

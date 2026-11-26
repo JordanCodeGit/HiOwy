@@ -6,6 +6,7 @@ use App\Models\AccessLog;
 use App\Models\IncidentCategory;
 use App\Models\SchoolSetting;
 use App\Models\StudentReport;
+use App\Support\AcademicYearService;
 use App\Support\AuditLogger;
 use App\Support\SchoolConfigService;
 use App\Support\StatisticsService;
@@ -43,7 +44,7 @@ class KesiswaanPreviewController extends Controller
     {
         $excluded = $this->excludedCategoryLabels();
 
-        return StudentReport::production()
+        return AcademicYearService::applyToReports(StudentReport::production())
             ->orderByDesc('id')
             ->get()
             ->filter(fn (StudentReport $r) => ! in_array($r->category, $excluded, true)

@@ -10,6 +10,7 @@ use App\Models\SchoolSetting;
 use App\Models\StaffMember;
 use App\Models\StudentReport;
 use App\Models\User;
+use App\Support\AcademicYearService;
 use App\Support\AuditLogger;
 use App\Support\SchoolConfigService;
 use App\Support\StatisticsService;
@@ -36,8 +37,11 @@ class BkReportController extends Controller
         $isTrainingView = $request->query('mode') === 'latihan';
         $trainingSettingActive = SchoolSetting::get('training_mode', '0') === '1';
 
-        $reports = StudentReport::active()
-            ->where('is_training', $isTrainingView)
+        $baseQuery = fn () => AcademicYearService::applyToReports(
+            StudentReport::active()->where('is_training', $isTrainingView)
+        );
+
+        $reports = $baseQuery()
             ->with('forwards')
             ->orderByRaw("CASE
                 WHEN status = 'belum_dibaca' AND LOWER(COALESCE(urgency, '')) IN ('darurat', 'urgent') THEN 1
@@ -48,24 +52,22 @@ class BkReportController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        $unreadCount = StudentReport::active()->where('is_training', $isTrainingView)->where('status', 'belum_dibaca')->count();
+        $unreadCount = $baseQuery()->where('status', 'belum_dibaca')->count();
 
-        $urgentUnreadCount = StudentReport::active()
-            ->where('is_training', $isTrainingView)
+        $urgentUnreadCount = $baseQuery()
             ->where('status', 'belum_dibaca')
             ->whereIn('urgency', ['Darurat', 'Urgent'])
             ->count();
 
         $threeDaysAgo = Carbon::now('Asia/Jakarta')->subDays(3)->toDateString();
-        $staleCount = StudentReport::active()
-            ->where('is_training', $isTrainingView)
+        $staleCount = $baseQuery()
             ->where('status', '!=', 'selesai')
             ->where('status_updated_date', '<=', $threeDaysAgo)
             ->count();
 
         $tabBelumDibaca = $unreadCount;
-        $tabSedangDitangani = StudentReport::active()->where('is_training', $isTrainingView)->whereIn('status', ['dibaca', 'ditindaklanjuti'])->count();
-        $tabSelesai = StudentReport::active()->where('is_training', $isTrainingView)->where('status', 'selesai')->count();
+        $tabSedangDitangani = $baseQuery()->whereIn('status', ['dibaca', 'ditindaklanjuti'])->count();
+        $tabSelesai = $baseQuery()->where('status', 'selesai')->count();
         $categories = IncidentCategory::where('active', true)->orderBy('order_index')->get();
 
         return view('bk.dashboard', compact(
@@ -540,11 +542,15 @@ class BkReportController extends Controller
     {
         Gate::authorize('viewAnyBk', StudentReport::class);
 
-        $archivedReports = StudentReport::archived()->production()->orderByDesc('id')->get();
+        $archivedReports = AcademicYearService::applyToReports(
+            StudentReport::archived()->production()
+        )->orderByDesc('id')->get();
         $totalArchived = $archivedReports->count();
         $resolvedCount = $archivedReports->where('archive_reason', 'selesai')->count();
         $isengCount = $archivedReports->where('archive_reason', 'iseng')->count();
-        $unreadCount = StudentReport::active()->production()->where('status', 'belum_dibaca')->count();
+        $unreadCount = AcademicYearService::applyToReports(
+            StudentReport::active()->production()
+        )->where('status', 'belum_dibaca')->count();
 
         return view('bk.archive', compact(
             'archivedReports',
@@ -564,12 +570,14 @@ class BkReportController extends Controller
 
         $selectedMonth = trim((string) $request->query('month', '')) ?: null;
         $stats = StatisticsService::buildFromReports(
-            StudentReport::production()->get(),
+            AcademicYearService::applyToReports(StudentReport::production())->get(),
             $selectedMonth,
             true
         );
 
-        $unreadCount = StudentReport::active()->production()->where('status', 'belum_dibaca')->count();
+        $unreadCount = AcademicYearService::applyToReports(
+            StudentReport::active()->production()
+        )->where('status', 'belum_dibaca')->count();
 
         return view('bk.statistics', [
             'stats' => $stats,
@@ -593,14 +601,19 @@ class BkReportController extends Controller
         Gate::authorize('viewAnyBk', StudentReport::class);
 
         $selectedMonth = trim((string) $request->query('month', '')) ?: null;
-        $stats = StatisticsService::buildFromReports(StudentReport::production()->get(), $selectedMonth, true);
+        $academicYearLabel = AcademicYearService::label();
+        $stats = StatisticsService::buildFromReports(
+            AcademicYearService::applyToReports(StudentReport::production())->get(),
+            $selectedMonth,
+            true
+        );
         $schoolName = SchoolConfigService::getConfig()['school_name'];
 
-        AuditLogger::log(Auth::user(), 'export_statistics_csv', null, $selectedMonth ? "Bulan: {$selectedMonth}" : 'Semua bulan');
+        AuditLogger::log(Auth::user(), 'export_statistics_csv', null, $academicYearLabel.($selectedMonth ? " · Bulan: {$selectedMonth}" : ' · Semua bulan'));
 
         $filename = 'statistik-hiowy-'.($selectedMonth ?: 'semua').'-'.now('Asia/Jakarta')->format('Ymd').'.csv';
 
-        return response()->streamDownload(function () use ($stats, $schoolName, $selectedMonth): void {
+        return response()->streamDownload(function () use ($stats, $schoolName, $selectedMonth, $academicYearLabel): void {
             $out = fopen('php://output', 'w');
             if ($out === false) {
                 return;
@@ -608,6 +621,7 @@ class BkReportController extends Controller
             fwrite($out, "\xEF\xBB\xBF");
 
             fputcsv($out, ['Laporan Statistik Agregat HiOwy', $schoolName]);
+            fputcsv($out, ['Tahun Ajaran', $academicYearLabel]);
             fputcsv($out, ['Periode Filter', $selectedMonth ? ($stats['available_months'][$selectedMonth] ?? $selectedMonth) : 'Semua Bulan']);
             fputcsv($out, ['Catatan Privasi', 'Angka kelompok 1-4 disamarkan sebagai "kurang dari 5". Tidak memuat isi cerita maupun identitas pelapor.']);
             fputcsv($out, []);
@@ -649,14 +663,20 @@ class BkReportController extends Controller
         Gate::authorize('viewAnyBk', StudentReport::class);
 
         $selectedMonth = trim((string) $request->query('month', '')) ?: null;
-        $stats = StatisticsService::buildFromReports(StudentReport::production()->get(), $selectedMonth, true);
+        $academicYearLabel = AcademicYearService::label();
+        $stats = StatisticsService::buildFromReports(
+            AcademicYearService::applyToReports(StudentReport::production())->get(),
+            $selectedMonth,
+            true
+        );
         $schoolConfig = SchoolConfigService::getConfig();
 
-        AuditLogger::log(Auth::user(), 'export_statistics_pdf', null, $selectedMonth ? "Bulan: {$selectedMonth}" : 'Semua bulan');
+        AuditLogger::log(Auth::user(), 'export_statistics_pdf', null, $academicYearLabel.($selectedMonth ? " · Bulan: {$selectedMonth}" : ' · Semua bulan'));
 
         return view('bk.statistics-print', [
             'stats' => $stats,
             'selectedMonth' => $selectedMonth,
+            'academicYearLabel' => $academicYearLabel,
             'schoolConfig' => $schoolConfig,
             'schoolName' => $schoolConfig['school_name'],
         ]);
@@ -673,7 +693,9 @@ class BkReportController extends Controller
         $totalLogs = AccessLog::count();
         $sensitiveViewsCount = AccessLog::whereIn('action', ['view_report', 'reply_report', 'add_note', 'forward_report'])->count();
         $failedAuthCount = AccessLog::whereIn('action', ['login_failed', 'login_locked', '2fa_failed'])->count();
-        $unreadCount = StudentReport::active()->production()->where('status', 'belum_dibaca')->count();
+        $unreadCount = AcademicYearService::applyToReports(
+            StudentReport::active()->production()
+        )->where('status', 'belum_dibaca')->count();
 
         return view('bk.access-log', compact(
             'logs',

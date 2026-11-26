@@ -43,6 +43,11 @@ Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'
 Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update');
 
+// Shared Staff Preference Route (BK, Kesiswaan, & Wali Kelas)
+Route::post('/staff/academic-year', [BkProfileController::class, 'switchAcademicYear'])
+    ->middleware(['auth', '2fa'])
+    ->name('staff.academic-year');
+
 // BK Portal (wajib login, 2FA terverifikasi, dan role:bk)
 Route::prefix('bk')->name('bk.')->middleware(['auth', '2fa', 'role:bk'])->group(function () {
     Route::get('/', [BkReportController::class, 'dashboard'])->name('dashboard');
@@ -122,6 +127,7 @@ Route::middleware('public.nocache')->group(function () {
     Route::get('/s/qr', [BkManageController::class, 'handleQrScan'])->name('public.qr');
     Route::get('/s/lapor', [BkManageController::class, 'showPublicReport'])->name('public.report');
     Route::post('/s/lapor', [BkManageController::class, 'storePublicReport'])->name('public.report.store');
+    Route::post('/s/lapor/ticket-password', [BkManageController::class, 'setTicketPassword'])->name('public.report.password');
     Route::match(['get', 'post'], '/s/lapor/track', [BkManageController::class, 'trackReport'])->name('public.report.track');
     Route::post('/s/lapor/track/reply', [BkManageController::class, 'replyReport'])->name('public.report.reply');
     Route::get('/latihan', [BkManageController::class, 'showTrainingReport'])->name('public.training');

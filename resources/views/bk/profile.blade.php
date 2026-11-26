@@ -149,9 +149,13 @@
 <label class="font-label-md text-label-md text-on-surface font-medium" for="selectTahunAjaran">Tahun Ajaran Aktif</label>
 <div class="relative">
 <select name="tahun_ajaran" class="w-full px-3.5 py-2.5 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded-lg shadow-xs focus:outline-none border border-outline-variant/50 transition-all appearance-none cursor-pointer pr-10" id="selectTahunAjaran">
-<option value="2024/2025" {{ session('academic_year', '2024/2025') === '2024/2025' ? 'selected' : '' }}>2024/2025 (Aktif)</option>
-<option value="2025/2026" {{ session('academic_year') === '2025/2026' ? 'selected' : '' }}>2025/2026 (Mendatang)</option>
-<option value="2023/2024" {{ session('academic_year') === '2023/2024' ? 'selected' : '' }}>2023/2024 (Arsip)</option>
+@php
+    $selectedAcademicYear = \App\Support\AcademicYearService::selected();
+    $currentAcademicYear = \App\Support\AcademicYearService::current();
+@endphp
+@foreach(\App\Support\AcademicYearService::options() as $yearValue => $yearText)
+<option value="{{ $yearValue }}" {{ $selectedAcademicYear === $yearValue ? 'selected' : '' }}>{{ $yearText }}{{ $yearValue === $currentAcademicYear ? ' (Berjalan)' : '' }}</option>
+@endforeach
 </select>
 <span class="material-symbols-outlined absolute right-3 top-2.5 text-outline pointer-events-none text-[20px]">expand_more</span>
 </div>

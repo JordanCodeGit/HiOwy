@@ -72,7 +72,7 @@
             <div>
                 <span class="text-slate-400 block font-medium">Target Pendampingan:</span>
                 <span class="font-bold text-slate-900 text-sm mt-0.5 block">Kelas {{ $className }}</span>
-                <span class="text-slate-500">Tahun Ajaran 2024/2025</span>
+                <span class="text-slate-500">{{ \App\Support\AcademicYearService::label() }}</span>
             </div>
             <div>
                 <span class="text-slate-400 block font-medium">Waktu Disposisi Diteruskan:</span>

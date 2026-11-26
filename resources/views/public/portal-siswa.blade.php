@@ -192,11 +192,11 @@
                     </p>
                 </div>
 
-                <!-- Kotak Kode Tiket + Wajib Salin -->
+                <!-- Kotak Kode Tiket + Wajib Salin & Buat Password Private -->
                 <div class="w-full max-w-md p-5 bg-surface-container-low rounded-2xl border border-surface-container flex flex-col gap-3.5 my-1 text-left">
                     <div class="flex flex-col gap-2.5 pb-3.5 border-b border-surface-container/80">
                         <div class="flex items-center justify-between gap-2">
-                            <span class="text-xs font-semibold text-on-surface-variant">Kode Laporan Kamu</span>
+                            <span class="text-xs font-semibold text-on-surface-variant">1. Kode Laporan Kamu</span>
                             <span x-show="ticketCopied" x-cloak class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
                                 <span class="material-symbols-outlined text-[13px]">check_circle</span>
                                 <span>Tersalin</span>
@@ -209,11 +209,62 @@
                                 <span x-text="ticketCopied ? 'Kode Tersalin' : 'Salin Kode'">Salin Kode</span>
                             </button>
                         </div>
-                        <p class="text-[11px] leading-relaxed flex items-start gap-1.5" :class="ticketCopied ? 'text-emerald-800' : 'text-amber-800'">
-                            <span class="material-symbols-outlined text-[15px] shrink-0 mt-0.5" x-text="ticketCopied ? 'verified' : 'info'">info</span>
-                            <span x-text="ticketCopied ? 'Kode berhasil disalin! Simpan di tempat aman dan jangan bagikan ke siapa pun. Sekarang kamu bisa memantau status atau mengirim aduan lain.' : 'Salin kode laporanmu terlebih dahulu agar tidak hilang. Tombol Pantau Status dan Kirim Aduan Lain akan aktif setelah kode disalin.'"></span>
-                        </p>
                     </div>
+
+                    <!-- Langkah 2: Atur Password Tiket (Private) -->
+                    <div class="flex flex-col gap-2.5 pb-3.5 border-b border-surface-container/80">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-semibold text-on-surface-variant flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[15px] text-blue-600">lock</span>
+                                <span>2. Buat Password Tiket (Private)</span>
+                            </span>
+                            <span x-show="ticketPasswordSaved" x-cloak class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                                <span class="material-symbols-outlined text-[13px]">verified_user</span>
+                                <span>Terkunci</span>
+                            </span>
+                        </div>
+
+                        <div x-show="ticketPasswordSaved" x-cloak class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2">
+                            <span class="material-symbols-outlined text-[16px] shrink-0 mt-0.5">shield_lock</span>
+                            <span>Password tiket berhasil disimpan! Kode laporanmu kini bersifat private dan hanya bisa dibuka dengan password yang kamu buat.</span>
+                        </div>
+
+                        <form x-show="!ticketPasswordSaved" @submit.prevent="saveTicketPassword()" class="flex flex-col gap-2.5">
+                            <p class="text-[11px] text-slate-600 leading-relaxed">
+                                Lindungi kode tiketmu dengan password (minimal 4 karakter, bebas berupa PIN atau kata yang mudah diingat). Password ini tidak diketahui siapa pun termasuk Guru BK.
+                            </p>
+                            <div class="relative">
+                                <input :type="showTicketPassword ? 'text' : 'password'" x-model="ticketPassword" @input="ticketPasswordError = ''" minlength="4" maxlength="64" autocomplete="new-password" placeholder="Buat password tiket (min. 4 karakter)" class="w-full pl-3.5 pr-10 py-2.5 bg-white text-slate-800 rounded-xl text-xs border border-blue-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <button type="button" @click="showTicketPassword = !showTicketPassword" aria-label="Tampilkan atau sembunyikan password" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer">
+                                    <span class="material-symbols-outlined text-[18px]" x-text="showTicketPassword ? 'visibility_off' : 'visibility'">visibility</span>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <input :type="showTicketPasswordConfirm ? 'text' : 'password'" x-model="ticketPasswordConfirm" @input="ticketPasswordError = ''" minlength="4" maxlength="64" autocomplete="new-password" placeholder="Ulangi password tiket" class="w-full pl-3.5 pr-10 py-2.5 bg-white text-slate-800 rounded-xl text-xs border border-blue-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <button type="button" @click="showTicketPasswordConfirm = !showTicketPasswordConfirm" aria-label="Tampilkan atau sembunyikan konfirmasi password" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer">
+                                    <span class="material-symbols-outlined text-[18px]" x-text="showTicketPasswordConfirm ? 'visibility_off' : 'visibility'">visibility</span>
+                                </button>
+                            </div>
+                            <div x-cloak x-show="ticketPasswordError" class="text-[11px] text-red-600 font-medium flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">error</span>
+                                <span x-text="ticketPasswordError"></span>
+                            </div>
+                            <button type="submit" :disabled="savingTicketPassword" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                                <template x-if="savingTicketPassword">
+                                    <span class="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                </template>
+                                <template x-if="!savingTicketPassword">
+                                    <span class="material-symbols-outlined text-[16px]">lock</span>
+                                </template>
+                                <span x-text="savingTicketPassword ? 'Menyimpan Password...' : 'Simpan Password Tiket'">Simpan Password Tiket</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <p class="text-[11px] leading-relaxed flex items-start gap-1.5" :class="(ticketCopied && ticketPasswordSaved) ? 'text-emerald-800' : 'text-amber-800'">
+                        <span class="material-symbols-outlined text-[15px] shrink-0 mt-0.5" x-text="(ticketCopied && ticketPasswordSaved) ? 'verified' : 'info'">info</span>
+                        <span x-text="(ticketCopied && ticketPasswordSaved) ? 'Kode tersalin & password aktif! Simpan keduanya di tempat aman. Sekarang kamu bisa memantau status atau mengirim aduan lain.' : (!ticketCopied && !ticketPasswordSaved ? 'Salin kode laporan dan buat password tiket terlebih dahulu agar tombol Pantau Status & Kirim Aduan Lain aktif.' : (!ticketCopied ? 'Password tiket sudah tersimpan! Sekarang salin kode laporanmu terlebih dahulu.' : 'Kode sudah disalin! Sekarang buat & simpan password tiket agar kode laporanmu bersifat private.'))"></span>
+                    </p>
 
                     <div class="grid grid-cols-2 gap-2.5 text-xs">
                         <div>
@@ -246,12 +297,12 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md mt-1">
-                    <button type="button" @click="goToTrack(ticketCode)" :disabled="!ticketCopied" :title="!ticketCopied ? 'Salin kode laporan terlebih dahulu' : 'Pantau status tiket ini'" class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span class="material-symbols-outlined text-[18px]" x-text="ticketCopied ? 'search' : 'lock'">lock</span>
+                    <button type="button" @click="goToTrack(ticketCode)" :disabled="!ticketCopied || !ticketPasswordSaved" :title="(!ticketCopied || !ticketPasswordSaved) ? 'Salin kode laporan & buat password tiket terlebih dahulu' : 'Pantau status tiket ini'" class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]" x-text="(ticketCopied && ticketPasswordSaved) ? 'search' : 'lock'">lock</span>
                         <span>Pantau Status Tiket</span>
                     </button>
-                    <button type="button" @click="resetForm()" :disabled="!ticketCopied" :title="!ticketCopied ? 'Salin kode laporan terlebih dahulu' : 'Buat laporan baru'" class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-surface-container hover:bg-surface-container-high disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed text-on-surface font-semibold text-xs sm:text-sm border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span class="material-symbols-outlined text-[18px]" x-text="ticketCopied ? 'replay' : 'lock'">lock</span>
+                    <button type="button" @click="resetForm()" :disabled="!ticketCopied || !ticketPasswordSaved" :title="(!ticketCopied || !ticketPasswordSaved) ? 'Salin kode laporan & buat password tiket terlebih dahulu' : 'Buat laporan baru'" class="w-full sm:flex-1 py-3 px-4 rounded-xl bg-surface-container hover:bg-surface-container-high disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed text-on-surface font-semibold text-xs sm:text-sm border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]" x-text="(ticketCopied && ticketPasswordSaved) ? 'replay' : 'lock'">lock</span>
                         <span>Kirim Aduan Lain</span>
                     </button>
                 </div>
@@ -465,13 +516,26 @@
                             @endphp
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 @foreach($timeOptions as $timeOpt)
-                                <button type="button" @click="incidentTime = @js($timeOpt)"
+                                <button type="button" @click="incidentTime = @js($timeOpt); errorMessage = ''"
                                     :class="incidentTime === @js($timeOpt) ? 'bg-blue-50 border-blue-500 text-blue-900 font-bold' : 'bg-surface-container-low/50 border-surface-container text-slate-700 hover:bg-surface-container-low font-medium'"
                                     class="px-3.5 py-2.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between gap-2 cursor-pointer">
                                     <span>{{ $timeOpt }}</span>
                                     <span class="material-symbols-outlined text-[16px]" :class="incidentTime === @js($timeOpt) ? 'text-blue-600' : 'text-slate-300'" x-text="incidentTime === @js($timeOpt) ? 'check_circle' : 'radio_button_unchecked'"></span>
                                 </button>
                                 @endforeach
+                                <button type="button" @click="incidentTime = '__other__'; errorMessage = ''"
+                                    :class="incidentTime === '__other__' ? 'bg-blue-50 border-blue-500 text-blue-900 font-bold' : 'bg-surface-container-low/50 border-surface-container text-slate-700 hover:bg-surface-container-low font-medium'"
+                                    class="px-3.5 py-2.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between gap-2 cursor-pointer">
+                                    <span class="flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[16px]" :class="incidentTime === '__other__' ? 'text-blue-600' : 'text-slate-400'">edit_calendar</span>
+                                        <span>Lainnya (isi sendiri)</span>
+                                    </span>
+                                    <span class="material-symbols-outlined text-[16px]" :class="incidentTime === '__other__' ? 'text-blue-600' : 'text-slate-300'" x-text="incidentTime === '__other__' ? 'check_circle' : 'radio_button_unchecked'"></span>
+                                </button>
+                            </div>
+                            <div x-cloak x-show="incidentTime === '__other__'" x-transition class="flex flex-col gap-1.5 pt-1">
+                                <label for="custom-incident-time-input" class="text-xs font-bold text-slate-700">Tuliskan Perkiraan Waktu Kejadian Lainnya <span class="text-red-500">*</span></label>
+                                <input id="custom-incident-time-input" type="text" x-model="customIncidentTime" maxlength="120" placeholder="Contoh: Saat jam pelajaran kosong, saat pulang ekskul, akhir pekan..." class="w-full px-4 py-3 bg-white text-on-surface rounded-xl text-xs sm:text-sm border border-blue-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             </div>
                             <span class="text-[11px] text-slate-400">Jam &amp; menit rinci sengaja tidak dikumpulkan demi menjaga privasimu.</span>
                         </div>
@@ -649,16 +713,25 @@
             <header class="flex flex-col items-center gap-2 text-center">
                 <img src="{{ asset('maskot_owy/maskot_9.png') }}" alt="Owy membantu melacak aduan" class="owy-float h-32 w-32 object-contain sm:h-40 sm:w-40">
                 <h2 class="text-xl font-extrabold tracking-tight text-on-surface sm:text-2xl">CEK STATUS ADUANMU</h2>
-                <p class="max-w-sm text-sm leading-relaxed text-on-surface-variant">Masukkan kode laporan 10 karakter untuk melihat status pengaduan. Contoh: <span class="whitespace-nowrap font-semibold">J4K8G7NFCK</span></p>
+                <p class="max-w-md text-sm leading-relaxed text-on-surface-variant">Masukkan kode laporan 10 karakter beserta password tiketmu untuk melihat status pengaduan. Contoh kode: <span class="whitespace-nowrap font-semibold">J4K8G7NFCK</span></p>
             </header>
 
             <!-- Search Ticket Form -->
-            <form @submit.prevent="searchTicket()" class="flex flex-col sm:flex-row gap-2.5">
-                <div class="relative flex-1">
-                    <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">tag</span>
-                    <input type="text" x-model="searchCode" @input="ticketData = null; hasTrackedTicket = false; trackError = ''" required maxlength="16" aria-label="Kode laporan" placeholder="Kode laporan 10 karakter" class="w-full pl-10 pr-4 py-3 bg-surface-container-low text-slate-800 rounded-xl text-xs sm:text-sm border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase font-mono tracking-wider">
+            <form @submit.prevent="searchTicket()" class="flex flex-col gap-2.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">tag</span>
+                        <input type="text" x-model="searchCode" @input="ticketData = null; hasTrackedTicket = false; trackError = ''" required maxlength="16" aria-label="Kode laporan" placeholder="Kode laporan 10 karakter" class="w-full pl-10 pr-4 py-3 bg-surface-container-low text-slate-800 rounded-xl text-xs sm:text-sm border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none uppercase font-mono tracking-wider">
+                    </div>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">lock</span>
+                        <input :type="showSearchPassword ? 'text' : 'password'" x-model="searchPassword" @input="ticketData = null; hasTrackedTicket = false; trackError = ''" maxlength="64" autocomplete="off" aria-label="Password tiket" placeholder="Password tiket (kosongkan jika tiket lama)" class="w-full pl-10 pr-10 py-3 bg-surface-container-low text-slate-800 rounded-xl text-xs sm:text-sm border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <button type="button" @click="showSearchPassword = !showSearchPassword" aria-label="Tampilkan atau sembunyikan password tiket" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer">
+                            <span class="material-symbols-outlined text-[18px]" x-text="showSearchPassword ? 'visibility_off' : 'visibility'">visibility</span>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" :disabled="tracking" class="py-3 px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-2xs">
+                <button type="submit" :disabled="tracking" class="w-full sm:w-auto sm:self-end py-3 px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 shadow-2xs">
                     <template x-if="tracking">
                         <span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                     </template>
@@ -880,6 +953,13 @@
                 totalSteps: 8,
                 submitted: false,
                 ticketCopied: false,
+                ticketPassword: '',
+                ticketPasswordConfirm: '',
+                showTicketPassword: false,
+                showTicketPasswordConfirm: false,
+                savingTicketPassword: false,
+                ticketPasswordSaved: false,
+                ticketPasswordError: '',
                 submitting: false,
                 tracking: false,
                 errorMessage: '',
@@ -900,6 +980,7 @@
                 incidentDate: typeof saved.incidentDate === 'string' ? saved.incidentDate : '',
                 incidentDateUnknown: Boolean(saved.incidentDateUnknown),
                 incidentTime: typeof saved.incidentTime === 'string' && saved.incidentTime ? saved.incidentTime : 'Pagi (Jam Pelajaran Sekolah)',
+                customIncidentTime: typeof saved.customIncidentTime === 'string' ? saved.customIncidentTime : '',
                 story: typeof saved.story === 'string' ? saved.story : '',
                 website: '',
                 isAnonymous: typeof saved.isAnonymous === 'boolean' ? saved.isAnonymous : true,
@@ -909,6 +990,8 @@
 
                 // Tracking tab (dipulihkan saat refresh)
                 searchCode: typeof saved.searchCode === 'string' ? saved.searchCode : '',
+                searchPassword: typeof saved.searchPassword === 'string' ? saved.searchPassword : '',
+                showSearchPassword: false,
                 hasTrackedTicket: Boolean(saved.hasTrackedTicket),
                 ticketData: null,
                 get ticketStep() {
@@ -929,9 +1012,9 @@
                         'activeTab', 'currentStep', 'maxReachedStep',
                         'category', 'location', 'customLocation', 'involvedParties',
                         'urgency', 'dangerConfirmed', 'reporterRole',
-                        'incidentDate', 'incidentDateUnknown', 'incidentTime',
+                        'incidentDate', 'incidentDateUnknown', 'incidentTime', 'customIncidentTime',
                         'story', 'isAnonymous', 'reporterName', 'reporterClass', 'reporterContact',
-                        'searchCode', 'replyBody', 'hasTrackedTicket'
+                        'searchCode', 'searchPassword', 'replyBody', 'hasTrackedTicket'
                     ];
                     persistedKeys.forEach((key) => {
                         this.$watch(key, () => this.persistDraftState());
@@ -960,12 +1043,14 @@
                             incidentDate: this.incidentDate,
                             incidentDateUnknown: this.incidentDateUnknown,
                             incidentTime: this.incidentTime,
+                            customIncidentTime: this.customIncidentTime,
                             story: this.story,
                             isAnonymous: this.isAnonymous,
                             reporterName: this.reporterName,
                             reporterClass: this.reporterClass,
                             reporterContact: this.reporterContact,
                             searchCode: this.searchCode,
+                            searchPassword: this.searchPassword,
                             replyBody: this.replyBody,
                             hasTrackedTicket: this.hasTrackedTicket,
                         }));
@@ -993,6 +1078,10 @@
 
                 quickExit() {
                     this.wipeClientState();
+                    this.searchCode = '';
+                    this.searchPassword = '';
+                    this.ticketPassword = '';
+                    this.ticketPasswordConfirm = '';
                     this.clearDraftStorage();
                     try {
                         sessionStorage.setItem('hiowy_exited', '1');
@@ -1012,6 +1101,7 @@
                     this.incidentDate = '';
                     this.incidentDateUnknown = false;
                     this.incidentTime = 'Pagi (Jam Pelajaran Sekolah)';
+                    this.customIncidentTime = '';
                     this.story = '';
                     this.website = '';
                     this.isAnonymous = true;
@@ -1047,9 +1137,15 @@
                         this.errorMessage = 'Centang kotak konfirmasi darurat terlebih dahulu sebelum melanjutkan.';
                         return false;
                     }
-                    if (step === 5 && !this.incidentDateUnknown && !this.incidentDate) {
-                        this.errorMessage = 'Pilih tanggal kejadian atau centang "Saya tidak ingat tanggal pastinya".';
-                        return false;
+                    if (step === 5) {
+                        if (!this.incidentDateUnknown && !this.incidentDate) {
+                            this.errorMessage = 'Pilih tanggal kejadian atau centang "Saya tidak ingat tanggal pastinya".';
+                            return false;
+                        }
+                        if (this.incidentTime === '__other__' && !this.customIncidentTime.trim()) {
+                            this.errorMessage = 'Tuliskan perkiraan waktu kejadian lainnya terlebih dahulu.';
+                            return false;
+                        }
                     }
                     if (step === 7 && this.story.trim().length < 5) {
                         this.errorMessage = 'Tuliskan ceritamu minimal 5 karakter agar Guru BK dapat memahami situasinya.';
@@ -1120,6 +1216,9 @@
                         formData.append('urgency', this.urgency);
                         formData.append('reporter_role', this.reporterRole);
                         formData.append('incident_time', this.incidentTime);
+                        if (this.incidentTime === '__other__' && this.customIncidentTime.trim()) {
+                            formData.append('custom_incident_time', this.customIncidentTime.trim());
+                        }
                         formData.append('incident_date_unknown', this.incidentDateUnknown ? '1' : '0');
                         if (!this.incidentDateUnknown && this.incidentDate) {
                             formData.append('incident_date', this.incidentDate);
@@ -1160,6 +1259,12 @@
                             this.submittedLocationLabel = this.resolvedLocationDisplay();
                             this.submittedAnonymous = this.isAnonymous;
                             this.ticketCopied = false;
+                            this.ticketPassword = '';
+                            this.ticketPasswordConfirm = '';
+                            this.showTicketPassword = false;
+                            this.showTicketPasswordConfirm = false;
+                            this.ticketPasswordSaved = false;
+                            this.ticketPasswordError = '';
                             this.submitted = true;
                             this.wipeClientState();
                             this.persistDraftState();
@@ -1172,6 +1277,52 @@
                         this.errorMessage = 'Gagal menghubungi server. Pastikan koneksi internet Anda aktif.';
                     } finally {
                         this.submitting = false;
+                    }
+                },
+
+                async saveTicketPassword() {
+                    if (this.savingTicketPassword || !this.ticketCode) return;
+                    this.ticketPasswordError = '';
+
+                    if (this.ticketPassword.length < 4) {
+                        this.ticketPasswordError = 'Password tiket minimal 4 karakter.';
+                        return;
+                    }
+                    if (this.ticketPassword !== this.ticketPasswordConfirm) {
+                        this.ticketPasswordError = 'Konfirmasi password tiket tidak cocok.';
+                        return;
+                    }
+
+                    this.savingTicketPassword = true;
+                    try {
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                        const response = await fetch('{{ route('public.report.password') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                            },
+                            body: JSON.stringify({
+                                ticket_code: this.ticketCode,
+                                ticket_password: this.ticketPassword,
+                                ticket_password_confirmation: this.ticketPasswordConfirm,
+                            }),
+                        });
+
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            this.ticketPasswordSaved = true;
+                            this.ticketPasswordError = '';
+                        } else {
+                            const firstErr = data.errors ? Object.values(data.errors).flat()[0] : null;
+                            this.ticketPasswordError = firstErr || data.message || 'Gagal menyimpan password tiket.';
+                        }
+                    } catch (error) {
+                        console.error('Save ticket password error:', error);
+                        this.ticketPasswordError = 'Gagal menghubungi server. Periksa koneksi internetmu.';
+                    } finally {
+                        this.savingTicketPassword = false;
                     }
                 },
 
@@ -1214,17 +1365,24 @@
                 },
 
                 goToTrack(code) {
-                    if (!this.ticketCopied) return;
+                    if (!this.ticketCopied || !this.ticketPasswordSaved) return;
                     this.searchCode = code;
+                    this.searchPassword = this.ticketPassword;
+                    this.ticketPassword = '';
+                    this.ticketPasswordConfirm = '';
                     this.activeTab = 'track';
                     this.submitted = false;
                     this.searchTicket();
                 },
 
                 resetForm() {
-                    if (!this.ticketCopied) return;
+                    if (!this.ticketCopied || !this.ticketPasswordSaved) return;
                     this.submitted = false;
                     this.ticketCopied = false;
+                    this.ticketPasswordSaved = false;
+                    this.ticketPassword = '';
+                    this.ticketPasswordConfirm = '';
+                    this.ticketPasswordError = '';
                     this.ticketCode = '';
                     this.errorMessage = '';
                     this.wipeClientState();
@@ -1239,11 +1397,18 @@
                     this.ticketData = null;
 
                     try {
-                        const url = '{{ route('public.report.track') }}?ticket_code=' + encodeURIComponent(requestedCode);
-                        const response = await fetch(url, {
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                        const response = await fetch('{{ route('public.report.track') }}', {
+                            method: 'POST',
                             headers: {
+                                'Content-Type': 'application/json',
                                 'Accept': 'application/json',
-                            }
+                                'X-CSRF-TOKEN': csrfToken,
+                            },
+                            body: JSON.stringify({
+                                ticket_code: requestedCode,
+                                ticket_password: this.searchPassword,
+                            }),
                         });
 
                         const data = await response.json();
@@ -1283,6 +1448,7 @@
                             },
                             body: JSON.stringify({
                                 ticket_code: this.searchCode,
+                                ticket_password: this.searchPassword,
                                 body: this.replyBody,
                             }),
                         });

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\StaffInvitationMail;
 use App\Models\AccessLog;
+use App\Models\Forward;
 use App\Models\IncidentCategory;
 use App\Models\IncidentLocation;
 use App\Models\ReportMessage;
@@ -12,8 +13,10 @@ use App\Models\SchoolSetting;
 use App\Models\StaffMember;
 use App\Models\StudentReport;
 use App\Models\User;
+use App\Support\AcademicYearService;
 use App\Support\TicketCodeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
@@ -544,8 +547,237 @@ class Batch4UatComplianceTest extends TestCase
             ->assertSee('Langkah 1 dari 8')
             ->assertSee('maskot_owy')
             ->assertSee('hiowy_reporter_state_v1:')
-            ->assertSee(':disabled="!ticketCopied"', false)
+            ->assertSee(':disabled="!ticketCopied || !ticketPasswordSaved"', false)
+            ->assertSee('Lainnya (isi sendiri)')
             ->assertDontSee('FR-20')
             ->assertDontSee('FR-');
+    }
+
+    public function test_custom_incident_time_option_on_step_5(): void
+    {
+        $this->seedDefaults();
+
+        $this->get('/s/lapor')
+            ->assertOk()
+            ->assertSee('Lainnya (isi sendiri)')
+            ->assertSee('custom-incident-time-input');
+
+        // Memilih opsi Lainnya tanpa mengisi teks kustom harus ditolak 422
+        $this->postJson('/s/lapor', [
+            'category' => 'Perundungan Fisik & Pemukulan',
+            'location' => 'Ruang Kelas',
+            'incident_time' => '__other__',
+            'custom_incident_time' => '',
+            'story' => 'Uji validasi waktu kejadian lainnya kosong.',
+            'is_anonymous' => '1',
+        ])->assertStatus(422);
+
+        // Memilih opsi Lainnya dengan teks kustom tersimpan sebagai "Lainnya: ..."
+        $res = $this->postJson('/s/lapor', [
+            'category' => 'Perundungan Fisik & Pemukulan',
+            'location' => 'Ruang Kelas',
+            'incident_time' => '__other__',
+            'custom_incident_time' => 'Saat pulang ekskul basket',
+            'story' => 'Uji penyimpanan waktu kejadian kustom dari siswa.',
+            'is_anonymous' => '1',
+        ])->assertOk()->assertJsonPath('success', true);
+
+        $report = StudentReport::latest('id')->firstOrFail();
+        $this->assertSame('Lainnya: Saat pulang ekskul basket', $report->incident_time);
+    }
+
+    public function test_private_ticket_password_setup_tracking_reply_and_legacy_compatibility(): void
+    {
+        $this->seedDefaults();
+
+        $submit = $this->postJson('/s/lapor', [
+            'category' => 'Perundungan Fisik & Pemukulan',
+            'location' => 'Ruang Kelas',
+            'story' => 'Laporan untuk uji perlindungan password tiket private.',
+            'is_anonymous' => '1',
+        ])->assertOk();
+        $code = (string) $submit->json('ticket_code');
+        $report = StudentReport::latest('id')->firstOrFail();
+
+        // Password < 4 karakter atau konfirmasi tidak cocok ditolak 422
+        $this->postJson('/s/lapor/ticket-password', [
+            'ticket_code' => $code,
+            'ticket_password' => '123',
+            'ticket_password_confirmation' => '123',
+        ])->assertStatus(422);
+
+        $this->postJson('/s/lapor/ticket-password', [
+            'ticket_code' => $code,
+            'ticket_password' => 'rahasiaku',
+            'ticket_password_confirmation' => 'berbeda123',
+        ])->assertStatus(422);
+
+        // Password valid >= 4 karakter berhasil disimpan sebagai hash & tersembunyi
+        $this->postJson('/s/lapor/ticket-password', [
+            'ticket_code' => $code,
+            'ticket_password' => 'owy2026',
+            'ticket_password_confirmation' => 'owy2026',
+        ])->assertOk()->assertJsonPath('success', true);
+
+        $report->refresh();
+        $this->assertNotNull($report->ticket_password_hash);
+        $this->assertNotSame('owy2026', $report->ticket_password_hash);
+        $this->assertTrue(Hash::check('owy2026', $report->ticket_password_hash));
+        $this->assertArrayNotHasKey('ticket_password_hash', $report->toArray());
+
+        // Tidak boleh menimpa password tiket yang sudah diatur (409)
+        $this->postJson('/s/lapor/ticket-password', [
+            'ticket_code' => $code,
+            'ticket_password' => 'hack9999',
+            'ticket_password_confirmation' => 'hack9999',
+        ])->assertStatus(409);
+
+        // Melacak tanpa password atau dengan password salah ditolak 401
+        $this->postJson('/s/lapor/track', [
+            'ticket_code' => $code,
+            'ticket_password' => '',
+        ])->assertStatus(401)->assertJsonPath('password_required', true);
+
+        $this->postJson('/s/lapor/track', [
+            'ticket_code' => $code,
+            'ticket_password' => 'salah123',
+        ])->assertStatus(401)->assertJsonPath('password_required', true);
+
+        // Melacak dengan password benar berhasil & tidak membocorkan hash
+        $trackOk = $this->postJson('/s/lapor/track', [
+            'ticket_code' => $code,
+            'ticket_password' => 'owy2026',
+        ])->assertOk()->assertJsonPath('success', true);
+        $this->assertStringNotContainsString('ticket_password_hash', $trackOk->getContent());
+
+        // Membalas pesan wajib password yang benar
+        $this->postJson('/s/lapor/track/reply', [
+            'ticket_code' => $code,
+            'ticket_password' => 'salah123',
+            'body' => 'Balasan dengan password salah.',
+        ])->assertStatus(401);
+
+        $this->postJson('/s/lapor/track/reply', [
+            'ticket_code' => $code,
+            'ticket_password' => 'owy2026',
+            'body' => 'Balasan sah dengan password benar.',
+        ])->assertOk()->assertJsonPath('success', true);
+
+        // Tiket lama tanpa ticket_password_hash tetap bisa dilacak & dibalas tanpa password
+        $legacyCode = TicketCodeService::generateCode(10);
+        StudentReport::create([
+            'ticket_hash' => TicketCodeService::hash($legacyCode),
+            'category' => 'Perundungan Fisik & Pemukulan',
+            'location' => 'Ruang Kelas',
+            'story' => 'Tiket lama sebelum fitur password private.',
+            'urgency' => 'Sedang',
+            'status' => 'belum_dibaca',
+            'submitted_date' => now('Asia/Jakarta')->toDateString(),
+            'submitted_daypart' => 'pagi',
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+
+        $this->postJson('/s/lapor/track', [
+            'ticket_code' => $legacyCode,
+            'ticket_password' => '',
+        ])->assertOk()->assertJsonPath('success', true);
+    }
+
+    public function test_academic_year_dropdown_switching_and_filtering_for_bk_kesiswaan_and_walas(): void
+    {
+        $this->seedDefaults();
+        $bk = User::factory()->bk()->create();
+        $kesiswaan = User::factory()->kesiswaan()->create();
+        $walas = User::factory()->walas()->create();
+
+        $reportOld = StudentReport::create([
+            'ticket_hash' => TicketCodeService::hash(TicketCodeService::generateCode(10)),
+            'category' => 'Perundungan Fisik & Pemukulan',
+            'location' => 'Ruang Kelas',
+            'story' => 'Laporan tahun ajaran lama 2024/2025.',
+            'urgency' => 'Sedang',
+            'status' => 'belum_dibaca',
+            'submitted_date' => '2024-10-15',
+            'submitted_daypart' => 'pagi',
+            'status_updated_date' => '2024-10-15',
+        ]);
+
+        $reportCurrent = StudentReport::create([
+            'ticket_hash' => TicketCodeService::hash(TicketCodeService::generateCode(10)),
+            'category' => 'Perundungan Fisik & Pemukulan',
+            'location' => 'Ruang Kelas',
+            'story' => 'Laporan tahun ajaran berjalan sekarang.',
+            'urgency' => 'Sedang',
+            'status' => 'belum_dibaca',
+            'submitted_date' => now('Asia/Jakarta')->toDateString(),
+            'submitted_daypart' => 'siang',
+            'status_updated_date' => now('Asia/Jakarta')->toDateString(),
+        ]);
+
+        Forward::create([
+            'student_report_id' => $reportOld->id,
+            'from_user_id' => $bk->id,
+            'to_user_id' => $walas->id,
+            'summary' => 'Ringkasan pendampingan TA 2024/2025.',
+            'forwarded_at' => '2024-10-16 09:00:00',
+        ]);
+
+        Forward::create([
+            'student_report_id' => $reportCurrent->id,
+            'from_user_id' => $bk->id,
+            'to_user_id' => $walas->id,
+            'summary' => 'Ringkasan pendampingan TA berjalan.',
+            'forwarded_at' => now('Asia/Jakarta'),
+        ]);
+
+        $currentAy = AcademicYearService::current();
+
+        // 1. Default BK menampilkan tahun ajaran berjalan (tidak menampilkan TA 2024/2025) & memiliki dropdown header
+        $this->actingAs($bk)->get('/bk')
+            ->assertOk()
+            ->assertSee('academicYearBtn')
+            ->assertSee('Tahun Ajaran '.$currentAy)
+            ->assertSee('#'.$reportCurrent->case_label)
+            ->assertDontSee('#'.$reportOld->case_label);
+
+        // 2. BK memilih Tahun Ajaran 2024/2025 melalui dropdown -> hanya laporan 2024/2025 tampil
+        $this->actingAs($bk)->post('/staff/academic-year', ['academic_year' => '2024/2025'])
+            ->assertRedirect();
+        $this->actingAs($bk)->get('/bk')
+            ->assertOk()
+            ->assertSee('Tahun Ajaran 2024/2025')
+            ->assertSee('#'.$reportOld->case_label)
+            ->assertDontSee('#'.$reportCurrent->case_label);
+
+        // 3. BK memilih "Semua Tahun Ajaran" -> kedua laporan tampil
+        $this->actingAs($bk)->post('/staff/academic-year', ['academic_year' => AcademicYearService::ALL])
+            ->assertRedirect();
+        $this->actingAs($bk)->get('/bk')
+            ->assertOk()
+            ->assertSee('Semua Tahun Ajaran')
+            ->assertSee('#'.$reportOld->case_label)
+            ->assertSee('#'.$reportCurrent->case_label);
+
+        // 4. Kesiswaan dapat mengganti tahun ajaran dari header dan data ikut tersaring
+        $this->actingAs($kesiswaan)->post('/staff/academic-year', ['academic_year' => '2024/2025'])
+            ->assertRedirect();
+        $this->actingAs($kesiswaan)->get('/kesiswaan')
+            ->assertOk()
+            ->assertSee('academicYearBtn')
+            ->assertSee('#'.$reportOld->case_label)
+            ->assertDontSee('#'.$reportCurrent->case_label);
+
+        // 5. Wali Kelas dapat mengganti tahun ajaran dari header dan ringkasan ikut tersaring
+        $this->actingAs($walas)->post('/staff/academic-year', ['academic_year' => '2024/2025'])
+            ->assertRedirect();
+        $this->actingAs($walas)->get('/wali-kelas')
+            ->assertOk()
+            ->assertSee('academicYearBtn')
+            ->assertSee('Ringkasan pendampingan TA 2024/2025.')
+            ->assertDontSee('Ringkasan pendampingan TA berjalan.');
+
+        // 6. Format tahun ajaran tidak valid ditolak
+        $this->actingAs($bk)->post('/staff/academic-year', ['academic_year' => 'invalid-2099'])
+            ->assertSessionHasErrors('academic_year');
     }
 }
