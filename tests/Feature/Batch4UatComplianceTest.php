@@ -518,11 +518,16 @@ class Batch4UatComplianceTest extends TestCase
         ])->assertRedirect(route('bk.manage').'#sekolah');
         $this->assertSame('Senin–Sabtu, 07.30–14.30 WIB', SchoolSetting::get('reading_hours'));
 
-        // 4. Tombol Kembali pada halaman cetak poster tidak 403 untuk BK maupun Wali Kelas
+        // 4. Tombol Kembali pada halaman cetak poster tidak 403 untuk BK maupun Wali Kelas & format A4 Portrait
         $this->actingAs($bk)->get('/bk/manage/poster')
             ->assertOk()
             ->assertSee(route('bk.manage').'#qr', false)
-            ->assertSee('Kembali ke Kelola Sekolah');
+            ->assertSee('Kembali ke Kelola Sekolah')
+            ->assertSee('size: A4 portrait', false)
+            ->assertSee('qr.createSvg(300, 4)', false)
+            ->assertSee('Pindai Kode QR')
+            ->assertSee('Isi Form Pengaduan')
+            ->assertSee('Didampingi Guru BK');
 
         $this->actingAs($walas)->get('/wali-kelas/poster')
             ->assertOk()

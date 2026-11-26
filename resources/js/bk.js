@@ -580,7 +580,7 @@ export function registerBk(Alpine, navigateTo) {
                 qr.addData(this.reportUrl || this.qrScanUrl);
                 qr.make();
                 this.qrSvgHtml = qr.createSvg(208, 4);
-                this.posterQrSvgHtml = qr.createSvg(124, 3);
+                this.posterQrSvgHtml = qr.createSvg(184, 4);
             } catch (e) {
                 console.error('Failed to generate QR', e);
             }

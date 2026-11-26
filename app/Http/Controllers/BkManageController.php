@@ -1254,7 +1254,7 @@ class BkManageController extends Controller
     }
 
     /**
-     * Poster panduan format A4 landscape siap cetak.
+     * Poster panduan format A4 portrait siap cetak.
      */
     public function downloadPoster(): View
     {

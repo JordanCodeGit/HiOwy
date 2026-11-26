@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poster Panduan Pelaporan Siswa A4 Landscape — {{ $schoolName }}</title>
+    <title>Poster Panduan Pelaporan Siswa A4 Portrait — {{ $schoolName }}</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon-owy.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,18 +26,22 @@
             flex-direction: column;
             align-items: center;
             padding: 24px 16px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         .no-print-bar {
             width: 100%;
-            max-width: 297mm;
+            max-width: 210mm;
             background: #ffffff;
-            padding: 14px 20px;
+            padding: 14px 18px;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
+            gap: 10px;
             margin-bottom: 20px;
         }
 
@@ -45,9 +49,9 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 18px;
+            padding: 10px 16px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
@@ -72,13 +76,13 @@
             background: #e2e8f0;
         }
 
-        /* A4 Landscape Page Container (297mm x 210mm) */
+        /* A4 Portrait Page Container (210mm x 297mm) */
         .a4-page {
-            width: 297mm;
-            height: 210mm;
+            width: 210mm;
+            height: 297mm;
             background: #ffffff;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            padding: 12mm 16mm 10mm 16mm;
+            padding: 14mm 15mm 11mm 15mm;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -86,7 +90,6 @@
             overflow: hidden;
         }
 
-        /* Decorative Background Elements */
         .decor-top-stripe {
             position: absolute;
             top: 0;
@@ -100,15 +103,17 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 12px;
             border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
+            padding-bottom: 12px;
             margin-top: 2mm;
         }
 
         .school-info {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
+            min-width: 0;
         }
 
         .school-icon {
@@ -121,90 +126,63 @@
             align-items: center;
             justify-content: center;
             font-size: 28px;
+            flex-shrink: 0;
+            overflow: hidden;
         }
 
         .school-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
             color: #0f172a;
             line-height: 1.2;
         }
 
         .school-subtitle {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #64748b;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
+            margin-top: 2px;
         }
 
         .portal-badge {
             background: #006398;
-            color: white;
+            color: #ffffff;
             padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
+            border-radius: 999px;
+            font-size: 12px;
             font-weight: 700;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
-        /* Landscape Main Content: 2-column Grid */
-        .landscape-content {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 20px;
+        /* Portrait Vertical Main Stack */
+        .portrait-content {
+            display: flex;
+            flex-direction: column;
             align-items: stretch;
-            margin: 10px 0;
-            flex: 1;
-        }
-
-        .qr-card-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #f8fafc;
-            border: 2px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 14px;
-            text-align: center;
-        }
-
-        .qr-box {
-            background: #ffffff;
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-            display: inline-block;
-            border: 1px solid #e2e8f0;
-        }
-
-        .qr-svg {
-            width: 155px;
-            height: 155px;
-            display: block;
-        }
-
-        .url-link-text {
-            margin-top: 8px;
-            font-size: 11px;
-            color: #64748b;
-            word-break: break-all;
-        }
-
-        .url-link-text strong {
-            color: #006398;
-        }
-
-        .right-section {
-            display: flex;
-            flex-direction: column;
             justify-content: space-between;
-            gap: 10px;
+            gap: 16px;
+            flex: 1;
+            margin: 14px 0 12px 0;
         }
 
-        .headline-section {
-            text-align: left;
+        .headline-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 14px 18px;
+        }
+
+        .headline-text {
+            flex: 1;
+            min-width: 0;
         }
 
         .headline-badge {
@@ -213,97 +191,187 @@
             color: #92400e;
             font-size: 11px;
             font-weight: 700;
-            padding: 3px 12px;
-            border-radius: 14px;
+            padding: 4px 12px;
+            border-radius: 999px;
             margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .headline-title {
-            font-size: 22px;
+            font-size: 23px;
             font-weight: 800;
             color: #0f172a;
-            line-height: 1.25;
-            margin-bottom: 4px;
+            line-height: 1.2;
+            margin-bottom: 6px;
         }
 
         .headline-desc {
-            font-size: 12px;
+            font-size: 12.5px;
             color: #475569;
             line-height: 1.45;
+        }
+
+        .mascot-img {
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        /* Center Focal Point: Large QR Card */
+        .qr-hero-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+            border: 2.5px dashed #38bdf8;
+            border-radius: 22px;
+            padding: 22px 20px 18px 20px;
+            text-align: center;
+        }
+
+        .qr-cta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #006398;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 5px 16px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+        }
+
+        .qr-box {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(0, 99, 152, 0.12);
+            border: 2px solid #bae6fd;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #poster-qr-container svg {
+            width: 300px;
+            height: 300px;
+            display: block;
+        }
+
+        .qr-caption {
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .url-link-text {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #475569;
+            word-break: break-all;
+        }
+
+        .url-link-text strong {
+            color: #006398;
+            font-weight: 700;
+        }
+
+        /* 3 Steps Section Below QR */
+        .steps-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .steps-heading {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: #006398;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
         .steps-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 12px;
         }
 
         .step-item {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 10px 8px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 12px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .step-num {
-            width: 26px;
-            height: 26px;
+            width: 32px;
+            height: 32px;
             background: #006398;
-            color: white;
+            color: #ffffff;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            font-size: 12px;
-            margin: 0 auto 6px auto;
+            font-size: 14px;
+            margin-bottom: 8px;
         }
 
         .step-title {
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 13.5px;
+            font-weight: 800;
             color: #0f172a;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .step-desc {
-            font-size: 10px;
+            font-size: 11px;
             color: #64748b;
-            line-height: 1.35;
+            line-height: 1.4;
         }
 
         .guarantee-box {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
-            border-radius: 10px;
-            padding: 8px 12px;
+            border-radius: 12px;
+            padding: 10px 14px;
         }
 
         .guarantee-box span.material-symbols-outlined {
             color: #16a34a;
-            font-size: 22px;
+            font-size: 24px;
             flex-shrink: 0;
         }
 
         .guarantee-text {
-            font-size: 11px;
+            font-size: 11.5px;
             color: #166534;
-            line-height: 1.35;
+            line-height: 1.4;
         }
 
         .footer {
             border-top: 1px solid #e2e8f0;
-            padding-top: 6px;
+            padding-top: 8px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 10px;
+            font-size: 10.5px;
             color: #94a3b8;
         }
 
@@ -319,13 +387,13 @@
             .a4-page {
                 box-shadow: none;
                 margin: 0;
-                width: 297mm;
-                height: 210mm;
-                padding: 10mm 14mm 8mm 14mm;
-                page-break-after: always;
+                width: 210mm;
+                height: 297mm;
+                padding: 13mm 14mm 10mm 14mm;
+                break-inside: avoid;
             }
             @page {
-                size: A4 landscape;
+                size: A4 portrait;
                 margin: 0;
             }
         }
@@ -343,11 +411,11 @@
                 <span class="material-symbols-outlined">arrow_back</span>
                 {{ $resolvedBackLabel }}
             </a>
-            <span style="font-size: 13px; color: #64748b;">Format A4 Landscape Siap Cetak (300 DPI)</span>
+            <span style="font-size: 13px; color: #64748b;">Format A4 Portrait Siap Cetak (300 DPI)</span>
         </div>
         <button onclick="window.print()" class="btn btn-primary">
             <span class="material-symbols-outlined">print</span>
-            Cetak Poster / Simpan PDF (A4 Landscape)
+            Cetak Poster / Simpan PDF (A4 Portrait)
         </button>
     </div>
 
@@ -373,51 +441,60 @@
             </div>
         </div>
 
-        <div class="landscape-content">
-            <div class="qr-card-container">
+        <div class="portrait-content">
+            <!-- Headline + Maskot Owy -->
+            <div class="headline-banner">
+                <div class="headline-text">
+                    <span class="headline-badge">Kanal Aman &amp; Terlindungi</span>
+                    <h2 class="headline-title">Punya Masalah di Sekolah? Kamu Tidak Sendirian.</h2>
+                    <p class="headline-desc">
+                        Laporkan perundungan, intimidasi, pemalakan, atau curhat secara aman bersama Owy &amp; Guru BK. Jam baca layanan BK: <strong>{{ $schoolConfig['reading_hours'] ?? 'Senin–Jumat, 07.00–15.00 WIB' }}</strong>.
+                    </p>
+                </div>
+                <img src="{{ asset('maskot_owy/maskot_6.png') }}" alt="Maskot Owy" class="mascot-img">
+            </div>
+
+            <!-- QR Code Besar di Tengah -->
+            <div class="qr-hero-card">
+                <span class="qr-cta-pill">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">qr_code_scanner</span>
+                    <span>Pindai Kode QR di Sini untuk Melapor</span>
+                </span>
                 <div class="qr-box">
                     <div id="poster-qr-container"></div>
                 </div>
-                <p class="url-link-text">Tautan langsung: <br><strong>{{ $reportUrl }}</strong></p>
-                <span style="font-size: 10px; color: #94a3b8; margin-top: 6px;">Pindai dengan kamera ponsel</span>
+                <p class="qr-caption">Arahkan kamera ponselmu ke kode QR — tanpa perlu instal aplikasi</p>
+                <p class="url-link-text">Atau buka tautan langsung: <strong>{{ $reportUrl }}</strong></p>
             </div>
 
-            <div class="right-section">
-                <div class="headline-section" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
-                    <div>
-                        <span class="headline-badge">Kanal Aman &amp; Terlindungi</span>
-                        <h2 class="headline-title">Punya Masalah di Sekolah? Kamu Tidak Sendirian.</h2>
-                        <p class="headline-desc">
-                            Laporkan segala bentuk intimidasi, perundungan, pemalakan, atau masalah pribadi secara aman bersama Owy &amp; Guru BK. Jam baca: {{ $schoolConfig['reading_hours'] ?? 'Senin–Jumat, 07.00–15.00 WIB' }}.
-                        </p>
-                    </div>
-                    <img src="{{ asset('maskot_owy/maskot_6.png') }}" alt="Maskot Owy" style="width: 82px; height: 82px; object-fit: contain; flex-shrink: 0;">
-                </div>
-
+            <!-- Tahapan Pelaporan di Bawah QR -->
+            <div class="steps-section">
+                <p class="steps-heading">3 Langkah Mudah Melapor Bersama Owy</p>
                 <div class="steps-grid">
                     <div class="step-item">
                         <div class="step-num">1</div>
                         <h4 class="step-title">Pindai Kode QR</h4>
-                        <p class="step-desc">Arahkan kamera ponsel ke QR code tanpa perlu instal aplikasi.</p>
+                        <p class="step-desc">Arahkan kamera ponsel ke kode QR di atas tanpa perlu mengunduh aplikasi.</p>
                     </div>
                     <div class="step-item">
                         <div class="step-num">2</div>
                         <h4 class="step-title">Isi Form Pengaduan</h4>
-                        <p class="step-desc">Pilih kejadian &amp; lokasi. Kamu dapat melapor secara anonim.</p>
+                        <p class="step-desc">Pilih jenis kejadian, lokasi, dan ceritakan kondisimu. Kamu dapat melapor secara anonim.</p>
                     </div>
                     <div class="step-item">
                         <div class="step-num">3</div>
                         <h4 class="step-title">Didampingi Guru BK</h4>
-                        <p class="step-desc">Konselor sekolah segera memvalidasi dan mendampingi kamu.</p>
+                        <p class="step-desc">Simpan kode tiket &amp; passwordmu. Guru BK segera menelaah dan mendampingi kamu.</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="guarantee-box">
-                    <span class="material-symbols-outlined">verified_user</span>
-                    <p class="guarantee-text">
-                        <strong>Jaminan Kerahasiaan Penuh:</strong> Data dan identitas pelapor dilindungi berdasarkan Standar Perlindungan Anak di Satuan Pendidikan. Laporan ditujukan khusus untuk konselor sekolah.
-                    </p>
-                </div>
+            <!-- Jaminan Kerahasiaan -->
+            <div class="guarantee-box">
+                <span class="material-symbols-outlined">verified_user</span>
+                <p class="guarantee-text">
+                    <strong>Jaminan Kerahasiaan &amp; Perlindungan:</strong> Laporan terenkripsi dan dijaga sesuai Standar Perlindungan Anak di Satuan Pendidikan. Laporan ditujukan khusus bagi tim konselor sekolah.
+                </p>
             </div>
         </div>
 
@@ -436,7 +513,7 @@
                         qr.addData('{{ $qrScanUrl }}');
                         qr.make();
                         const container = document.getElementById('poster-qr-container');
-                        if (container) container.innerHTML = qr.createSvg(160, 4);
+                        if (container) container.innerHTML = qr.createSvg(300, 4);
                     } catch (e) {
                         console.error('Error generating poster QR:', e);
                     }

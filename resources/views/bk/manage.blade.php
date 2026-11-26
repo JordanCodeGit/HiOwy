@@ -258,7 +258,7 @@
 <span class="material-symbols-outlined text-[20px]">campaign</span>
 <span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Poster Panduan Pelaporan Siswa</span>
 </div>
-<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface mt-0.5">Pratinjau Poster Siap Cetak (A4 Landscape)</h3>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface mt-0.5">Pratinjau Poster Siap Cetak (A4 Portrait)</h3>
 </div>
 <button class="px-4 py-2.5 bg-primary hover:bg-inverse-surface text-on-primary rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center gap-2 cursor-pointer" type="button" @click="openPosterA4()">
 <span class="material-symbols-outlined text-[18px]">print</span>
@@ -266,10 +266,10 @@
 </button>
 </div>
 
-{{-- Inline Pratinjau Poster Panduan Pelaporan Siswa --}}
-<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+{{-- Inline Pratinjau Poster Panduan Pelaporan Siswa (A4 Portrait) --}}
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-md mx-auto w-full">
 <div class="h-2 w-full bg-gradient-to-r from-[#006398] to-sky-400"></div>
-<div class="p-5 flex flex-col gap-4">
+<div class="p-5 flex flex-col gap-3.5">
 <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200">
 <div class="flex items-center gap-2.5">
 <div class="w-9 h-9 rounded-lg bg-sky-100 text-[#006398] flex items-center justify-center shrink-0 overflow-hidden">
@@ -280,44 +280,46 @@
 @endif
 </div>
 <div>
-<p class="text-sm font-extrabold text-slate-900 leading-tight">{{ $schoolName }}</p>
+<p class="text-xs font-extrabold text-slate-900 leading-tight">{{ $schoolName }}</p>
 <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Layanan Bimbingan &amp; Konseling (BK) @if(!empty($schoolConfig['emergency_contact'])) • Darurat: {{ $schoolConfig['emergency_contact'] }} @endif</p>
 </div>
 </div>
-<span class="px-3 py-1 rounded-full bg-[#006398] text-white text-[11px] font-bold">HiOwy! Portal Pengaduan Siswa</span>
+<span class="px-2.5 py-0.5 rounded-full bg-[#006398] text-white text-[10px] font-bold">HiOwy!</span>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-<div class="md:col-span-4 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-3 flex flex-col items-center justify-center text-center">
-<div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs" x-html="posterQrSvgHtml"></div>
-<p class="text-[10px] text-slate-500 mt-2 break-all">Pindai QR atau buka:<br><strong class="text-[#006398]" x-text="reportUrl">{{ $reportUrl }}</strong></p>
+<div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3">
+<div class="flex-1 min-w-0">
+<span class="inline-block px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[9px] font-bold uppercase tracking-wider mb-1">Kanal Aman &amp; Terlindungi</span>
+<h4 class="text-sm font-extrabold text-slate-900 leading-snug">Punya Masalah di Sekolah? Kamu Tidak Sendirian.</h4>
+<p class="text-[10px] text-slate-600 mt-1 leading-relaxed">Jam baca BK: {{ $schoolConfig['reading_hours'] }}.</p>
+</div>
+<img src="{{ asset('maskot_owy/maskot_6.png') }}" alt="Maskot Owy" class="w-14 h-14 object-contain shrink-0 drop-shadow-xs">
 </div>
 
-<div class="md:col-span-8 flex flex-col gap-3">
-<div class="flex items-center gap-3">
-<div class="flex-1">
-<span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold uppercase tracking-wider mb-1">Kanal Aman &amp; Terlindungi</span>
-<h4 class="text-base font-extrabold text-slate-900 leading-snug">Punya Masalah di Sekolah? Kamu Tidak Sendirian.</h4>
-<p class="text-[11px] text-slate-600 mt-1 leading-relaxed">Laporkan perundungan, intimidasi, atau curhat secara aman bersama Owy &amp; Guru BK. Jam baca: {{ $schoolConfig['reading_hours'] }}.</p>
-</div>
-<img src="{{ asset('maskot_owy/maskot_6.png') }}" alt="Maskot Owy" class="w-16 h-16 object-contain shrink-0 hidden sm:block drop-shadow-xs">
+<div class="bg-gradient-to-b from-sky-50/80 to-slate-50 border-2 border-dashed border-sky-300 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+<span class="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-[#006398] text-white text-[10px] font-bold uppercase tracking-wide mb-2.5">
+<span class="material-symbols-outlined text-[13px]">qr_code_scanner</span>
+<span>Pindai Kode QR di Sini</span>
+</span>
+<div class="bg-white p-2.5 rounded-xl border border-sky-200 shadow-xs" x-html="posterQrSvgHtml"></div>
+<p class="text-[10px] text-slate-600 mt-2.5 break-all">Arahkan kamera ponselmu atau buka:<br><strong class="text-[#006398]" x-text="reportUrl">{{ $reportUrl }}</strong></p>
 </div>
 
 <div class="grid grid-cols-3 gap-2">
 <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center">
 <span class="w-5 h-5 rounded-full bg-[#006398] text-white text-[10px] font-extrabold inline-flex items-center justify-center mb-1">1</span>
-<p class="text-[11px] font-bold text-slate-900">Pindai QR</p>
-<p class="text-[10px] text-slate-500 leading-tight mt-0.5">Gunakan kamera HP tanpa instal aplikasi.</p>
+<p class="text-[11px] font-bold text-slate-900 leading-tight">Pindai Kode QR</p>
+<p class="text-[9.5px] text-slate-500 leading-tight mt-0.5">Gunakan kamera HP tanpa instal aplikasi.</p>
 </div>
 <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center">
 <span class="w-5 h-5 rounded-full bg-[#006398] text-white text-[10px] font-extrabold inline-flex items-center justify-center mb-1">2</span>
-<p class="text-[11px] font-bold text-slate-900">Ceritakan</p>
-<p class="text-[10px] text-slate-500 leading-tight mt-0.5">Jawab pertanyaan singkat, bisa anonim.</p>
+<p class="text-[11px] font-bold text-slate-900 leading-tight">Isi Form Pengaduan</p>
+<p class="text-[9.5px] text-slate-500 leading-tight mt-0.5">Pilih kejadian &amp; lokasi, bisa anonim.</p>
 </div>
 <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center">
 <span class="w-5 h-5 rounded-full bg-[#006398] text-white text-[10px] font-extrabold inline-flex items-center justify-center mb-1">3</span>
-<p class="text-[11px] font-bold text-slate-900">Didampingi BK</p>
-<p class="text-[10px] text-slate-500 leading-tight mt-0.5">Simpan kode tiket untuk pantau respons BK.</p>
+<p class="text-[11px] font-bold text-slate-900 leading-tight">Didampingi Guru BK</p>
+<p class="text-[9.5px] text-slate-500 leading-tight mt-0.5">Simpan kode tiket &amp; pantau respons BK.</p>
 </div>
 </div>
 
@@ -328,9 +330,8 @@
 </div>
 </div>
 </div>
-</div>
 <p class="text-xs text-on-surface-variant">
-  Tempelkan poster A4 Landscape ini di mading, ruang kelas, papan pengumuman BK, perpustakaan, dan area strategis sekolah.
+  Tempelkan poster A4 Portrait ini di mading, ruang kelas, papan pengumuman BK, perpustakaan, dan area strategis sekolah.
 </p>
 </div>
 </div>
